@@ -1,8 +1,18 @@
-= flatware
+= Flatware
 
-Description goes here.
+A drop in replacement for your Spork that's a bit more up scale.
 
-== Contributing to flatware
+Flatware manages distributed sporks on a local network.  Most of the goods are borrowed from specjour, 
+but with the hope of reusing as much prior art as possible.
+
+== Features
+
+* Reliable enough to use as part of your Continuous Integration system
+* Always accounts for every feature or spec you ask it to run
+* If you know how to use Spork you know how to use Flatware
+* Uses heuristics to run your slowest tests first 
+
+== Contributing to Flatware
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
