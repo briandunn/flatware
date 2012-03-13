@@ -1,13 +1,7 @@
-require 'bundler'
-begin
-  Bundler.setup(:default, :development)
-rescue Bundler::BundlerError => e
-  $stderr.puts e.message
-  $stderr.puts "Run `bundle install` to install missing gems"
-  exit e.status_code
-end
+require 'pathname'
 
-$LOAD_PATH.unshift(File.dirname(__FILE__) + '/../../lib')
-require 'flatware'
+$:.unshift Pathname.new(__FILE__).dirname.join('../../lib').to_s
 
+ENV['PATH'] = [Pathname.new('.').expand_path.join('bin').to_s, ENV['PATH']].join(':')
+require 'aruba/cucumber'
 require 'rspec/expectations'

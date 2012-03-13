@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.10"
   s.add_dependency %<zmq>
-  s.add_development_dependency %<cucumber>
+  s.add_development_dependency %<aruba>
   s.add_development_dependency %<rake>
   s.add_development_dependency %<rspec>
 end

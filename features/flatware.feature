@@ -1,17 +1,9 @@
-Feature: Run features on all local cores
+Feature: Distribute scenarios between workers
   In order to get feedback on my code as fast as possible
-  My features will run on all my local cores
+  I want to run more than one at a time
 
-  Scenario: Distribute scenarios between the cores
-    Given I am using a dual core machine
-    And I am in the root directory of a spork bootsrapped cucumber app
-    And my app has two scenarios
-    When I run "flatware Cucumber"
-    Then I should see
-    """
-    Using Cucumber
-    Using Cucumber
-    """
-    When I run "cucumber --drb"
-    Then each spork should run one scenario
-    And I should see the cucumber output
+  Scenario:
+    Given I am using a multi core machine
+    And a cucumber suite with two features that each sleep for 1 second
+    When I run flatware
+    Then the suite finishes in less than 2 seconds

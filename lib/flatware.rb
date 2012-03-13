@@ -1,7 +1,7 @@
 require 'yaml'
 require 'zmq'
 module Flatware
-  autoload :Job, 'flatware/messages'
-  autoload :Worker, 'flatware/worker'
   autoload :Dispatcher, 'flatware/dispatcher'
+  autoload :Cucumber, 'flatware/cucumber'
+  autoload :Worker, 'flatware/worker'
 end
