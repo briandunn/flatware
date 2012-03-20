@@ -1,3 +1,4 @@
+@wip
 Feature: Signals
 
   Scenario: TERM
@@ -6,7 +7,3 @@ Feature: Signals
     When I send the TERM signal to the dispatcher
     Then the dispatcher exits
     And the worker exits
-
-  Scenario: output
-    Given a worker is running
-    And I dispatch a task that emits periods at regular intervals
