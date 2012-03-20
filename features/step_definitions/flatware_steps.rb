@@ -5,6 +5,25 @@ A = OpenStruct.new.tap do |a|
   end
 end
 
+module Support
+  def without_bundler_rubyopt(&block)
+    rubyopt = ENV['RUBYOPT']
+    ENV['RUBYOPT'] = ''
+    val = yield
+  ensure
+    ENV['RUBYOPT'] = rubyopt
+    return val
+  end
+
+  def duration(&block)
+    started_at = Time.now
+    yield
+  ensure
+    return Time.now - started_at
+  end
+end
+World(Support)
+
 Given /^I am using a multi core machine$/ do
   `hostinfo` =~ /^(?<processors>\d+) processors are logically available\.$/
   @processors = $~[:processors].to_i
@@ -27,13 +46,17 @@ Given /^a cucumber suite with two features that each sleep for (#{A.number}) sec
 end
 
 When 'I run flatware' do
-  @started_at = Time.now
   @processors.times { run 'worker &' }
-  run_simple 'dispatcher'
+  @duration = duration do
+    # loading bundler slows down the SUT processes too much for us to detect
+    # parallelization.
+    # TODO: make the tests aware of when the workers check in, and start the
+    # timer after that
+    without_bundler_rubyopt { run_simple 'dispatcher' }
+  end
   assert_partial_output 'passed', all_output
 end
 
 Then /^the suite finishes in less than (#{A.number}) seconds$/ do |seconds|
-
-  (Time.now - @started_at).should < seconds
+  @duration.should < seconds
 end
