@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/briandunn/flatware"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
+  s.executables = ["worker", "dispatcher"]
   s.rubygems_version = "1.8.10"
   s.add_dependency %<zmq>
   s.add_development_dependency %<aruba>
