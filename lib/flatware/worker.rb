@@ -24,6 +24,15 @@ module Flatware
           dispatch.send 'hi'
 
           quit = false
+
+          Signal.trap("INT") do
+            dispatch.setsockopt(ZMQ::LINGER, 0)
+            dispatch.close
+            die.close
+            context.close
+            return
+          end
+
           while !quit && (ready = ZMQ.select([dispatch, die]))
             messages = ready.flatten.compact.map(&:recv)
             for message in messages
