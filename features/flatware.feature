@@ -7,3 +7,15 @@ Feature: Distribute scenarios between workers
     And a cucumber suite with two features that each sleep for 1 second
     When I run flatware
     Then the suite finishes in less than 2 seconds
+
+    @announce
+  Scenario: output
+    Given a cucumber suite with two features that each sleep for 1 second
+    When I run flatware
+    Then the output contains the following:
+    """
+    ..
+
+    2 scenarios (2 passed)
+    2 steps (2 passed)
+    """

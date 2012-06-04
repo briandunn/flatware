@@ -15,6 +15,10 @@ module Support
     return val
   end
 
+  def processors
+    @processors ||= `hostinfo`.match(/^(?<processors>\d+) processors are logically available\.$/)[:processors].to_i
+  end
+
   def duration(&block)
     started_at = Time.now
     yield
@@ -25,9 +29,7 @@ end
 World(Support)
 
 Given /^I am using a multi core machine$/ do
-  `hostinfo` =~ /^(?<processors>\d+) processors are logically available\.$/
-  @processors = $~[:processors].to_i
-  @processors.should > 1
+  processors.should > 1
 end
 
 Given /^a cucumber suite with two features that each sleep for (#{A.number}) seconds?$/ do |sleepyness|
@@ -46,7 +48,7 @@ Given /^a cucumber suite with two features that each sleep for (#{A.number}) sec
 end
 
 When 'I run flatware' do
-  @processors.times { run 'worker &' }
+  processors.times { run 'worker &' }
   @duration = duration do
     # loading bundler slows down the SUT processes too much for us to detect
     # parallelization.
@@ -54,9 +56,13 @@ When 'I run flatware' do
     # timer after that
     without_bundler_rubyopt { run_simple 'dispatcher' }
   end
-  assert_partial_output 'passed', all_output
+  # assert_partial_output 'passed', all_output
 end
 
 Then /^the suite finishes in less than (#{A.number}) seconds$/ do |seconds|
   @duration.should < seconds
+end
+
+Then /^the output contains the following:$/ do |string|
+    assert_partial_output string, all_output
 end

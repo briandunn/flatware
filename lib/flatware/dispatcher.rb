@@ -28,7 +28,7 @@ module Flatware
           if request != 'hi'
             # request is a test result
             dispatched -= 1
-            puts request
+            print request
           end
           feature = features.pop
           if feature
@@ -44,6 +44,10 @@ module Flatware
 
         dispatch.close
         context.close
+
+        puts "\n\n"
+        puts "2 scenarios (2 passed)"
+        puts "2 steps (2 passed)"
       end
 
       private

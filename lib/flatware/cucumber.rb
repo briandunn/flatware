@@ -1,13 +1,20 @@
 require 'cucumber'
+require 'cucumber/formatter/progress'
 module Flatware
   module Cucumber
+    class Formatter < ::Cucumber::Formatter::Progress
+      def after_features(features)
+      end
+    end
+
     extend self
     def features
       `find features -name '*.feature' | xargs grep -Hn Scenario | cut -f '1,2' -d ':'`.split "\n"
     end
 
     def run(options, out, error)
-      cli = ::Cucumber::Cli::Main.new(Array(options), out, error)
+      options = Array(options) + %w[--format Flatware::Cucumber::Formatter]
+      cli = ::Cucumber::Cli::Main.new(options, out, error)
       runtime.configure(cli.configuration)
 
       runtime.instance_eval do
