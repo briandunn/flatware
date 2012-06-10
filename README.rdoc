@@ -2,15 +2,22 @@
 
 A drop in replacement for your Spork that's a bit more up scale.
 
-Flatware manages distributed sporks on a local network.  Most of the goods are borrowed from specjour, 
-but with the hope of reusing as much prior art as possible.
+Flatware aims to be a distributed cucumber runner that speaks cucumber's DRB protocol. You will run it like spork, but instead of running in synchronous it will distribute your scenarios.
 
-== Features
+== Features (eventually)
 
 * Reliable enough to use as part of your Continuous Integration system
 * Always accounts for every feature or spec you ask it to run
 * If you know how to use Spork you know how to use Flatware
 * Uses heuristics to run your slowest tests first 
+
+== Tinkering
+
+Flatware is tested with aruba. In order to get a demo cucumber project you can add the `@no-clobber` tag to `features/flatware.feature` and run the test with `cucumber features/flatware.feature`. Now you should have a `./tmp/aruba` directory. CD there and you can run the `worker` and `dispatcher` binaries, like `../../bin/worker` and `../../bin/dispatcher`
+
+== Resources
+
+The excellent ZeroMQ guide: http://zguide.zeromq.org/page:all
 
 == Contributing to Flatware
  
@@ -24,6 +31,6 @@ but with the hope of reusing as much prior art as possible.
 
 == Copyright
 
-Copyright (c) 2011 Brian Dunn. See LICENSE.txt for
+Copyright (c) 2011-2012 Brian Dunn. See LICENSE.txt for
 further details.
 
