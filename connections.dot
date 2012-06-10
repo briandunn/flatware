@@ -1,0 +1,7 @@
+digraph {
+  dispatcher [label="dispatcher | <pub> PUB | <rep> REP", shape=record];
+  worker     [label="worker     | <sub> SUB | <req> REQ", shape=record];
+  dispatcher:pub -> worker:sub     [label=sepuku];
+  worker:req     -> dispatcher:rep [label=results];
+  dispatcher:rep -> worker:req     [label=test];
+}
