@@ -16,9 +16,10 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/briandunn/flatware"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.executables = ["worker", "dispatcher"]
+  s.executables = ["flatware"]
   s.rubygems_version = "1.8.10"
   s.add_dependency %<zmq>
+  s.add_dependency %<thor>
   s.add_development_dependency %<aruba>
   s.add_development_dependency %<rake>
   s.add_development_dependency %<rspec>

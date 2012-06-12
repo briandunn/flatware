@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     flatware (0.0.0)
+      thor
       zmq
 
 GEM
@@ -36,6 +37,7 @@ GEM
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.8.0)
     term-ansicolor (1.0.7)
+    thor (0.15.2)
     zmq (2.1.4)
 
 PLATFORMS

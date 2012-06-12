@@ -48,13 +48,13 @@ Given /^a cucumber suite with two features that each sleep for (#{A.number}) sec
 end
 
 When 'I run flatware' do
-  processors.times { run 'worker &' }
+  processors.times { run 'flatware work &' }
   @duration = duration do
     # loading bundler slows down the SUT processes too much for us to detect
     # parallelization.
     # TODO: make the tests aware of when the workers check in, and start the
     # timer after that
-    without_bundler_rubyopt { run_simple 'dispatcher' }
+    without_bundler_rubyopt { run_simple 'flatware dispatch' }
   end
   # assert_partial_output 'passed', all_output
 end
