@@ -5,7 +5,7 @@ module Flatware
     def mux
       processors.times do |env_number|
         command = <<-SH
-          TEST_ENV_NUMBER=#{env_number} bundle exec rake db:create db:test:prepare && bundle exec flatware work
+          TEST_ENV_NUMBER=#{env_number} bundle exec flatware work && exit
         SH
         system <<-SH
           tmux send-keys -t `tmux split-window -h -P` "#{command}" C-m
