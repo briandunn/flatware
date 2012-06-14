@@ -4,10 +4,12 @@ module Flatware
     desc "mux", "splits your current tmux pane into worker panes. Runs workers in them."
     def mux
       processors.times do |env_number|
-        spawn({'TEST_ENV_NUMBER' => env_number.to_s}, <<-SHELL
-            tmux send-keys -t `tmux split-window -h -P` "flatware work; exit" C-m
-          SHELL
-        )
+        command = <<-SH
+          TEST_ENV_NUMBER=#{env_number} bundle exec rake db:create db:test:prepare && bundle exec flatware work
+        SH
+        system <<-SH
+          tmux send-keys -t `tmux split-window -h -P` "#{command}" C-m
+        SH
       end
       system "tmux select-layout even-horizontal"
       dispatch
