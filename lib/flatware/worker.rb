@@ -3,52 +3,39 @@ module Flatware
     class << self
 
       def context
-        @context ||= ZMQ::Context.new 1
+        @context ||= ZMQ::Context.new
       end
 
-      def in_context(&block)
-        yield context
-        context.close
+      def die
+        @die ||= context.socket(ZMQ::SUB).tap do |die|
+          die.connect 'ipc://die'
+          die.setsockopt ZMQ::SUBSCRIBE, ''
+        end
+      end
+
+      def task
+        @task ||= context.socket(ZMQ::REQ).tap do |task|
+          task.connect 'ipc://dispatch'
+        end
+      end
+
+      def listen_to_boss
+        die
+      end
+
+      def clock_in
+        task.send 'hi'
+      end
+
+      def close_up
+        [die, task, context].each &:close
       end
 
       def listen!
-        in_context do |context|
-
-          dispatch = context.socket ZMQ::REQ
-          dispatch.connect 'ipc://dispatch'
-
-          die = context.socket ZMQ::SUB
-          die.connect 'ipc://die'
-          die.setsockopt ZMQ::SUBSCRIBE, ''
-
-          dispatch.send 'hi'
-
-          quit = false
-
-          Signal.trap("INT") do
-            dispatch.setsockopt(ZMQ::LINGER, 0)
-            dispatch.close
-            die.close
-            context.close
-            return
-          end
-
-          while !quit && (ready = ZMQ.select([dispatch, die]))
-            messages = ready.flatten.compact.map(&:recv)
-            for message in messages
-              if message == 'seppuku'
-                quit = true
-              else
-                Cucumber.run message, $stdout, $stderr
-                dispatch.send 'done'
-              end
-            end
-          end
-          dispatch.close
-          die.close
-          Sink.disconnect
-          puts Cucumber::Formatter.all_summaries
-        end
+        clock_in
+        listen_to_boss
+        die.recv
+        close_up
       end
     end
   end
