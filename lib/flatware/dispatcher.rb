@@ -30,8 +30,8 @@ module Flatware
           if feature
             dispatch.send feature
             dispatched += 1
-            puts "Not yet dispatched: #{features.length}"
-            puts "       In progress: #{dispatched}"
+            log "Not yet dispatched: #{features.length}"
+            log "       In progress: #{dispatched}"
           else
             dispatch.send 'seppuku'
           end
@@ -43,6 +43,10 @@ module Flatware
       end
 
       private
+
+      def log(*args)
+        Flatware.log *args
+      end
 
       def die!
         die.send 'seppuku'

@@ -1,6 +1,8 @@
 require 'thor'
 module Flatware
   class CLI < Thor
+    class_option :log, :aliases => "-l", :type => :boolean, :desc => "Print debug messages to $stderr"
+
     desc "mux", "splits your current tmux pane into worker panes. Runs workers in them."
     def mux
       processors.times do |env_number|
@@ -28,22 +30,27 @@ module Flatware
     default_task :default
     desc "default", "starts workers and gives them work"
     def default
+      Flatware.verbose = options[:log]
       processors.times do
         fork do
-          puts "#{$$} work"
+          log "work"
           Worker.listen!
         end
       end
       fork do
-        puts "#{$$} sink"
+        log "sink"
         Sink.start_server
       end
-      puts "#{$$} dispatch"
+      log "dispatch"
       dispatch
       Process.waitall
     end
 
     private
+
+    def log(*args)
+      Flatware.log(*args)
+    end
 
     def processors
       @processors ||= `hostinfo`.match(/^(?<processors>\d+) processors are logically available\.$/)[:processors].to_i

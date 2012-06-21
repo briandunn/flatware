@@ -16,15 +16,22 @@ module Flatware
   end
 
   def close
-    puts "#{$$} closing"
     sockets.each &:close
     context.close
+  end
+
+  def log(message)
+    $stderr.puts "#{$$} #{message}" if verbose?
+  end
+
+  attr_writer :verbose
+  def verbose?
+    !!@verbose
   end
 
   private
   def context
     return @context if @context
-    puts "#{$$} context"
     @context = ZMQ::Context.new
   end
 

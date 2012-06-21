@@ -23,7 +23,12 @@ module Flatware
           Cucumber.run message, $stdout, $stderr
           task.send 'done'
         end
-        puts Cucumber::Formatter.all_summaries
+        log Cucumber::Formatter.all_summaries
+      end
+
+      private
+      def log(*args)
+        Flatware.log *args
       end
     end
   end
