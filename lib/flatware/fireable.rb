@@ -10,8 +10,7 @@ module Flatware
     attr_reader :die
 
     def until_fired(sockets=[], &block)
-      quit = false
-      while !quit && (ready = ZMQ.select(Array(sockets) + [die]))
+      while ready = ZMQ.select(Array(sockets) + [die])
         messages = ready.flatten.compact.map(&:recv)
         return if messages.include? 'seppuku'
         messages.each &block
