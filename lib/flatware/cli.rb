@@ -5,7 +5,7 @@ module Flatware
     def mux
       processors.times do |env_number|
         command = <<-SH
-          TEST_ENV_NUMBER=#{env_number} bundle exec flatware work && exit
+          TEST_ENV_NUMBER=#{env_number} bundle exec ../../bin/flatware work && exit
         SH
         system <<-SH
           tmux send-keys -t `tmux split-window -h -P` "#{command}" C-m
@@ -23,6 +23,24 @@ module Flatware
     desc "work", "request and perform work from a dispatcher"
     def work
      Worker.listen!
+    end
+
+    default_task :default
+    desc "default", "starts workers and gives them work"
+    def default
+      processors.times do
+        fork do
+          puts "#{$$} work"
+          Worker.listen!
+        end
+      end
+      fork do
+        puts "#{$$} sink"
+        Sink.start_server
+      end
+      puts "#{$$} dispatch"
+      dispatch
+      Process.waitall
     end
 
     private

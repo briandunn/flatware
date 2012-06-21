@@ -1,3 +1,4 @@
+require 'flatware'
 module Flatware
   class Sink
     class << self
@@ -5,14 +6,8 @@ module Flatware
         client.push message
       end
 
-      def disconnect
-        client.disconnect
-      end
-
       def start_server
-        fork do
-          Server.start
-        end
+        Server.start
       end
 
       def client
@@ -24,13 +19,19 @@ module Flatware
       extend self
 
       def start
-        while message = socket.recv
+        fireable.until_fired socket do |message|
           print message
         end
       end
 
+      private
+
+      def fireable
+        Fireable.new
+      end
+
       def socket
-        @socket ||= ZMQ::Context.new(1).socket(ZMQ::PULL).tap do |socket|
+        @socket ||= Flatware.socket(ZMQ::PULL).tap do |socket|
           socket.bind 'ipc://sink'
         end
       end
@@ -41,21 +42,12 @@ module Flatware
         socket.send message
       end
 
-      def disconnect
-        socket.send ''
-        socket.close
-      end
-
       private
 
       def socket
-        @socket ||= context.socket(ZMQ::PUSH).tap do |socket|
+        @socket ||= Flatware.socket(ZMQ::PUSH).tap do |socket|
           socket.connect 'ipc://sink'
         end
-      end
-
-      def context
-        Worker.context
       end
     end
   end
