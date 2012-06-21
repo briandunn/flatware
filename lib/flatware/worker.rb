@@ -17,6 +17,7 @@ module Flatware
       end
 
       def listen!
+        fireable
         clock_in
         fireable.until_fired task do |message|
           Cucumber.run message, $stdout, $stderr
