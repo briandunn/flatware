@@ -20,8 +20,11 @@ module Flatware
     context.close
   end
 
-  def log(message)
-    $stderr.puts "#{$$} #{message}" if verbose?
+  def log(*message)
+    if verbose?
+      $stderr.print "#{$$} "
+      $stderr.puts *message
+    end
   end
 
   attr_writer :verbose
