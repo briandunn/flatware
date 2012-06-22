@@ -2,36 +2,11 @@ require 'cucumber'
 require 'cucumber/formatter/progress'
 module Flatware
   module Cucumber
-    class Formatter < ::Cucumber::Formatter::Progress
-      @@all_summaries = []
-
-      def after_step_result(*)
-        Sink.push capture { super }
-      end
-
-      def after_features(*)
-        @@all_summaries.push capture { super }
-      end
-
-      def self.all_summaries
-        @@all_summaries
-      end
-
-      private
-
-      def capture(&block)
-        io = @io
-        @io = StringIO.new
-        block.call
-        @io.tap(&:rewind).read.tap do
-          @io = io
-        end
-      end
-    end
+    autoload :Formatter, 'flatware/cucumber/formatter'
 
     extend self
     def features
-      `find features -name '*.feature' | xargs grep -Hn Scenario | cut -f '1,2' -d ':'`.split "\n"
+      @features ||= `find features -name '*.feature' | xargs grep -Hn Scenario | cut -f '1,2' -d ':'`.split "\n"
     end
 
     def run(options, out, error)

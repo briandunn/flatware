@@ -38,11 +38,11 @@ module Flatware
         end
       end
       fork do
-        log "sink"
-        Sink.start_server
+        log "dispatch"
+        dispatch
       end
-      log "dispatch"
-      dispatch
+      log "bossman"
+      Sink.start_server
       Process.waitall
     end
 

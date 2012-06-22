@@ -8,7 +8,6 @@ Feature: Distribute scenarios between workers
     When I run flatware
     Then the suite finishes in less than 2 seconds
 
-    @wip
   Scenario: output
     Given a cucumber suite with two features that each sleep for 1 second
     When I run flatware

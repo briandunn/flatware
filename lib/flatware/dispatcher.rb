@@ -8,20 +8,12 @@ module Flatware
         end
       end
 
-      def die
-        @die ||= Flatware.socket(ZMQ::PUB).tap do |socket|
-          socket.bind 'ipc://die'
-        end
-      end
-
       def dispatch!
-        die
-
         features = Cucumber.features
 
         dispatched = 0
 
-        while request = dispatch.recv
+        fireable.until_fired dispatch do |request|
           if request != 'hi'
             # request is a test result
             dispatched -= 1
@@ -35,11 +27,7 @@ module Flatware
           else
             dispatch.send 'seppuku'
           end
-          break if dispatched == 0
         end
-
-        die!
-        Flatware.close
       end
 
       private
@@ -48,8 +36,8 @@ module Flatware
         Flatware.log *args
       end
 
-      def die!
-        die.send 'seppuku'
+      def fireable
+        @fireable ||= Fireable.new
       end
     end
   end
