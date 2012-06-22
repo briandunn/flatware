@@ -53,8 +53,7 @@ When 'I run flatware' do
     # parallelization.
     # TODO: make the tests aware of when the workers check in, and start the
     # timer after that
-    without_bundler_rubyopt { run_simple 'pwd' }
-    without_bundler_rubyopt { run_simple 'flatware default' }
+    without_bundler_rubyopt { run_simple 'flatware' }
   end
 end
 
