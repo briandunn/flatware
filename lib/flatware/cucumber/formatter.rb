@@ -10,16 +10,19 @@ module Flatware
       end
 
       def after_features(*)
+        @result.steps = StepResult.all
         Sink.push @result
+        StepResult.all.clear
       end
 
       def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
-        Sink.push @result.add_step_result(status, exception)
+        Sink.push StepResult.add(status, exception.inspect)
       end
     end
 
     class ScenarioResult
-      attr_reader :id, :steps
+      attr_reader :id
+      attr_accessor :steps
 
       def initialize(id)
         @id = id
@@ -37,7 +40,7 @@ module Flatware
       end
     end
 
-    StepResult = Struct.new(:status, :exception, :scenario) do
+    StepResult = Struct.new(:status, :exception) do
       include ::Cucumber::Formatter::Console
       FORMATS = {
         :passed    => '.',
@@ -53,6 +56,18 @@ module Flatware
 
       def progress
         format_string FORMATS[status], status
+      end
+
+      class << self
+        def add(status, exception)
+          new(status, exception).tap do |result|
+            all << result
+          end
+        end
+
+        def all
+          @all ||= []
+        end
       end
     end
   end
