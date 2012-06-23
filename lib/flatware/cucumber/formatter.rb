@@ -1,3 +1,4 @@
+require 'cucumber/formatter/console'
 module Flatware
   module Cucumber
     class Formatter
@@ -37,6 +38,7 @@ module Flatware
     end
 
     StepResult = Struct.new(:status, :exception, :scenario) do
+      include ::Cucumber::Formatter::Console
       FORMATS = {
         :passed    => '.',
         :failed    => 'F',
@@ -50,7 +52,7 @@ module Flatware
       end
 
       def progress
-        FORMATS[status]
+        format_string FORMATS[status], status
       end
     end
   end
