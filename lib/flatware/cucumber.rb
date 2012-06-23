@@ -6,7 +6,7 @@ module Flatware
 
     extend self
     def features
-      @features ||= `find features -name '*.feature' | xargs grep -Hn Scenario | cut -f '1,2' -d ':'`.split "\n"
+      @features ||= `find features -name '*.feature' | xargs grep -Hn Scenario: | cut -f '1,2' -d ':'`.split "\n"
     end
 
     def run(feature_files=[])
