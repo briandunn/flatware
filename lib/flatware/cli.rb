@@ -31,10 +31,10 @@ module Flatware
     desc "default", "starts workers and gives them work"
     def default
       Flatware.verbose = options[:log]
-      processors.times do
+      processors.times do |i|
         fork do
           log "work"
-          Worker.listen!
+          Worker.listen! i
         end
       end
       fork do

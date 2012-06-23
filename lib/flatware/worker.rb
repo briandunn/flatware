@@ -16,11 +16,14 @@ module Flatware
         task.send 'hi'
       end
 
-      def listen!
+      def listen!(worker_number='')
+        ENV['TEST_ENV_NUMBER'] = worker_number.to_s
         fireable
         clock_in
         fireable.until_fired task do |message|
-          Cucumber.run message, $stdout, $stderr
+          log 'working!'
+          Cucumber.run message
+          log 'waiting'
           task.send 'done'
         end
       end
