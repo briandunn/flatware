@@ -1,5 +1,4 @@
 require 'cucumber'
-require 'cucumber/formatter/progress'
 module Flatware
   module Cucumber
     autoload :Formatter, 'flatware/cucumber/formatter'
