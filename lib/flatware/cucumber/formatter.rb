@@ -25,7 +25,7 @@ module Flatware
       attr_accessor :steps
 
       def initialize(id)
-        @id = id
+        @id = id.split(':').first
         @steps = []
       end
 
