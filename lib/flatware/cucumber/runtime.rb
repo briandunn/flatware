@@ -22,6 +22,7 @@ module Flatware
       end
 
       def run(feature_files=[])
+        @loader = nil
         options = Array(feature_files) + %w[--format Flatware::Cucumber::Formatter]
 
         configure(::Cucumber::Cli::Main.new(options, out, err).configuration)
@@ -29,12 +30,6 @@ module Flatware
         self.visitor = configuration.build_tree_walker(self)
         visitor.visit_features(features)
         results
-      end
-
-      private
-      def features
-        @loader = nil
-        super
       end
     end
   end
