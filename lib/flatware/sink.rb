@@ -4,7 +4,7 @@ module Flatware
   class Sink
     class << self
       def push(message)
-        client.push YAML.dump message
+        client.push Marshal.dump message
       end
 
       def start_server
@@ -28,9 +28,10 @@ module Flatware
         until done?
           message = socket.recv
           log 'printing'
-          case (result = YAML.load message)
+          case (result = Marshal.load message)
           when Cucumber::StepResult
             print result.progress
+            steps << result
           when Cucumber::ScenarioResult
             completed_scenarios << result
             log "COMPLETED SCENARIO"
@@ -44,11 +45,7 @@ module Flatware
       private
 
       def summarize
-        puts
-        puts
-        puts "#{completed_scenarios.size} scenarios (#{completed_scenarios.select(&:passed?).count} passed)"
-        completed_steps = completed_scenarios.map(&:steps).flatten
-        puts "#{completed_steps.size} steps (#{completed_steps.select(&:passed?).count} passed)"
+        Cucumber::Summary.new(completed_scenarios, steps, $stdout).summarize
       end
 
       def log(*args)
@@ -63,11 +60,16 @@ module Flatware
         die.send 'seppuku'
       end
 
+      def steps
+        @steps ||= []
+      end
+
       def completed_scenarios
         @completed_scenarios ||= []
       end
 
       def done?
+        log remaining_work
         remaining_work.empty?
       end
 

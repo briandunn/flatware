@@ -62,5 +62,30 @@ Then /^the suite finishes in less than (#{A.number}) seconds$/ do |seconds|
 end
 
 Then /^the output contains the following:$/ do |string|
-    assert_partial_output string, all_output
+  assert_partial_output string, all_output
+end
+
+Given 'the following scenario:' do |scenario|
+  write_file "features/step_definitions/flunky_steps.rb", <<-RB
+    Then('flunk') { false.should be_true }
+  RB
+
+  write_file "features/flunk.feature", <<-FEATURE
+  Feature: flunk
+
+  #{scenario}
+  FEATURE
+end
+
+Then 'the output contains a backtrace' do
+
+  trace = <<-TXT.gsub(/^ +/, '')
+    (::) failed steps (::)
+
+    expected false to be true (RSpec::Expectations::ExpectationNotMetError)
+    ./features/step_definitions/flunky_steps.rb:1:in `/^flunk$/'
+    features/flunk.feature:4:in `Given flunk'
+  TXT
+
+  assert_partial_output trace, all_output
 end

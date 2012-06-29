@@ -3,6 +3,7 @@ require_relative 'cucumber/runtime'
 module Flatware
   module Cucumber
     autoload :Formatter, 'flatware/cucumber/formatter'
+    autoload :Summary, 'flatware/cucumber/formatter'
 
     extend self
     def features
