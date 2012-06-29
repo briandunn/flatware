@@ -68,7 +68,11 @@ module Flatware
       end
 
       def done?
-        (Cucumber.features - completed_scenarios.map(&:id)).empty?
+        remaining_work.empty?
+      end
+
+      def remaining_work
+        Cucumber.features - completed_scenarios.map(&:id)
       end
 
       def fireable
