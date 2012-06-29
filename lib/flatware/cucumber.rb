@@ -9,8 +9,8 @@ module Flatware
       @features ||= `find features -name '*.feature'`.split "\n"
     end
 
-    def run(feature_files=[])
-      runtime.run feature_files
+    def run(feature_files=[], options=[])
+      runtime.run feature_files, options
     end
 
     def runtime
