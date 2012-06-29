@@ -1,3 +1,4 @@
+require 'benchmark'
 module Flatware
   class Worker
     class << self
@@ -17,15 +18,18 @@ module Flatware
       end
 
       def listen!(worker_number='')
-        ENV['TEST_ENV_NUMBER'] = worker_number.to_s
-        fireable
-        clock_in
-        fireable.until_fired task do |message|
-          log 'working!'
-          Cucumber.run message
-          log 'waiting'
-          task.send 'done'
+        time = Benchmark.realtime do
+          ENV['TEST_ENV_NUMBER'] = worker_number.to_s
+          fireable
+          clock_in
+          fireable.until_fired task do |message|
+            log 'working!'
+            Cucumber.run message
+            log 'waiting'
+            task.send 'done'
+          end
         end
+        log time
       end
 
       private
