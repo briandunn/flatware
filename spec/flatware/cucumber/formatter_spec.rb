@@ -39,7 +39,7 @@ describe Flatware::Cucumber::StepResult do
     subject { described_class.new(status, exception) }
 
     it 'can be serialized' do
-      expect { YAML.load(YAML.dump(subject)) }.to_not raise_error
+      expect { Marshal.load(Marshal.dump(subject)) }.to_not raise_error
     end
   end
 end
