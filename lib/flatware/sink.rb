@@ -2,9 +2,14 @@ require 'flatware'
 require 'flatware/cucumber/formatter'
 module Flatware
   class Sink
+    CompletedJob = Struct.new(:id)
     class << self
       def push(message)
         client.push Marshal.dump message
+      end
+
+      def finished(job)
+        push CompletedJob.new(job)
       end
 
       def start_server
@@ -32,7 +37,7 @@ module Flatware
           when Cucumber::StepResult
             print result.progress
             steps << result
-          when Cucumber::ScenarioResult
+          when CompletedJob
             completed_scenarios << result
             log "COMPLETED SCENARIO"
           else
@@ -45,7 +50,7 @@ module Flatware
       private
 
       def summarize
-        Cucumber::Summary.new(completed_scenarios, steps, $stdout).summarize
+        Cucumber::Summary.new(steps, $stdout).summarize
       end
 
       def log(*args)

@@ -13,20 +13,21 @@ module Flatware
         end
       end
 
-      def clock_in
-        task.send 'hi'
+      def report_for_duty
+        task.send 'ready'
       end
 
       def listen!(worker_number='')
         time = Benchmark.realtime do
           ENV['TEST_ENV_NUMBER'] = worker_number.to_s
           fireable
-          clock_in
-          fireable.until_fired task do |message|
+          report_for_duty
+          fireable.until_fired task do |work|
             log 'working!'
-            Cucumber.run message
+            Cucumber.run work
+            Sink.finished work
+            report_for_duty
             log 'waiting'
-            task.send 'done'
           end
         end
         log time

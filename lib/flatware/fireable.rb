@@ -12,7 +12,7 @@ module Flatware
     def until_fired(sockets=[], &block)
       while ready = ZMQ.select(Array(sockets) + [die])
         messages = ready.flatten.compact.map(&:recv)
-        return if messages.include? 'seppuku'
+        break if messages.include? 'seppuku'
         messages.each &block
       end
     ensure

@@ -17,56 +17,48 @@ module Flatware
       end
 
       def scenario_name(keyword, name, file_colon_line, source_indent)
-        push_scenario_result
-        @result = ScenarioResult.new(file_colon_line)
-      end
-
-      def after_features(*)
-        push_scenario_result
+        @current_scenario = file_colon_line
       end
 
       def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
-        Sink.push StepResult.add(status, exception)
-      end
-
-      private
-
-      def push_scenario_result
-        if @result
-          @result.steps = StepResult.all
-          Sink.push @result
-          StepResult.all.clear
-          @result = nil
-        end
+        Sink.push StepResult.new status, exception, @current_scenario
       end
     end
 
     class ScenarioResult
-      attr_reader :id
-      attr_accessor :steps
+      attr_reader :id, :steps
 
-      def initialize(id)
-        @id = id.split(':').first
-        @steps = []
+      def initialize(id, steps=[])
+        @id = id
+        @steps = steps
       end
 
       def passed?
         steps.all? &:passed?
       end
 
+      def failed?
+        steps.any? &:failed?
+      end
+
       def status
-        passed? ? :passed : :failed
+        failed? ? :failed : :passed
       end
     end
 
     class Summary
       include ::Cucumber::Formatter::Console
-      attr_reader :scenarios, :io, :steps
+      attr_reader :io, :steps
 
-      def initialize(scenarios, steps, io=StringIO.new)
+      def initialize(steps, io=StringIO.new)
         @io = io
-        @scenarios = scenarios
         @steps = steps
+      end
+
+      def scenarios
+        @scenarios ||= steps.group_by(&:scenario_id).map do |scenario, steps|
+          ScenarioResult.new(scenario, steps)
+        end
       end
 
       def summarize
@@ -112,14 +104,18 @@ module Flatware
 
     class StepResult
       include ::Cucumber::Formatter::Console
-      attr_reader :status, :exception
+      attr_reader :status, :exception, :scenario_id
 
-      def initialize(status, exception)
-        @status, @exception = status, serialized(exception)
+      def initialize(status, exception, scenario_id=nil)
+        @status, @exception, @scenario_id = status, serialized(exception), scenario_id
       end
 
       def passed?
         status == :passed
+      end
+
+      def failed?
+        status == :failed
       end
 
       def progress
@@ -129,18 +125,6 @@ module Flatware
       private
       def serialized(e)
         SerializedException.new(e.class, e.message, e.backtrace) if e
-      end
-
-      class << self
-        def add(status, exception)
-          new(status, exception).tap do |result|
-            all << result
-          end
-        end
-
-        def all
-          @all ||= []
-        end
       end
     end
 
