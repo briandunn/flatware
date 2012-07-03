@@ -47,6 +47,22 @@ module Flatware
       Process.waitall
     end
 
+    method_option :workers, :aliases => "-w", :type => :numeric, :desc => "Number of concurent processes to run. Defaults to your system's available cores."
+    desc "fan [COMMAND]", "executes the given job on all of the workers"
+    def fan(*command)
+      Flatware.verbose = options[:log]
+
+      command = command.join(" ")
+      puts "Running '#{command}' on #{workers} workers"
+
+      workers.times do |i|
+        fork do
+          exec({"TEST_ENV_NUMBER" => i.to_s}, command)
+        end
+      end
+      Process.waitall
+    end
+
     private
 
     def log(*args)
