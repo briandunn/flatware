@@ -28,10 +28,11 @@ module Flatware
     end
 
     default_task :default
+    method_option :workers, :aliases => "-w", :type => :numeric, :desc => "Number of concurent processes to run. Defaults to your system's available cores."
     desc "default", "starts workers and gives them work"
     def default
       Flatware.verbose = options[:log]
-      processors.times do |i|
+      workers.times do |i|
         fork do
           log "work"
           Worker.listen! i
@@ -50,6 +51,10 @@ module Flatware
 
     def log(*args)
       Flatware.log(*args)
+    end
+
+    def workers
+      options[:workers] || processors
     end
 
     def processors
