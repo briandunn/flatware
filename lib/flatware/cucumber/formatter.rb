@@ -25,7 +25,7 @@ module Flatware
         result = if scenario_outline?
           Result.new ProgressString.format status
         else
-          Result.step status, exception, @current_scenario
+          Result.step status, exception, current_scenario
         end
 
         Sink.push result
@@ -47,8 +47,8 @@ module Flatware
 
       def after_table_row(table_row)
         if example_row? table_row
-          @step_collector.stop(table_row)
-          Sink.push Result.new @step_collector.progress, @step_collector.steps
+          step_collector.stop table_row
+          Sink.push Result.new step_collector.progress, step_collector.steps
         end
       end
 
@@ -57,6 +57,8 @@ module Flatware
       end
 
       private
+
+      attr_reader :step_mother, :step_collector, :current_scenario
 
       class StepCollector
         attr_reader :step_mother
@@ -93,8 +95,6 @@ module Flatware
           @ran_steps = step_mother.steps.dup
         end
       end
-
-      attr_reader :step_mother
 
       def scenario_outline?
         !!@outline_steps
