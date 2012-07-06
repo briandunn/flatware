@@ -23,7 +23,7 @@ module Flatware
 
       def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
         result = if scenario_outline?
-          Result.new ProgressString.format status
+          Result.status status
         else
           Result.step status, exception, current_scenario
         end
@@ -53,7 +53,7 @@ module Flatware
       end
 
       def table_cell_value(_, status)
-        Sink.push Result.new ProgressString.format status if example_cell? status
+        Sink.push Result.status status if example_cell? status
       end
 
       private
