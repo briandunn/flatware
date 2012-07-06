@@ -60,6 +60,38 @@ module Flatware
 
       attr_reader :step_mother, :step_collector, :current_scenario
 
+      def status_only?(background)
+        scenario_outline? or (background and not current_scenario)
+      end
+
+      def scenario_outline?
+        !!@outline_steps
+      end
+
+      def example_row?(table_row)
+        outline_table? and not table_header_row? table_row
+      end
+
+      def example_cell?(status)
+        outline_table? and not table_header_cell? status
+      end
+
+      def table_header_cell?(status)
+        status == :skipped_param
+      end
+
+      def outline_table?
+        !!@outline_table
+      end
+
+      def table_header_row?(table_row)
+        table_row.failed?
+      rescue ::Cucumber::Ast::OutlineTable::ExampleRow::InvalidForHeaderRowError
+        true
+      else
+        false
+      end
+
       class StepCollector
         attr_reader :step_mother
         def initialize(step_mother)
@@ -94,34 +126,6 @@ module Flatware
         def snapshot_steps
           @ran_steps = step_mother.steps.dup
         end
-      end
-
-      def scenario_outline?
-        !!@outline_steps
-      end
-
-      def example_row?(table_row)
-        outline_table? and not table_header_row? table_row
-      end
-
-      def example_cell?(status)
-        outline_table? and not table_header_cell? status
-      end
-
-      def table_header_cell?(status)
-        status == :skipped_param
-      end
-
-      def outline_table?
-        !!@outline_table
-      end
-
-      def table_header_row?(table_row)
-        table_row.failed?
-      rescue ::Cucumber::Ast::OutlineTable::ExampleRow::InvalidForHeaderRowError
-        true
-      else
-        false
       end
     end
 
