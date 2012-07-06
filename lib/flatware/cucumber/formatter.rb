@@ -12,6 +12,21 @@ module Flatware
 
     STATUSES = FORMATS.keys
 
+    class Result
+      attr_reader :progress, :steps
+
+      def initialize(progress, steps=nil)
+        @progress, @steps = progress, steps || []
+      end
+
+      class << self
+        def step(*args)
+          step = StepResult.new *args
+          new step.progress, [step]
+        end
+      end
+    end
+
     class Formatter
       def initialize(*)
       end
@@ -21,7 +36,7 @@ module Flatware
       end
 
       def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
-        Sink.push StepResult.new status, exception, @current_scenario
+        Sink.push Result.step status, exception, @current_scenario
       end
     end
 

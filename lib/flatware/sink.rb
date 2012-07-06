@@ -34,9 +34,9 @@ module Flatware
           message = socket.recv
           log 'printing'
           case (result = Marshal.load message)
-          when Cucumber::StepResult
+          when Cucumber::Result
             print result.progress
-            steps << result
+            steps.push *result.steps
           when CompletedJob
             completed_scenarios << result
             log "COMPLETED SCENARIO"
