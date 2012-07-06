@@ -48,16 +48,18 @@ module Flatware
         @steps = steps
       end
 
-      def passed?
-        steps.all? &:passed?
-      end
-
-      def failed?
-        steps.any? &:failed?
-      end
-
       def status
-        failed? ? :failed : :passed
+        first(:failed) || first(:undefined) || :passed
+      end
+
+      private
+
+      def first(status)
+        statuses.detect {|s| s == status}
+      end
+
+      def statuses
+        steps.map &:status
       end
     end
 
