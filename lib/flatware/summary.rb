@@ -10,7 +10,7 @@ module Flatware
     end
 
     def scenarios
-      @scenarios ||= steps.group_by(&:scenario_id).map do |scenario, steps|
+      @scenarios ||= scenario_steps.group_by(&:scenario_id).map do |scenario, steps|
         ScenarioResult.new(scenario, steps)
       end
     end
@@ -23,6 +23,10 @@ module Flatware
     end
 
     private
+
+    def scenario_steps
+      steps.select &:scenario_id
+    end
 
     def print_steps(status)
       print_elements steps.select(&with_status(status)), status, 'steps'

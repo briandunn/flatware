@@ -45,3 +45,19 @@ Feature: Output
     2 scenarios (1 failed, 1 undefined)
     6 steps (1 failed, 5 undefined)
     """
+
+  Scenario: backgrounds
+    Given the following scenario:
+    """
+    Background:
+      Given some stuff
+
+    Scenario:
+      Then there are two steps
+    """
+    When I run flatware
+    Then the output contains the following:
+    """
+    1 scenario (1 undefined)
+    2 steps (2 undefined)
+    """

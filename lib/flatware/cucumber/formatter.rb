@@ -22,7 +22,7 @@ module Flatware
       end
 
       def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
-        result = if scenario_outline?
+        result = if status_only? background
           Result.status status
         else
           Result.step status, exception, current_scenario
