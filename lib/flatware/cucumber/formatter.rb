@@ -96,7 +96,7 @@ module Flatware
       end
 
       def print_step_counts
-        io.puts "#{pluralize 'step',steps.size} (#{count_summary steps})"
+        io.puts "#{pluralize 'step', steps.size} (#{count_summary steps})"
       end
 
       def pluralize(word, number)
