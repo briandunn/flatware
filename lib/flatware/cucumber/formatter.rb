@@ -119,8 +119,14 @@ module Flatware
       end
     end
 
+    class ProgressString
+      extend ::Cucumber::Formatter::Console
+      def self.format(status)
+        format_string FORMATS[status], status
+      end
+    end
+
     class StepResult
-      include ::Cucumber::Formatter::Console
       attr_reader :status, :exception, :scenario_id
 
       def initialize(status, exception, scenario_id=nil)
@@ -136,7 +142,7 @@ module Flatware
       end
 
       def progress
-        format_string FORMATS[status], status
+        ProgressString.format(status)
       end
 
       private
