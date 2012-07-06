@@ -128,6 +128,7 @@ module Flatware
     class ProgressString
       extend ::Cucumber::Formatter::Console
       def self.format(status)
+        return '' unless status
         format_string FORMATS[status], status
       end
     end
