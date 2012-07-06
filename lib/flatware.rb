@@ -1,12 +1,16 @@
 require 'zmq'
 
 module Flatware
-  autoload :Dispatcher, 'flatware/dispatcher'
-  autoload :Cucumber, 'flatware/cucumber'
-  autoload :Fireable, 'flatware/fireable'
-  autoload :Worker, 'flatware/worker'
-  autoload :Sink, 'flatware/sink'
   autoload :CLI, 'flatware/cli'
+  autoload :Cucumber, 'flatware/cucumber'
+  autoload :Dispatcher, 'flatware/dispatcher'
+  autoload :Fireable, 'flatware/fireable'
+  autoload :Result, 'flatware/result'
+  autoload :ScenarioResult, 'flatware/scenario_result'
+  autoload :Sink, 'flatware/sink'
+  autoload :StepResult, 'flatware/step_result'
+  autoload :Summary, 'flatware/summary'
+  autoload :Worker, 'flatware/worker'
 
   extend self
   def socket(*args)

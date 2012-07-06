@@ -34,7 +34,7 @@ module Flatware
           message = socket.recv
           log 'printing'
           case (result = Marshal.load message)
-          when Cucumber::Result
+          when Result
             print result.progress
             steps.push *result.steps
           when CompletedJob
@@ -50,7 +50,7 @@ module Flatware
       private
 
       def summarize
-        Cucumber::Summary.new(steps, $stdout).summarize
+        Summary.new(steps, $stdout).summarize
       end
 
       def log(*args)
