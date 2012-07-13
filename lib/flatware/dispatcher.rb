@@ -11,6 +11,7 @@ module Flatware
     end
 
     def dispatch!
+      return Flatware.close if jobs.empty?
       fireable.until_fired dispatch do |request|
         if job = jobs.pop
           dispatch.send Marshal.dump job

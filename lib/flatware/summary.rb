@@ -16,6 +16,7 @@ module Flatware
     end
 
     def summarize
+      return unless steps.any?
       2.times { io.puts }
       print_steps :failed
       print_scenario_counts
