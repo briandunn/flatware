@@ -14,9 +14,9 @@ module Flatware
 
   extend self
   def socket(*args)
-   context.socket(*args).tap do |socket|
-     sockets.push socket
-   end
+    context.socket(*args).tap do |socket|
+      sockets.push socket
+    end
   end
 
   def close
