@@ -2,34 +2,35 @@ module Flatware
   class Dispatcher
     DISPATCH_PORT = 'ipc://dispatch'
 
-    class << self
-      def dispatch
-        @dispatch ||= Flatware.socket(ZMQ::REP).tap do |socket|
-          socket.bind DISPATCH_PORT
+    def self.dispatch!(jobs=Cucumber.features)
+      new(jobs).dispatch!
+    end
+
+    def initialize(jobs)
+      @jobs = jobs
+    end
+
+    def dispatch!
+      fireable.until_fired dispatch do |request|
+        if job = jobs.pop
+          dispatch.send job
+        else
+          dispatch.send 'seppuku'
         end
       end
+    end
 
-      def dispatch!
-        features = Cucumber.features
+    private
 
-        fireable.until_fired dispatch do |request|
-          feature = features.pop
-          if feature
-            dispatch.send feature
-          else
-            dispatch.send 'seppuku'
-          end
-        end
-      end
+    attr_reader :jobs
 
-      private
+    def fireable
+      @fireable ||= Fireable.new
+    end
 
-      def log(*args)
-        Flatware.log *args
-      end
-
-      def fireable
-        @fireable ||= Fireable.new
+    def dispatch
+      @dispatch ||= Flatware.socket(ZMQ::REP).tap do |socket|
+        socket.bind DISPATCH_PORT
       end
     end
   end
