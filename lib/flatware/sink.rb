@@ -2,18 +2,17 @@ require 'flatware'
 require 'flatware/cucumber/formatter'
 module Flatware
   class Sink
-    CompletedJob = Struct.new(:id)
     class << self
       def push(message)
         client.push Marshal.dump message
       end
 
       def finished(job)
-        push CompletedJob.new(job)
+        push job
       end
 
-      def start_server
-        Server.start
+      def start_server(jobs=Cucumber.jobs, out_stream=$stdout, error_stream=$stderr)
+        Server.new(jobs, out_stream, error_stream).start
       end
 
       def client
@@ -21,8 +20,10 @@ module Flatware
       end
     end
 
-    module Server
-      extend self
+    class Server
+      def initialize(jobs, out, error)
+        @jobs, @out, @error = jobs, out, error
+      end
 
       def start
         before_firing { listen }
@@ -37,8 +38,8 @@ module Flatware
           when Result
             print result.progress
             steps.push *result.steps
-          when CompletedJob
-            completed_scenarios << result
+          when Job
+            completed_jobs << result
             log "COMPLETED SCENARIO"
           else
             log "i don't know that message, bro."
@@ -49,8 +50,14 @@ module Flatware
 
       private
 
+      attr_reader :out, :jobs
+
+      def print(*args)
+        out.print *args
+      end
+
       def summarize
-        Summary.new(steps, $stdout).summarize
+        Summary.new(steps, @out).summarize
       end
 
       def log(*args)
@@ -69,8 +76,8 @@ module Flatware
         @steps ||= []
       end
 
-      def completed_scenarios
-        @completed_scenarios ||= []
+      def completed_jobs
+        @completed_jobs ||= []
       end
 
       def done?
@@ -79,7 +86,7 @@ module Flatware
       end
 
       def remaining_work
-        Cucumber.features - completed_scenarios.map(&:id)
+        jobs - completed_jobs
       end
 
       def fireable

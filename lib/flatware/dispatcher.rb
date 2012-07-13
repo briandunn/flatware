@@ -2,7 +2,7 @@ module Flatware
   class Dispatcher
     DISPATCH_PORT = 'ipc://dispatch'
 
-    def self.dispatch!(jobs=Cucumber.features)
+    def self.dispatch!(jobs=Cucumber.jobs)
       new(jobs).dispatch!
     end
 
@@ -13,7 +13,7 @@ module Flatware
     def dispatch!
       fireable.until_fired dispatch do |request|
         if job = jobs.pop
-          dispatch.send job
+          dispatch.send Marshal.dump job
         else
           dispatch.send 'seppuku'
         end

@@ -20,9 +20,10 @@ module Flatware
         fireable
         report_for_duty
         fireable.until_fired task do |work|
+          job = Marshal.load work
           log 'working!'
-          Cucumber.run work
-          Sink.finished work
+          Cucumber.run job.id
+          Sink.finished job
           report_for_duty
           log 'waiting'
         end

@@ -16,8 +16,13 @@ module Flatware
     STATUSES = FORMATS.keys
 
     extend self
-    def features
-      @features ||= `find features -name '*.feature'`.split "\n"
+
+    attr_reader :jobs
+
+    def extract_jobs_from_args(args=[], out_stream=$stdout, error_stream=$stderr)
+      config = ::Cucumber::Cli::Configuration.new(out_stream, error_stream)
+      config.parse! args
+      @jobs = config.feature_files.map { |file| Job.new file }
     end
 
     def run(feature_files=[], options=[])

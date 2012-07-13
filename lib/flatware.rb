@@ -12,6 +12,8 @@ module Flatware
   autoload :Summary, 'flatware/summary'
   autoload :Worker, 'flatware/worker'
 
+  Job = Struct.new :id
+
   extend self
   def socket(*args)
     context.socket(*args).tap do |socket|

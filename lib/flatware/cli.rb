@@ -33,12 +33,13 @@ module Flatware
     def default
       Flatware.verbose = options[:log]
       Worker.spawn workers
+      jobs = Cucumber.extract_jobs_from_args []
       fork do
         log "dispatch"
-        dispatch
+        Dispatcher.dispatch! jobs
       end
       log "bossman"
-      Sink.start_server
+      Sink.start_server jobs
       Process.waitall
     end
 
