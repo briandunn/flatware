@@ -2,13 +2,17 @@ require 'benchmark'
 module Flatware
   class Worker
 
-    def self.listen!(worker_number='')
-      new(worker_number).listen
+    def self.listen!
+      new.listen
     end
 
-    def initialize(worker_number)
-      @worker_number = worker_number.to_s
-      ENV['TEST_ENV_NUMBER'] = @worker_number
+    def self.spawn(worker_count)
+      worker_count.times do |i|
+        fork do
+          ENV['TEST_ENV_NUMBER'] = i.to_s
+          listen!
+        end
+      end
     end
 
     def listen
@@ -27,8 +31,6 @@ module Flatware
     end
 
     private
-
-    attr_reader :worker_number
 
     def log(*args)
       Flatware.log *args
