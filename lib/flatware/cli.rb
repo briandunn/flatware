@@ -7,7 +7,7 @@ module Flatware
     end
 
     def self.worker_option
-      method_option :workers, aliases: "-w", type: :numeric, default: processors, desc: "Number of concurent processes to run. Defaults to your system's available cores."
+      method_option :workers, aliases: "-w", type: :numeric, default: processors, desc: "Number of concurent processes to run"
     end
 
     class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
