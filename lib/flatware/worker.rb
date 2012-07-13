@@ -9,7 +9,7 @@ module Flatware
 
       def task
         @task ||= Flatware.socket(ZMQ::REQ).tap do |task|
-          task.connect 'ipc://dispatch'
+          task.connect Dispatcher::DISPATCH_PORT
         end
       end
 

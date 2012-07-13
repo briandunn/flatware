@@ -1,10 +1,11 @@
 module Flatware
   class Dispatcher
-    class << self
+    DISPATCH_PORT = 'ipc://dispatch'
 
+    class << self
       def dispatch
         @dispatch ||= Flatware.socket(ZMQ::REP).tap do |socket|
-          socket.bind 'ipc://dispatch'
+          socket.bind DISPATCH_PORT
         end
       end
 
