@@ -1,7 +1,16 @@
 require 'thor'
 module Flatware
   class CLI < Thor
-    class_option :log, :aliases => "-l", :type => :boolean, :desc => "Print debug messages to $stderr"
+
+    def self.processors
+      @processors ||= `hostinfo`.match(/^(?<processors>\d+) processors are logically available\.$/)[:processors].to_i
+    end
+
+    def self.worker_option
+      method_option :workers, aliases: "-w", type: :numeric, default: processors, desc: "Number of concurent processes to run. Defaults to your system's available cores."
+    end
+
+    class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
 
     desc "mux", "splits your current tmux pane into worker panes. Runs workers in them."
     def mux
@@ -28,8 +37,8 @@ module Flatware
     end
 
     default_task :default
-    method_option :workers, :aliases => "-w", :type => :numeric, :desc => "Number of concurent processes to run. Defaults to your system's available cores."
-    desc "default", "starts workers and gives them work"
+    worker_option
+    desc "default", "parallelizes cucumber with default arguments"
     def default
       Flatware.verbose = options[:log]
       Worker.spawn workers
@@ -43,7 +52,7 @@ module Flatware
       Process.waitall
     end
 
-    method_option :workers, :aliases => "-w", :type => :numeric, :desc => "Number of concurent processes to run. Defaults to your system's available cores."
+    worker_option
     desc "fan [COMMAND]", "executes the given job on all of the workers"
     def fan(*command)
       Flatware.verbose = options[:log]
@@ -66,11 +75,7 @@ module Flatware
     end
 
     def workers
-      options[:workers] || processors
-    end
-
-    def processors
-      @processors ||= `hostinfo`.match(/^(?<processors>\d+) processors are logically available\.$/)[:processors].to_i
+      options[:workers]
     end
   end
 end
