@@ -68,6 +68,11 @@ module Flatware
       Process.waitall
     end
 
+    desc "drb", "start a DRb server that will listen for Cucumber and run concurrently"
+    def drb
+      DRbServer.start workers
+    end
+
     private
 
     def log(*args)

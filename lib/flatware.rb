@@ -4,6 +4,7 @@ module Flatware
   autoload :CLI, 'flatware/cli'
   autoload :Cucumber, 'flatware/cucumber'
   autoload :Dispatcher, 'flatware/dispatcher'
+  autoload :DRbServer, 'flatware/drb_server'
   autoload :Fireable, 'flatware/fireable'
   autoload :Result, 'flatware/result'
   autoload :ScenarioResult, 'flatware/scenario_result'
