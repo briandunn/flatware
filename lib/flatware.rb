@@ -24,6 +24,7 @@ module Flatware
   def close
     sockets.each &:close
     context.close
+    @context = nil
   end
 
   def log(*message)
@@ -40,8 +41,7 @@ module Flatware
 
   private
   def context
-    return @context if @context
-    @context = ZMQ::Context.new
+    @context ||= ZMQ::Context.new
   end
 
   def sockets
