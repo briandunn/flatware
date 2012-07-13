@@ -2,7 +2,7 @@ module Flatware
   class Dispatcher
     DISPATCH_PORT = 'ipc://dispatch'
 
-    def self.dispatch!(jobs=Cucumber.jobs)
+    def self.start(jobs=Cucumber.jobs)
       new(jobs).dispatch!
     end
 

@@ -28,7 +28,7 @@ module Flatware
 
     desc "dispatch", "fire up the dispatcher to distribute tests"
     def dispatch
-      Dispatcher.dispatch!
+      Dispatcher.start
     end
 
     desc "work", "request and perform work from a dispatcher"
@@ -45,7 +45,7 @@ module Flatware
       jobs = Cucumber.extract_jobs_from_args []
       fork do
         log "dispatch"
-        Dispatcher.dispatch! jobs
+        Dispatcher.start jobs
       end
       log "bossman"
       Sink.start_server jobs
