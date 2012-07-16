@@ -23,7 +23,7 @@ module Flatware
 
       def run(feature_files=[], options=[])
         @loader = nil
-        options = Array(feature_files) + options + %w[--format Flatware::Cucumber::Formatter]
+        options = Array(feature_files) + %w[--format Flatware::Cucumber::Formatter] + options
 
         configure(::Cucumber::Cli::Main.new(options, out, err).configuration)
 
