@@ -12,7 +12,7 @@ module Flatware
   autoload :Summary, 'flatware/summary'
   autoload :Worker, 'flatware/worker'
 
-  Job = Struct.new :id
+  Job = Struct.new :id, :args
 
   extend self
   def socket(*args)
