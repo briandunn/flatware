@@ -16,11 +16,10 @@ module Flatware
     end
 
     def summarize
-      return unless steps.any?
       2.times { io.puts }
       print_steps :failed
-      print_scenario_counts
-      print_step_counts
+      print_counts 'scenario', scenarios
+      print_counts 'step', steps
     end
 
     private
@@ -33,12 +32,8 @@ module Flatware
       print_elements steps.select(&with_status(status)), status, 'steps'
     end
 
-    def print_scenario_counts
-      io.puts "#{pluralize 'scenario', scenarios.size} (#{count_summary scenarios})"
-    end
-
-    def print_step_counts
-      io.puts "#{pluralize 'step', steps.size} (#{count_summary steps})"
+    def print_counts(label, collection)
+      io.puts pluralize(label, collection.size) + count_summary(collection)
     end
 
     def pluralize(word, number)
@@ -50,10 +45,13 @@ module Flatware
     end
 
     def count_summary(results)
-      Cucumber::STATUSES.map do |status|
+      return "" unless results.any?
+      status_counts = Cucumber::STATUSES.map do |status|
         count = results.select(&with_status(status)).size
         format_string "#{count} #{status}", status if count > 0
       end.compact.join ", "
+
+      " (#{status_counts})"
     end
 
     def count(status)
