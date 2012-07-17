@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     flatware (0.0.0)
-      thor
+      thor (~> 0.15.0)
       zmq
 
 GEM

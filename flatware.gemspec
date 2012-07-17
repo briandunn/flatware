@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.executables = ["flatware"]
   s.rubygems_version = "1.8.10"
   s.add_dependency %<zmq>
-  s.add_dependency %<thor>
+  s.add_dependency %<thor>,'~> 0.15.0'
   s.add_development_dependency %<aruba>
   s.add_development_dependency %<rake>
   s.add_development_dependency %<rspec>
