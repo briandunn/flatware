@@ -80,9 +80,6 @@ end
 Then 'the output contains a backtrace' do
 
   trace = <<-TXT.gsub(/^ +/, '')
-    (::) failed steps (::)
-
-    expected false to be true (RSpec::Expectations::ExpectationNotMetError)
     ./features/step_definitions/flunky_steps.rb:1:in `/^flunk$/'
     features/flunk.feature:4:in `Given flunk'
   TXT
