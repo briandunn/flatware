@@ -1,7 +1,16 @@
 digraph {
-  dispatcher [label="dispatcher | <pub> PUB | <rep> REP", shape=record];
-  worker     [label="worker     | <sub> SUB | <req> REQ", shape=record];
-  dispatcher:pub -> worker:sub     [label=sepuku];
-  worker:req     -> dispatcher:rep [label=results];
-  dispatcher:rep -> worker:req     [label=test];
+  node [color=cornflowerblue];
+  subgraph {
+    node [shape=record, fontsize=10.0];
+    dispatcher [label="dispatcher | <sub> SUB | <rep>  REP"];
+    worker     [label="worker     | <sub> SUB | <req>  REQ | <push> PUSH"];
+    sink       [label="sink       | <pub> PUB | <pull> PULL"];
+  }
+  subgraph {
+    sink:pub       -> dispatcher:sub [label=quit];
+    sink:pub       -> worker:sub     [label=quit];
+    worker:push    -> sink:pull      [label=results];
+    worker:req     -> dispatcher:rep [label=ready];
+    dispatcher:rep -> worker:req     [label=job];
+  }
 }
