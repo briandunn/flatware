@@ -2,14 +2,59 @@
 
 A drop in replacement for your Spork that's a bit more up scale.
 
-Flatware aims to be a distributed cucumber runner that speaks cucumber's DRB protocol. You will run it like spork, but instead of running in synchronous it will distribute your scenarios.
+Flatware is a a distributed cucumber runner.
 
-== Features (eventually)
+== Requirements
+
+* ZeroMQ ~> 2.1
+
+== Installation
+
+Add this to your Gemfile:
+
+    gem 'flatware'
+
+and `bundle install`.
+
+== Usage
+
+To run your entire suite with the default cucumber options, just:
+
+    flatware
+
+If you'd like to limit the number of forked workers, you can pass the 'w' flag:
+
+    flatware -w 3
+
+You can also pass most cucumber options to flatware. For example, to run only features that are not tagged 'javascript', you can:
+
+    flatware cucumber -t ~@javascript
+
+
+== Planned Features
 
 * Reliable enough to use as part of your Continuous Integration system
-* Always accounts for every feature or spec you ask it to run
-* If you know how to use Spork you know how to use Flatware
-* Uses heuristics to run your slowest tests first 
+* Always accounts for every feature you ask it to run
+* Use heuristics to run your slowest tests first
+* speak Cucumber's DRB protocol; if you know how to use Spork you know how to use Flatware
+
+== Design Goals
+
+=== Maintainable
+
+* Fully test at an integration level. Don't be afraid to change the code. If you break it you'll know.
+* Couple as loosely as possible, and only to the most stable/public bits of Cucumber.
+
+=== Minimal
+
+* Projects define their own preperation scripts
+* Only distribute to local cores (for now)
+* Only handle cucumber
+
+=== Robust
+
+* Depend on a dedicated messaging library
+* Be acountable for completed work; provide progress report regardless of completing the suite.
 
 == Tinkering
 
@@ -20,7 +65,7 @@ Flatware is tested with aruba. In order to get a demo cucumber project you can a
 The excellent ZeroMQ guide: http://zguide.zeromq.org/page:all
 
 == Contributing to Flatware
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 * Fork the project
