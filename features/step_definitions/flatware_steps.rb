@@ -47,6 +47,26 @@ Given /^a cucumber suite with two features that each sleep for (#{A.number}) sec
   RB
 end
 
+Given 'a sleepy cucumber suite' do
+  step 'a cucumber suite with two features that each sleep for 1 second'
+end
+
+When /^I time the suite with (cucumber|flatware)$/ do |runner|
+  @durations ||= {}
+  commands = {
+    'cucumber' => 'cucumber --format progress',
+    'flatware' => 'flatware cucumber'
+  }
+  @durations[runner] = duration do
+    run_simple commands[runner], false
+  end
+  assert_exit_status 0
+end
+
+Then 'flatware is faster' do
+  @durations['flatware'].should < @durations['cucumber']
+end
+
 When /^I run flatware(?: with "([^"]+)")?$/ do |args|
   @duration = duration do
     # loading bundler slows down the SUT processes too much for us to detect

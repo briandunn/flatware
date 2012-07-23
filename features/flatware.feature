@@ -4,6 +4,7 @@ Feature: Distribute scenarios between workers
 
   Scenario:
     Given I am using a multi core machine
-    And a cucumber suite with two features that each sleep for 1 second
-    When I run flatware
-    Then the suite finishes in less than 2 seconds
+    And a sleepy cucumber suite
+    When I time the suite with cucumber
+    And I time the suite with flatware
+    Then flatware is faster
