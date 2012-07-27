@@ -21,8 +21,15 @@ module Flatware
         @outline_steps = nil
       end
 
+      def after_feature(*)
+        background_steps.each do |step|
+          Sink.push step
+        end unless current_scenario
+      end
+
       def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
         result = if status_only? background
+          background_steps << Result.background(status, exception)
           Result.status status
         else
           Result.step status, exception, current_scenario
@@ -59,6 +66,10 @@ module Flatware
       private
 
       attr_reader :step_mother, :step_collector, :current_scenario
+
+      def background_steps
+        @background_steps ||= []
+      end
 
       def status_only?(background)
         scenario_outline? or (background and not current_scenario)

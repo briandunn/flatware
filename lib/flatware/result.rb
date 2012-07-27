@@ -15,6 +15,10 @@ module Flatware
       def status(status)
         new Cucumber::ProgressString.format status
       end
+
+      def background(status, exception)
+        new '', [StepResult.new(status, exception)]
+      end
     end
   end
 end

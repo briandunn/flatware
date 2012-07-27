@@ -61,3 +61,16 @@ Feature: Output
     1 scenario (1 undefined)
     2 steps (2 undefined)
     """
+
+  Scenario: background without scenario
+    Given the following scenario:
+    """
+    Background:
+      Given some stuff
+    """
+    When I run flatware
+    Then the output contains the following:
+    """
+    0 scenarios
+    1 step (1 undefined)
+    """
