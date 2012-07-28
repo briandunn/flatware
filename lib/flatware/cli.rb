@@ -51,9 +51,11 @@ module Flatware
       jobs = Cucumber.extract_jobs_from_args args
       fork do
         log "dispatch"
+        $0 = 'flatware dispatcher'
         Dispatcher.start jobs
       end
       log "bossman"
+      $0 = 'flatware sink'
       Sink.start_server jobs
       Process.waitall
     end
@@ -72,6 +74,12 @@ module Flatware
         end
       end
       Process.waitall
+    end
+
+
+    desc "clear", "kills all flatware processes"
+    def clear
+      `ps -c -opid,command | grep flatware | cut -f 1 -d ' ' | xargs kill -6`
     end
 
     private
