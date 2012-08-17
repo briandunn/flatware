@@ -26,6 +26,11 @@ module Flatware
       end
 
       def start
+        trap 'INT' do
+          summarize
+          summarize_remaining
+        end
+
         before_firing { listen }
         Flatware.close
       end
@@ -33,7 +38,6 @@ module Flatware
       def listen
         until done?
           message = socket.recv
-          log 'printing'
           case (result = Marshal.load message)
           when Result
             print result.progress
@@ -46,6 +50,8 @@ module Flatware
           end
         end
         summarize
+      rescue ZMQ::Error => e
+        raise unless e.message == "Interrupted system call"
       end
 
       private
@@ -56,8 +62,21 @@ module Flatware
         out.print *args
       end
 
+      def puts(*args)
+        out.puts *args
+      end
+
       def summarize
-        Summary.new(steps, @out).summarize
+        Summary.new(steps, out).summarize
+      end
+
+      def summarize_remaining
+        return if remaining_work.empty?
+        puts
+        puts "The following features have not been run:"
+        for job in remaining_work
+          puts job.id
+        end
       end
 
       def log(*args)
