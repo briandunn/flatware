@@ -2,12 +2,12 @@
 
 Gem::Specification.new do |s|
   s.name = "flatware"
-  s.version = "0.0.0"
+  s.version = "0.0.1"
   s.authors = ["Brian Dunn"]
   s.date = "2012-02-24"
-  s.summary = "A distributing drop in replacement for Spork"
-  s.description = "A distributing drop in replacement for Spork"
-  s.email = "brian@theophil.us"
+  s.summary = "A distributed cucumber runner"
+  s.description = "A distributed cucumber runner"
+  s.email = "brian@hashrocket.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README.rdoc"
@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = "1.8.10"
   s.add_dependency %<zmq>
   s.add_dependency %<thor>,'~> 0.15.0'
-  s.add_dependency %<cucumber>,'~> 1.1.0'
+  s.add_dependency %<cucumber>,'~> 1.2.0'
   s.add_development_dependency %<aruba>
   s.add_development_dependency %<rake>
   s.add_development_dependency %<rspec>

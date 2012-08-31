@@ -1,7 +1,5 @@
 = Flatware
 
-A drop in replacement for your Spork that's a bit more up scale.
-
 Flatware is a a distributed cucumber runner.
 
 == Requirements
