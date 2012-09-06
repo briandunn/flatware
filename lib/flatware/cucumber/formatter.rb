@@ -27,7 +27,15 @@ module Flatware
         end unless current_scenario
       end
 
-      def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
+      # keyword,
+      # step_match,
+      # multiline_arg,
+      # status,
+      # exception,
+      # source_indent,
+      # background,
+      # file_colon_line
+      def after_step_result(_, _, _, status, exception, _, background, _)
         result = if status_only? background
           background_steps << Result.background(status, exception)
           Result.status status
