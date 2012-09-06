@@ -14,17 +14,19 @@ module Flatware
 
     default_task :default
     worker_option
-    desc "default", "parallelizes cucumber with default arguments"
+    desc "default [FLATWARE_OPTS]", "parallelizes cucumber with default arguments"
     def default
-      cucumber
+      invoke :cucumber
     end
 
     worker_option
-    desc "cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
+    desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
       Flatware.verbose = options[:log]
       Worker.spawn workers
-      jobs = Cucumber.extract_jobs_from_args args
+      log "flatware options:", options
+      log "cucumber options:", cucumber_args
+      jobs = Cucumber.extract_jobs_from_args cucumber_args
       fork do
         log "dispatch"
         $0 = 'flatware dispatcher'
@@ -63,6 +65,14 @@ module Flatware
     end
 
     private
+
+    def cucumber_args
+      if index = ARGV.index('cucumber')
+        ARGV[index + 1..-1]
+      else
+        []
+      end
+    end
 
     def log(*args)
       Flatware.log(*args)
