@@ -55,7 +55,11 @@ module Flatware
 
     desc "clear", "kills all flatware processes"
     def clear
-      `ps -c -opid,command | grep flatware | cut -f 1 -d ' ' | xargs kill -6`
+      `ps -c -opid,command`.split("\n").map do |row|
+        row =~ /(\d+).*flatware/ and $1.to_i
+      end.compact.each do |pid|
+        Process.kill 6, pid
+      end
     end
 
     private
