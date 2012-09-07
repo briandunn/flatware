@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "flatware"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
   s.authors = ["Brian Dunn"]
   s.date = "2012-02-24"
   s.summary = "A distributed cucumber runner"
