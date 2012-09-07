@@ -56,7 +56,7 @@ You can also pass most cucumber options to flatware. For example, to run only fe
 
 == Tinkering
 
-Flatware is tested with aruba. In order to get a demo cucumber project you can add the `@no-clobber` tag to `features/flatware.feature` and run the test with `cucumber features/flatware.feature`. Now you should have a `./tmp/aruba` directory. CD there and you can run the `worker` and `dispatcher` binaries, like `../../bin/worker` and `../../bin/dispatcher`
+Flatware is tested with aruba. In order to get a demo cucumber project you can add the `@no-clobber` tag to `features/flatware.feature` and run the test with `cucumber features/flatware.feature`. Now you should have a `./tmp/aruba` directory. CD there and `flatware` will be in your path so you can tinker away.
 
 == Resources
 
