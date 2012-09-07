@@ -88,7 +88,7 @@ module Flatware
       end
 
       def example_row?(table_row)
-        outline_table? and not table_header_row? table_row
+        table_row.respond_to? :failed? and outline_table? and not table_header_row? table_row
       end
 
       def example_cell?(status)
