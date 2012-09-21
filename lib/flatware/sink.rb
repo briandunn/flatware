@@ -41,7 +41,8 @@ module Flatware
           case (result = Marshal.load message)
           when Result
             print result.progress
-            steps.push *result.steps
+          when Checkpoint
+            checkpoints << result
           when Job
             completed_jobs << result
             log "COMPLETED SCENARIO"
@@ -67,7 +68,7 @@ module Flatware
       end
 
       def summarize
-        Summary.new(steps, out).summarize
+        Summary.new(checkpoints, out).summarize
       end
 
       def summarize_remaining
@@ -91,8 +92,8 @@ module Flatware
         die.send 'seppuku'
       end
 
-      def steps
-        @steps ||= []
+      def checkpoints
+        @checkpoints ||= []
       end
 
       def completed_jobs

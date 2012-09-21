@@ -2,17 +2,12 @@ require 'cucumber/formatter/console'
 module Flatware
   class Summary
     include ::Cucumber::Formatter::Console
-    attr_reader :io, :steps
+    attr_reader :io, :steps, :scenarios
 
-    def initialize(steps, io=StringIO.new)
+    def initialize(checkpoints, io=StringIO.new)
       @io = io
-      @steps = steps
-    end
-
-    def scenarios
-      @scenarios ||= scenario_steps.group_by(&:scenario_id).map do |scenario, steps|
-        ScenarioResult.new(scenario, steps)
-      end
+      @steps = checkpoints.map(&:steps).flatten
+      @scenarios = checkpoints.map(&:scenarios).flatten
     end
 
     def summarize
@@ -23,10 +18,6 @@ module Flatware
     end
 
     private
-
-    def scenario_steps
-      steps.select &:scenario_id
-    end
 
     def print_steps(status)
       print_elements steps.select(&with_status(status)), status, 'steps'
@@ -52,10 +43,6 @@ module Flatware
       end.compact.join ", "
 
       " (#{status_counts})"
-    end
-
-    def count(status)
-      completed_scenarios.select {|scenario| scenario.status == status}.count
     end
   end
 end

@@ -38,12 +38,12 @@ Feature: Output
     When I run flatware
     Then the output contains the following:
     """
-    ---UUUU
+    2 scenarios (1 failed, 1 undefined)
+    6 steps (1 failed, 5 undefined)
     """
     And the output contains the following:
     """
-    2 scenarios (1 failed, 1 undefined)
-    6 steps (1 failed, 5 undefined)
+    ---UUUU
     """
 
   Scenario: backgrounds

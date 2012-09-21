@@ -69,10 +69,6 @@ end
 
 When /^I run flatware(?: with "([^"]+)")?$/ do |args|
   @duration = duration do
-    # loading bundler slows down the SUT processes too much for us to detect
-    # parallelization.
-    # TODO: make the tests aware of when the workers check in, and start the
-    # timer after that
     without_bundler_rubyopt { run_simple ['flatware', args].compact.join(" ") }
   end
 end
@@ -105,4 +101,10 @@ Then 'the output contains a backtrace' do
   TXT
 
   assert_partial_output trace, all_output
+end
+
+Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count, thing|
+  match = all_output.match(/^(?<count>\d+) #{thing}s?/)
+  match.should be
+  match[:count].to_i.should eq count
 end
