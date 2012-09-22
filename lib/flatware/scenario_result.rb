@@ -1,24 +1,16 @@
 module Flatware
   class ScenarioResult
-    attr_reader :id, :steps
-
-    def initialize(id, steps=[])
-      @id = id
-      @steps = steps
+    attr_reader :status
+    def initialize(status)
+      @status = status
     end
 
-    def status
-      first(:failed) || first(:undefined) || :passed
+    def passed?
+      status == :passed
     end
 
-    private
-
-    def first(status)
-      statuses.detect {|s| s == status}
-    end
-
-    def statuses
-      steps.map &:status
+    def failed?
+      status == :failed
     end
   end
 end

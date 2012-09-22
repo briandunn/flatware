@@ -68,7 +68,9 @@ module Flatware
       end
 
       def summarize
-        Summary.new(checkpoints, out).summarize
+        steps = checkpoints.map(&:steps).flatten
+        scenarios = checkpoints.map(&:scenarios).flatten
+        Summary.new(steps, scenarios, out).summarize
       end
 
       def summarize_remaining
