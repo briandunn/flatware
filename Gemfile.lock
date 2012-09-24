@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    flatware (0.0.1)
+    flatware (0.0.3)
       cucumber (~> 1.2.0)
       thor (> 0.13, < 0.16)
       zmq
