@@ -1,13 +1,14 @@
 require 'cucumber/formatter/console'
+require 'flatware/checkpoint'
 module Flatware
   class Summary
     include ::Cucumber::Formatter::Console
     attr_reader :io, :steps, :scenarios
 
-    def initialize(checkpoints, io=StringIO.new)
+    def initialize(steps, scenarios=[], io=StringIO.new)
       @io = io
-      @steps = checkpoints.map(&:steps).flatten
-      @scenarios = checkpoints.map(&:scenarios).flatten
+      @steps = steps
+      @scenarios = scenarios
     end
 
     def summarize

@@ -15,6 +15,10 @@ module Flatware
         send_progress(status)
       end
 
+      def table_cell_value(_, status)
+        send_progress(status) if status
+      end
+
       private
       attr_reader :collector
 
