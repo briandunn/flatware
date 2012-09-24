@@ -69,10 +69,6 @@ end
 
 When /^I run flatware(?: with "([^"]+)")?$/ do |args|
   @duration = duration do
-    # loading bundler slows down the SUT processes too much for us to detect
-    # parallelization.
-    # TODO: make the tests aware of when the workers check in, and start the
-    # timer after that
     without_bundler_rubyopt { run_simple ['flatware', args].compact.join(" ") }
   end
 end
