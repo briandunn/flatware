@@ -102,3 +102,9 @@ Then 'the output contains a backtrace' do
 
   assert_partial_output trace, all_output
 end
+
+Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count, thing|
+  match = all_output.match(/^(?<count>\d+) #{thing}s?/)
+  match.should be
+  match[:count].to_i.should eq count
+end

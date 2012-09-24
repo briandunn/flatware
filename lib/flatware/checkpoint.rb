@@ -1,0 +1,22 @@
+module Flatware
+  class Checkpoint
+    attr_reader :steps, :scenarios
+    def initialize(steps, scenarios)
+      @steps, @scenarios = serialize_steps(steps), serialize_scenarios(scenarios)
+    end
+
+    private
+
+    def serialize_steps(steps)
+      steps.map do |step|
+        StepResult.new step.status, step.exception
+      end
+    end
+
+    def serialize_scenarios(scenarios)
+      scenarios.map do |scenario|
+        ScenarioResult.new scenario.status
+      end
+    end
+  end
+end

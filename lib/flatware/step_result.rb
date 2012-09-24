@@ -1,9 +1,9 @@
 module Flatware
   class StepResult
-    attr_reader :status, :exception, :scenario_id
+    attr_reader :status, :exception
 
-    def initialize(status, exception, scenario_id=nil)
-      @status, @exception, @scenario_id = status, serialized(exception), scenario_id
+    def initialize(status, exception)
+      @status, @exception = status, serialized(exception)
     end
 
     def passed?
