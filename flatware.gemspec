@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+require 'date'
 $:.unshift File.expand_path "../lib", __FILE__
 require 'flatware/version'
 
@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name = "flatware"
   s.version = Flatware::VERSION
   s.authors = ["Brian Dunn"]
-  s.date = "2012-02-24"
+  s.date = Date.today.to_s
   s.summary = "A distributed cucumber runner"
   s.description = "A distributed cucumber runner"
   s.email = "brian@hashrocket.com"
