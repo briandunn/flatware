@@ -3,7 +3,7 @@ module Flatware
   class CLI < Thor
 
     def self.processors
-      @processors ||= `hostinfo`.match(/^(?<processors>\d+) processors are logically available\.$/)[:processors].to_i
+      @processors ||= ProcessorInfo.count
     end
 
     def self.worker_option

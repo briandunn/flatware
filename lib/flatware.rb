@@ -5,6 +5,7 @@ module Flatware
   autoload :Cucumber, 'flatware/cucumber'
   autoload :Dispatcher, 'flatware/dispatcher'
   autoload :Fireable, 'flatware/fireable'
+  autoload :ProcessorInfo, 'flatware/processor_info'
   autoload :Result, 'flatware/result'
   autoload :ScenarioResult, 'flatware/scenario_result'
   autoload :Sink, 'flatware/sink'

@@ -15,10 +15,6 @@ module Support
     return val
   end
 
-  def processors
-    @processors ||= `hostinfo`.match(/^(?<processors>\d+) processors are logically available\.$/)[:processors].to_i
-  end
-
   def duration(&block)
     started_at = Time.now
     yield
@@ -28,8 +24,9 @@ module Support
 end
 World(Support)
 
-Given /^I am using a multi core machine$/ do
-  processors.should > 1
+Given 'I am using a multi core machine' do
+  require 'flatware/processor_info'
+  Flatware::ProcessorInfo.count.should > 1
 end
 
 Given /^a cucumber suite with two features that each sleep for (#{A.number}) seconds?$/ do |sleepyness|
