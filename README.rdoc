@@ -28,6 +28,26 @@ You can also pass most cucumber options to flatware. For example, to run only fe
 
     flatware cucumber -t ~@javascript
 
+== Typical Usage in a Rails App
+
+Add the following to your config/database.yml:
+
+    test:
+      database: foo_test
+
+becomes:
+
+    test:
+      database: foo_test<%=ENV['TEST_ENV_NUMBER']%>
+
+Run the following:
+
+    rake db:setup # if not already done
+    flatware fan rake db:test:prepare
+
+Now you are ready to rock:
+
+    flatware
 
 == Planned Features
 
