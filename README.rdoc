@@ -1,6 +1,8 @@
 = Flatware
 
-Flatware is a a distributed cucumber runner.
+{<img src="https://travis-ci.org/briandunn/flatware.png" />}[https://travis-ci.org/briandunn/flatware]
+
+Flatware is a distributed cucumber runner.
 
 == Requirements
 
