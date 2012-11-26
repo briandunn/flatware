@@ -3,7 +3,7 @@ Feature: Output
   I want familiar cucumber output
 
   Scenario: success
-    Given a cucumber suite with two features that each sleep for 1 second
+    Given a cucumber suite with two features that each sleep for 2 second
     When I run flatware
     Then the output contains the following:
     """
@@ -21,6 +21,11 @@ Feature: Output
     """
     When I run flatware
     Then the output contains a backtrace
+
+  Scenario: multiple failure
+    Given a cucumber suite with two features that each fail
+    When I run flatware
+    Then the output contains a summary of failing features
 
   Scenario: outlines
     Given the following scenario:

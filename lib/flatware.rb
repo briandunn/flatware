@@ -12,6 +12,7 @@ module Flatware
   autoload :StepResult, 'flatware/step_result'
   autoload :Summary, 'flatware/summary'
   autoload :Worker, 'flatware/worker'
+  autoload :ScenarioDecorator, 'flatware/scenario_decorator'
 
   Job = Struct.new :id, :args
 
