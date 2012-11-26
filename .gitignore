@@ -4,3 +4,4 @@ tmp
 Gemfile.lock
 doc
 *.gem
+*.un~

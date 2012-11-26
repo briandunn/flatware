@@ -1,5 +1,6 @@
 require 'cucumber/formatter/console'
 require 'flatware/checkpoint'
+require 'flatware/scenario_decorator'
 module Flatware
   module Cucumber
     class Formatter
@@ -34,7 +35,7 @@ module Flatware
         end
 
         def checkpoint
-          Checkpoint.new(step_mother.steps - @ran_steps, step_mother.scenarios - @ran_scenarios).tap do
+          Checkpoint.new(step_mother.steps - @ran_steps, decorate_scenarios(step_mother.scenarios - @ran_scenarios)).tap do
             snapshot
           end
         end
@@ -44,6 +45,10 @@ module Flatware
         def snapshot
           @ran_steps = step_mother.steps.dup
           @ran_scenarios = step_mother.scenarios.dup
+        end
+
+        def decorate_scenarios(scenarios)
+          scenarios.map { |scenario| ScenarioDecorator.new(scenario) }
         end
       end
     end

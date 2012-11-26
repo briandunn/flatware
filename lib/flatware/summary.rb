@@ -14,11 +14,22 @@ module Flatware
     def summarize
       2.times { io.puts }
       print_steps :failed
+      print_failed_scenarios scenarios
       print_counts 'scenario', scenarios
       print_counts 'step', steps
     end
 
     private
+
+    def print_failed_scenarios(scenarios)
+      return "" unless scenarios.select(&with_status(:failed)).size > 0
+      io.puts format_string "Failing Scenarios:", :failed
+
+      scenarios.select(&with_status(:failed)).each do |scenario|
+        io.puts format_string(scenario.file_colon_line, :failed) + format_string(" # Scenario: " + scenario.name, :comment)
+      end
+      io.puts
+    end
 
     def print_steps(status)
       print_elements steps.select(&with_status(status)), status, 'steps'
