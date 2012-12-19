@@ -15,6 +15,12 @@ module Support
     return val
   end
 
+  def create_flunk_step_definition
+    write_file "features/step_definitions/flunky_steps.rb", <<-RB
+      Then('flunk') { false.should be_true }
+    RB
+  end
+
   def duration(&block)
     started_at = Time.now
     yield
@@ -76,12 +82,6 @@ end
 
 Then /^the output contains the following:$/ do |string|
   assert_partial_output string, all_output
-end
-
-def create_flunk_step_definition
-  write_file "features/step_definitions/flunky_steps.rb", <<-RB
-    Then('flunk') { false.should be_true }
-  RB
 end
 
 Given 'the following scenario:' do |scenario|
