@@ -1,18 +1,24 @@
 module Flatware
   class ScenarioDecorator
+    attr_reader :status
+
     def initialize(scenario)
-      @scenario = scenario
+      @scenario, @status = scenario, scenario.status
+      @scenario = scenario.scenario_outline if example_row?
     end
 
-    %w(file_colon_line name).each do |get|
-      define_method "#{get}" do
-        @scenario.respond_to?(:scenario_outline) ? @scenario.scenario_outline.send("#{get}") : @scenario.send("#{get}")
-      end
+    def name
+      @scenario.name
     end
 
-    def status
-      @scenario.status
+    def file_colon_line
+      @scenario.file_colon_line
     end
 
+    private
+
+    def example_row?
+      @scenario.respond_to? :scenario_outline
+    end
   end
 end
