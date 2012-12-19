@@ -1,6 +1,7 @@
 = Flatware
 
 {<img src="https://travis-ci.org/briandunn/flatware.png" />}[https://travis-ci.org/briandunn/flatware]
+{<img src="https://codeclimate.com/badge.png" />}[https://codeclimate.com/github/briandunn/flatware]
 
 Flatware is a distributed cucumber runner.
 
