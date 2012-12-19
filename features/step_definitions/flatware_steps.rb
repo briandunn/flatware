@@ -15,6 +15,12 @@ module Support
     return val
   end
 
+  def create_flunk_step_definition
+    write_file "features/step_definitions/flunky_steps.rb", <<-RB
+      Then('flunk') { false.should be_true }
+    RB
+  end
+
   def duration(&block)
     started_at = Time.now
     yield
@@ -79,9 +85,7 @@ Then /^the output contains the following:$/ do |string|
 end
 
 Given 'the following scenario:' do |scenario|
-  write_file "features/step_definitions/flunky_steps.rb", <<-RB
-    Then('flunk') { false.should be_true }
-  RB
+  create_flunk_step_definition
 
   write_file "features/flunk.feature", <<-FEATURE
   Feature: flunk
@@ -104,4 +108,28 @@ Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count,
   match = all_output.match(/^(?<count>\d+) #{thing}s?/)
   match.should be
   match[:count].to_i.should eq count
+end
+
+Given /^a cucumber suite with two features that each fail$/ do
+  create_flunk_step_definition
+
+  2.times do |feature_number|
+    write_file "features/failing_feature_#{feature_number}.feature", <<-FEATURE
+    Feature: flunking
+
+    Scenario: flunk
+      Given flunk
+    FEATURE
+  end
+end
+
+Then 'the output contains a summary of failing features' do
+
+  trace = <<-TXT.gsub(/^ +/, '')
+    Failing Scenarios:
+    features/failing_feature_1.feature:3 # Scenario: flunk
+    features/failing_feature_0.feature:3 # Scenario: flunk
+  TXT
+
+  assert_partial_output trace, all_output
 end
