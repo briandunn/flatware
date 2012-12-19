@@ -3,7 +3,7 @@ Feature: Output
   I want familiar cucumber output
 
   Scenario: success
-    Given a cucumber suite with two features that each sleep for 2 second
+    Given a cucumber suite with two features that each sleep for 1 second
     When I run flatware
     Then the output contains the following:
     """
