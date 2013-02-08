@@ -11,4 +11,9 @@ Cucumber::Rake::Task.new :cucumber do |task|
   task.cucumber_opts = %w[--tags ~@wip]
 end
 
+desc "generate connection diagram"
+task :diagram do
+  system "dot connections.dot -Tpng > connections.png"
+end
+
 task :default => [:spec, :cucumber]
