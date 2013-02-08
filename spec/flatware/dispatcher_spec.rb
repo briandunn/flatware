@@ -2,33 +2,27 @@ require 'spec_helper'
 
 describe Flatware::Dispatcher do
   context 'when a dispatcher is started' do
-    before :all do
-      @pid = fork { described_class.start [:job] }
+
+    before do
+      @pid = fork do
+        $0 = described_class.to_s
+        described_class.start [:job]
+      end
     end
 
     attr_reader :pid
 
-    it 'is a child of this process' do
-      child_pids.should include pid
-      Process.kill 6, pid
-    end
-
     context 'when a publisher has bound the die socket' do
-      let(:context) { ZMQ::Context.new }
 
-      let! :die do
-        context.socket(ZMQ::PUB).tap do |s|
-          s.bind 'ipc://die'
-        end
-      end
-
-      after { [die, context].each &:close }
+      before { Flatware::Fireable::bind }
 
       context 'when the publisher sends the die message' do
 
         it 'the dispatcher exits' do
-          die.send 'seppuku'
-          Process.waitall
+          wait_until { child_pids.include? pid }
+          Flatware::Fireable::kill
+          exit_statuses = Process.waitall.map(&:last)
+          exit_statuses.all?(&:success?).should be
           child_pids.should_not include pid
         end
       end

@@ -1,6 +1,6 @@
 module Flatware
   class Dispatcher
-    DISPATCH_PORT = 'ipc://dispatch'
+    PORT = 'ipc://dispatch'
 
     def self.start(jobs=Cucumber.jobs)
       new(jobs).dispatch!
@@ -11,10 +11,10 @@ module Flatware
     end
 
     def dispatch!
-      return Flatware.close if jobs.empty?
+      return if jobs.empty?
       fireable.until_fired dispatch do |request|
         if job = jobs.pop
-          dispatch.send Marshal.dump job
+          dispatch.send job
         else
           dispatch.send 'seppuku'
         end
@@ -30,9 +30,7 @@ module Flatware
     end
 
     def dispatch
-      @dispatch ||= Flatware.socket(ZMQ::REP).tap do |socket|
-        socket.bind DISPATCH_PORT
-      end
+      @dispatch ||= Flatware.socket ZMQ::REP, bind: PORT
     end
   end
 end

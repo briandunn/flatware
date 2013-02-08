@@ -2,9 +2,10 @@ require 'flatware'
 require 'flatware/cucumber/formatter'
 module Flatware
   class Sink
+    PORT = 'ipc://sink'
     class << self
       def push(message)
-        client.push Marshal.dump message
+        client.push message
       end
 
       def finished(job)
@@ -29,6 +30,7 @@ module Flatware
         trap 'INT' do
           summarize
           summarize_remaining
+          exit 1
         end
 
         before_firing { listen }
@@ -38,7 +40,7 @@ module Flatware
       def listen
         until done?
           message = socket.recv
-          case (result = Marshal.load message)
+          case (result = message)
           when Result
             print result.progress
           when Checkpoint
@@ -47,11 +49,11 @@ module Flatware
             completed_jobs << result
             log "COMPLETED SCENARIO"
           else
-            log "i don't know that message, bro."
+            log "i don't know that message, bro.", message
           end
         end
         summarize
-      rescue ZMQ::Error => e
+      rescue Error => e
         raise unless e.message == "Interrupted system call"
       end
 
@@ -87,11 +89,9 @@ module Flatware
       end
 
       def before_firing(&block)
-        die = Flatware.socket(ZMQ::PUB).tap do |socket|
-          socket.bind 'ipc://die'
-        end
+        Flatware::Fireable::bind
         block.call
-        die.send 'seppuku'
+        Flatware::Fireable::kill
       end
 
       def checkpoints
@@ -116,9 +116,7 @@ module Flatware
       end
 
       def socket
-        @socket ||= Flatware.socket(ZMQ::PULL).tap do |socket|
-          socket.bind 'ipc://sink'
-        end
+        @socket ||= Flatware.socket(ZMQ::PULL, bind: PORT)
       end
     end
 
@@ -130,9 +128,7 @@ module Flatware
       private
 
       def socket
-        @socket ||= Flatware.socket(ZMQ::PUSH).tap do |socket|
-          socket.connect 'ipc://sink'
-        end
+        @socket ||= Flatware.socket(ZMQ::PUSH, connect: PORT)
       end
     end
   end

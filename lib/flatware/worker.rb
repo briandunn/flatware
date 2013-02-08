@@ -20,8 +20,7 @@ module Flatware
       time = Benchmark.realtime do
         fireable
         report_for_duty
-        fireable.until_fired task do |work|
-          job = Marshal.load work
+        fireable.until_fired task do |job|
           log 'working!'
           Cucumber.run job.id, job.args
           Sink.finished job
@@ -43,9 +42,7 @@ module Flatware
     end
 
     def task
-      @task ||= Flatware.socket(ZMQ::REQ).tap do |task|
-        task.connect Dispatcher::DISPATCH_PORT
-      end
+      @task ||= Flatware.socket ZMQ::REQ, connect: Dispatcher::PORT
     end
 
     def report_for_duty

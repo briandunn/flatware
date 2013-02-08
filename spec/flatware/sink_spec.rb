@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe Flatware::Sink do
+  before(:all) { Flatware.close }
+
   context 'when I have work to do, but am interupted' do
     let(:job) { double 'job', id: 'int.feature' }
 
