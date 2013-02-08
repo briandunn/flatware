@@ -125,10 +125,10 @@ end
 
 Then 'the output contains a summary of failing features' do
 
-  trace = <<-TXT.gsub(/^ +/, '')
+  trace = <<-TXT.gsub /^ +/, ''
     Failing Scenarios:
-    features/failing_feature_1.feature:3 # Scenario: flunk
     features/failing_feature_0.feature:3 # Scenario: flunk
+    features/failing_feature_1.feature:3 # Scenario: flunk
   TXT
 
   assert_partial_output trace, all_output
