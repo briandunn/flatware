@@ -1,13 +1,15 @@
 Feature: cucumber task
   Passes arguments on to cucumber
 
-  Scenario:
+  Background:
     Given the following scenario:
     """
     @wip
     Scenario: wipped
     Given wips
     """
+
+  Scenario: provide only cucumber options
     When I run flatware with "cucumber -t~@wip"
     Then the output contains the following:
     """
@@ -15,3 +17,11 @@ Feature: cucumber task
     0 steps
     """
 
+  Scenario: provide flatware options and cucumber options
+    When I run flatware with "-l cucumber -t~@wip"
+    Then the output contains the following:
+    """
+    0 scenarios
+    0 steps
+    """
+    And I see log messages

@@ -133,3 +133,7 @@ Then 'the output contains a summary of failing features' do
 
   assert_partial_output trace, all_output
 end
+
+Then 'I see log messages' do
+  assert_partial_output 'flatware options:', all_output
+end

@@ -15,7 +15,7 @@ module Flatware
     default_task :default
     worker_option
     desc "default [FLATWARE_OPTS]", "parallelizes cucumber with default arguments"
-    def default
+    def default(*)
       invoke :cucumber
     end
 
