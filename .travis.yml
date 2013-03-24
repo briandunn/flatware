@@ -1,5 +1,5 @@
 language: ruby
-before_install: sudo apt-get install libzmq-dev
+before_install: sudo apt-get --purge remove libzmq3; sudo apt-get install libzmq-dev
 rvm:
   - 1.9.3
   - 1.9.2
