@@ -40,7 +40,7 @@ module Flatware
       def listen
         until done?
           message = socket.recv
-          message.process! checkpoints, completed_jobs
+          message.process! checkpoints: checkpoints, completed_jobs: completed_jobs
         end
         summarize
       rescue Error => e
