@@ -40,17 +40,7 @@ module Flatware
       def listen
         until done?
           message = socket.recv
-          case (result = message)
-          when Result
-            print result.progress
-          when Checkpoint
-            checkpoints << result
-          when Job
-            completed_jobs << result
-            log "COMPLETED SCENARIO"
-          else
-            log "i don't know that message, bro.", message
-          end
+          message.process! checkpoints, completed_jobs
         end
         summarize
       rescue Error => e

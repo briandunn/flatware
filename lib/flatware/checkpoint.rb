@@ -5,6 +5,10 @@ module Flatware
       @steps, @scenarios = serialize_steps(steps), serialize_scenarios(scenarios)
     end
 
+    def process!(checkpoints, completed_jobs)
+      checkpoints << self
+    end
+
     private
 
     def serialize_steps(steps)
@@ -18,6 +22,5 @@ module Flatware
         ScenarioResult.new scenario.status, scenario.file_colon_line, scenario.name
       end
     end
-
   end
 end

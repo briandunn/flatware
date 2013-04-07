@@ -6,6 +6,10 @@ module Flatware
       @progress, @steps = progress, steps || []
     end
 
+    def process!(checkpoints, completed_jobs)
+      print progress
+    end
+
     class << self
       def step(*args)
         step = StepResult.new *args

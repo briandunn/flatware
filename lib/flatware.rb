@@ -17,7 +17,12 @@ module Flatware
 
   Error = Class.new StandardError
 
-  Job = Struct.new :id, :args
+  Job = Struct.new :id, :args do
+    def process!(checkpoints, completed_jobs)
+      completed_jobs << self
+      Flatware.log "COMPLETED SCENARIO"
+    end
+  end
 
   extend self
   def socket(type, options={})
