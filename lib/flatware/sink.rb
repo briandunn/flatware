@@ -40,7 +40,7 @@ module Flatware
       def listen
         until done?
           message = socket.recv
-          message.process! checkpoints: checkpoints, completed_jobs: completed_jobs
+          message.process message_params
         end
         summarize
       rescue Error => e
@@ -50,6 +50,13 @@ module Flatware
       private
 
       attr_reader :out, :jobs
+
+      def message_params
+        {
+          checkpoints: checkpoints,
+          completed_jobs: completed_jobs
+        }
+      end
 
       def print(*args)
         out.print *args
