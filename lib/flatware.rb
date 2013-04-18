@@ -18,7 +18,7 @@ module Flatware
   Error = Class.new StandardError
 
   Job = Struct.new :id, :args do
-    def process!(args = {})
+    def process(args = {})
       args[:completed_jobs] << self
       Flatware.log "COMPLETED SCENARIO"
     end

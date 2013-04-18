@@ -6,7 +6,7 @@ module Flatware
       @progress, @steps = progress, steps || []
     end
 
-    def process!(args = {})
+    def process(args = {})
       print progress
     end
 
