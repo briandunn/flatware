@@ -2,18 +2,20 @@ module Flatware
   class Dispatcher
     PORT = 'ipc://dispatch'
 
+    attr_reader :job_cue
+
     def self.start(jobs=Cucumber.jobs)
       new(jobs).dispatch!
     end
 
-    def initialize(jobs)
-      @jobs = jobs
+    def initialize(job_cue)
+      @job_cue = job_cue
     end
 
     def dispatch!
-      return if jobs.empty?
+      return if job_cue.empty?
       fireable.until_fired dispatch do |request|
-        if job = jobs.pop
+        if job = job_cue.pop
           dispatch.send job
         else
           dispatch.send 'seppuku'

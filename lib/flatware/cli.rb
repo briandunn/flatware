@@ -26,15 +26,15 @@ module Flatware
       Worker.spawn workers
       log "flatware options:", options
       log "cucumber options:", cucumber_args
-      jobs = Cucumber.extract_jobs_from_args cucumber_args
+      job_cue = Cucumber.extract_jobs_from_args cucumber_args
       fork do
         log "dispatch"
         $0 = 'flatware dispatcher'
-        Dispatcher.start jobs
+        Dispatcher.start job_cue
       end
       log "bossman"
       $0 = 'flatware sink'
-      Sink.start_server jobs
+      Sink.start_server job_cue
       Process.waitall
     end
 

@@ -5,10 +5,6 @@ module Flatware
       @steps, @scenarios = serialize_steps(steps), serialize_scenarios(scenarios)
     end
 
-    def process(args = {})
-      args[:checkpoints] << self
-    end
-
     private
 
     def serialize_steps(steps)
