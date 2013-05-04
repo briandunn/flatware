@@ -1,6 +1,7 @@
 require 'flatware'
 require 'flatware/cucumber/formatter'
 module Flatware
+
   class Sink
     PORT = 'ipc://sink'
     class << self
@@ -12,8 +13,8 @@ module Flatware
         push job
       end
 
-      def start_server(jobs=Cucumber.jobs, out_stream=$stdout, error_stream=$stderr)
-        Server.new(jobs, out_stream, error_stream).start
+      def start_server(job_cue=Cucumber.jobs, out_stream=$stdout, error_stream=$stderr)
+        Server.new(job_cue, out_stream, error_stream).start
       end
 
       def client
@@ -22,44 +23,36 @@ module Flatware
     end
 
     class Server
-      def initialize(jobs, out, error)
-        @jobs, @out, @error = jobs, out, error
+
+      def initialize(job_cue, out, error)
+        @job_cue, @out, @error = job_cue, out, error
       end
 
       def start
         trap 'INT' do
-          summarize
-          summarize_remaining
+          summarize_activity
           exit 1
         end
 
-        before_firing { listen }
+        before_firing do
+          listen
+          summarize_activity
+        end
         Flatware.close
       end
 
       def listen
-        until done?
-          message = socket.recv
-          case (result = message)
-          when Result
-            print result.progress
-          when Checkpoint
-            checkpoints << result
-          when Job
-            completed_jobs << result
-            log "COMPLETED SCENARIO"
-          else
-            log "i don't know that message, bro.", message
-          end
+        loop do
+          return unless job_dispatched
+          # handle_messages
         end
-        summarize
       rescue Error => e
         raise unless e.message == "Interrupted system call"
       end
 
       private
 
-      attr_reader :out, :jobs
+      attr_reader :out, :job_cue
 
       def print(*args)
         out.print *args
@@ -69,17 +62,30 @@ module Flatware
         out.puts *args
       end
 
-      def summarize
+      def job_dispatched
+        p job_cue
+        # this should ideally use the dispatcher object
+        # to pop a job off from the cue and send it
+        # over the wire to a worker.
+        job_cue.dispatch_next_job
+      end
+
+      def summarize_activity
+        summarize_completed
+        summarize_remaining
+      end
+
+      def summarize_completed
         steps = checkpoints.map(&:steps).flatten
         scenarios = checkpoints.map(&:scenarios).flatten
         Summary.new(steps, scenarios, out).summarize
       end
 
       def summarize_remaining
-        return if remaining_work.empty?
+        return if job_cue.empty?
         puts
         puts "The following features have not been run:"
-        for job in remaining_work
+        for job in job_cue.remaining_work
           puts job.id
         end
       end
@@ -96,19 +102,6 @@ module Flatware
 
       def checkpoints
         @checkpoints ||= []
-      end
-
-      def completed_jobs
-        @completed_jobs ||= []
-      end
-
-      def done?
-        log remaining_work
-        remaining_work.empty?
-      end
-
-      def remaining_work
-        jobs - completed_jobs
       end
 
       def fireable

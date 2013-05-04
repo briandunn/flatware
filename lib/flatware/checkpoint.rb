@@ -18,6 +18,5 @@ module Flatware
         ScenarioResult.new scenario.status, scenario.file_colon_line, scenario.name
       end
     end
-
   end
 end
