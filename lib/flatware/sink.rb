@@ -28,13 +28,17 @@ module Flatware
 
       def start
         trap 'INT' do
-          summarize
+          checkpoint_handler.summarize
           summarize_remaining
           exit 1
         end
 
         before_firing { listen }
         Flatware.close
+      end
+
+      def checkpoint_handler
+        @checkpoint_handler ||= CheckpointHandler.new(out, fail_fast?)
       end
 
       def listen
@@ -44,21 +48,15 @@ module Flatware
           when Result
             print result.progress
           when Checkpoint
-            checkpoints << result
-            if result.failures? && fail_fast?
-              log "sink is firing everybody!"
-              Fireable::kill
-              summarize
-              return
-            end
+            checkpoint_handler.handle! result
           when Job
             completed_jobs << result
             log "COMPLETED SCENARIO"
           else
-            log "i don't know that message, bro.", message
+            log "i don't know that message, bro.", result
           end
         end
-        summarize
+        checkpoint_handler.summarize
       rescue Error => e
         raise unless e.message == "Interrupted system call"
       end
@@ -77,12 +75,6 @@ module Flatware
 
       def puts(*args)
         out.puts *args
-      end
-
-      def summarize
-        steps = checkpoints.map(&:steps).flatten
-        scenarios = checkpoints.map(&:scenarios).flatten
-        Summary.new(steps, scenarios, out).summarize
       end
 
       def summarize_remaining
@@ -104,17 +96,13 @@ module Flatware
         Flatware::Fireable::kill
       end
 
-      def checkpoints
-        @checkpoints ||= []
-      end
-
       def completed_jobs
         @completed_jobs ||= []
       end
 
       def done?
         log remaining_work
-        remaining_work.empty?
+        remaining_work.empty? || checkpoint_handler.done?
       end
 
       def remaining_work

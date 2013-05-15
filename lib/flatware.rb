@@ -2,6 +2,7 @@ require 'forwardable'
 require 'ffi-rzmq'
 
 module Flatware
+  autoload :CheckpointHandler, 'flatware/checkpoint_handler'
   autoload :CLI, 'flatware/cli'
   autoload :Cucumber, 'flatware/cucumber'
   autoload :Dispatcher, 'flatware/dispatcher'
