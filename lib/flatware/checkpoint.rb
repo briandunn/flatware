@@ -1,8 +1,13 @@
+require 'flatware/scenario_result'
 module Flatware
   class Checkpoint
     attr_reader :steps, :scenarios
     def initialize(steps, scenarios)
       @steps, @scenarios = serialize_steps(steps), serialize_scenarios(scenarios)
+    end
+
+    def failures?
+      scenarios.any? &:failed?
     end
 
     private

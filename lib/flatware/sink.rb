@@ -12,8 +12,8 @@ module Flatware
         push job
       end
 
-      def start_server(jobs=Cucumber.jobs, out_stream=$stdout, error_stream=$stderr)
-        Server.new(jobs, out_stream, error_stream).start
+      def start_server(*args)
+        Server.new(*args).start
       end
 
       def client
@@ -22,8 +22,8 @@ module Flatware
     end
 
     class Server
-      def initialize(jobs, out, error)
-        @jobs, @out, @error = jobs, out, error
+      def initialize(jobs, out=$stdout, error=$stderr, fail_fast=false)
+        @jobs, @out, @error, @fail_fast = jobs, out, error, fail_fast
       end
 
       def start
@@ -39,12 +39,18 @@ module Flatware
 
       def listen
         until done?
-          message = socket.recv
-          case (result = message)
+          result = socket.recv
+          case result
           when Result
             print result.progress
           when Checkpoint
             checkpoints << result
+            if result.failures? && fail_fast?
+              log "sink is firing everybody!"
+              Fireable::kill
+              summarize
+              return
+            end
           when Job
             completed_jobs << result
             log "COMPLETED SCENARIO"
@@ -58,6 +64,10 @@ module Flatware
       end
 
       private
+
+      def fail_fast?
+        @fail_fast
+      end
 
       attr_reader :out, :jobs
 

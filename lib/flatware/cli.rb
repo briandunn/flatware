@@ -20,6 +20,7 @@ module Flatware
     end
 
     worker_option
+    method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
       Flatware.verbose = options[:log]
@@ -34,7 +35,7 @@ module Flatware
       end
       log "bossman"
       $0 = 'flatware sink'
-      Sink.start_server jobs
+      Sink.start_server jobs, $stdout, $stderr, options['fail-fast']
       Process.waitall
     end
 

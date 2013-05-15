@@ -1,3 +1,4 @@
+require 'flatware/processor_info'
 require 'ostruct'
 A = OpenStruct.new.tap do |a|
   a.number = Transform /^(\d+)$/ do |num|
@@ -21,6 +22,15 @@ module Support
     RB
   end
 
+  def create_sleep_step_definition
+    write_file "features/step_definitions/sleepy_steps.rb", <<-RB
+      Then 'sleep for $seconds seconds' do |seconds|
+        puts seconds
+        sleep seconds.to_f
+      end
+    RB
+  end
+
   def duration(&block)
     started_at = Time.now
     yield
@@ -31,11 +41,11 @@ end
 World(Support)
 
 Given 'I am using a multi core machine' do
-  require 'flatware/processor_info'
   Flatware::ProcessorInfo.count.should > 1
 end
 
 Given /^a cucumber suite with two features that each sleep for (#{A.number}) seconds?$/ do |sleepyness|
+  create_sleep_step_definition
   2.times do |feature_number|
     write_file "features/feature_#{feature_number}.feature", <<-FEATURE
       Feature: sleeeeeep
@@ -43,24 +53,33 @@ Given /^a cucumber suite with two features that each sleep for (#{A.number}) sec
         Then sleep for #{sleepyness} seconds
     FEATURE
   end
-  write_file "features/step_definitions/sleepy_steps.rb", <<-RB
-    Then /^sleep for (\\d+) seconds$/ do |seconds|
-      sleep seconds.to_i
-    end
-  RB
+end
+
+Given 'more slow failing features than workers' do
+  create_sleep_step_definition
+  create_flunk_step_definition
+  ((Flatware::ProcessorInfo.count * 2) + 1).times do |feature_number|
+    write_file "features/feature_#{feature_number}.feature", <<-FEATURE
+      Feature: slowly die
+      Scenario: languish
+        Given sleep for 0.5 seconds
+        Then flunk
+    FEATURE
+  end
 end
 
 Given 'a sleepy cucumber suite' do
   step 'a cucumber suite with two features that each sleep for 1 second'
 end
 
-runners = Regexp.union %w[cucumber flatware]
+runners = Regexp.union %w[cucumber flatware fail-fast]
 
 When /^I time the suite with (#{runners})$/ do |runner|
   @durations ||= {}
   commands = {
-    'cucumber' => 'cucumber --format progress',
-    'flatware' => 'flatware cucumber'
+    'cucumber'  => 'cucumber --format progress',
+    'fail-fast' => 'flatware --fail-fast',
+    'flatware'  => 'flatware cucumber'
   }
   @durations[runner] = duration do
     run_simple commands[runner], false
@@ -139,4 +158,10 @@ end
 
 Then 'I see log messages' do
   assert_partial_output 'flatware options:', all_output
+end
+
+
+Then 'the failure list only includes one feature' do
+  all_output.match /Failing Scenarios:\n(.+)\n\n/m
+  $1.split("\n").should have(1).feature
 end
