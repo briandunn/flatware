@@ -7,4 +7,4 @@ Feature: Distribute scenarios between workers
     And a sleepy cucumber suite
     When I time the suite with cucumber
     And I time the suite with flatware
-    Then flatware is faster
+    Then flatware is the fastest
