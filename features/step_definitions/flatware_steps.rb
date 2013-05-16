@@ -159,8 +159,7 @@ Then 'I see log messages' do
   assert_partial_output 'flatware options:', all_output
 end
 
-
 Then 'the failure list only includes one feature' do
-  all_output.match /Failing Scenarios:\n(.+)\n\n/m
+  all_output.match /Failing Scenarios:\n(.+?)(?=\n\n)/m
   $1.split("\n").should have(1).feature
 end
