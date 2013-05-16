@@ -1,4 +1,3 @@
-require 'flatware/processor_info'
 require 'ostruct'
 A = OpenStruct.new.tap do |a|
   a.number = Transform /^(\d+)$/ do |num|
@@ -58,7 +57,7 @@ end
 Given 'more slow failing features than workers' do
   create_sleep_step_definition
   create_flunk_step_definition
-  ((Flatware::ProcessorInfo.count * 2) + 1).times do |feature_number|
+  ((max_workers * 2) + 1).times do |feature_number|
     write_file "features/feature_#{feature_number}.feature", <<-FEATURE
       Feature: slowly die
       Scenario: languish
@@ -78,8 +77,8 @@ When /^I time the suite with (#{runners})$/ do |runner|
   @durations ||= {}
   commands = {
     'cucumber'  => 'cucumber --format progress',
-    'fail-fast' => 'flatware --fail-fast',
-    'flatware'  => 'flatware cucumber'
+    'fail-fast' => "flatware -w #{max_workers} --fail-fast",
+    'flatware'  => "flatware -w #{max_workers}"
   }
   @durations[runner] = duration do
     run_simple commands[runner], false
