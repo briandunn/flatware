@@ -67,7 +67,7 @@ module Flatware
     def_delegators :s, :bind, :connect, :setsockopt
     def send(message)
       result = s.send_string(Marshal.dump(message))
-      raise Error, ZMQ::Util.error_string, caller unless result == 0
+      raise Error, ZMQ::Util.error_string, caller if result == -1
       message
     end
 
@@ -79,7 +79,7 @@ module Flatware
     def recv
       message = ''
       result = s.recv_string(message)
-      raise Error, ZMQ::Util.error_string, caller unless result == 0
+      raise Error, ZMQ::Util.error_string, caller if result == -1
       Marshal.load message
     end
   end

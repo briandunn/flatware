@@ -7,7 +7,7 @@ Flatware is a distributed cucumber runner.
 
 == Requirements
 
-* ZeroMQ ~> 2.1
+* ZeroMQ > 2.1
 
 == Installation
 
