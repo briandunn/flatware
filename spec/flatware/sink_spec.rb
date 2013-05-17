@@ -6,14 +6,20 @@ describe Flatware::Sink do
   context 'when I have work to do, but am interupted' do
     let(:job) { double 'job', id: 'int.feature' }
 
-    let! :pid do
-      fork { described_class.start_server [job], StringIO.new }
+    attr_reader :child_io
+
+    before do
+      unless @child_io = IO.popen("-")
+        described_class.start_server [job]
+      end
     end
 
     it 'exits' do
-      wait_until { child_pids.include? pid }
+      wait_until { !child_pids.empty? }
+      pid = child_pids.first
       Process.kill 'INT', pid
       Process.wait pid
+      child_io.read.should match /SystemExit:/
       child_pids.should_not include pid
     end
   end

@@ -1,6 +1,7 @@
 language: ruby
 before_install: sudo apt-get install libzmq3-dev
 rvm:
+  - 2.0.0
   - 1.9.3
   - 1.9.2
 gemfile:
