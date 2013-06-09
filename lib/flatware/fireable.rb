@@ -33,18 +33,25 @@ module Flatware
     attr_reader :sockets
     def initialize(*sockets)
       @sockets = sockets
+      register_sockets
     end
 
     def each(&block)
-      poller = ZMQ::Poller.new
-      for socket in sockets
-        poller.register_readable socket.s
-      end
-      while poller.poll > 0
-        poller.readables.each do |s|
+      while zmq_poller.poll > 0
+        zmq_poller.readables.each do |s|
           block.call Socket.new(s).recv
         end
       end
+    end
+
+    private
+
+    def zmq_poller
+      @zmq_poller ||= ZMQ::Poller.new
+    end
+
+    def register_sockets
+      sockets.each { |socket| zmq_poller.register_readable socket.s }
     end
   end
 end
