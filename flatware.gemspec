@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = "1.8.10"
   s.add_dependency %<ffi-rzmq>, '~> 1.0.0'
   s.add_dependency %<thor>, '~> 0.13'
-  s.add_dependency %<cucumber>,'>= 1.2.0'
+  s.add_dependency %<cucumber>,'>= 1.3.0'
   s.add_development_dependency %<aruba>, '~> 0.5.1'
   s.add_development_dependency %<rake>, '~> 10.0.3'
   s.add_development_dependency %<rspec>, '~> 2.13.0'

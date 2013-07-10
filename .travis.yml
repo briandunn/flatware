@@ -5,6 +5,5 @@ rvm:
   - 1.9.3
   - 1.9.2
 gemfile:
-  - ".gemfiles/Gemfile.cucumber-1.2.0"
-  - ".gemfiles/Gemfile.cucumber-1.2.1"
   - ".gemfiles/Gemfile.cucumber-1.3.1"
+  - ".gemfiles/Gemfile.cucumber-1.3.3"
