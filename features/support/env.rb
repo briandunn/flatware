@@ -14,4 +14,18 @@ World(Module.new do
     return 3 if ENV['TRAVIS'] == 'true'
     Flatware::ProcessorInfo.count
   end
+
+  def travis?
+    ENV['TRAVIS'] == 'true'
+  end
 end)
+
+Before do
+  if travis?
+    @announce_stdout = true
+    @announce_stderr = true
+    @announce_cmd = true
+    @announce_dir = true
+    @announce_env = true
+  end
+end
