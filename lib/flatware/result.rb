@@ -1,9 +1,9 @@
 module Flatware
   class Result
-    attr_reader :progress, :steps
+    attr_reader :progress
 
-    def initialize(progress, steps=nil)
-      @progress, @steps = progress, steps || []
+    def initialize(progress)
+      @progress = progress
     end
 
     class << self
@@ -13,7 +13,7 @@ module Flatware
       end
 
       def status(status)
-        new Cucumber::ProgressString.format status
+        new status
       end
 
       def background(status, exception)
