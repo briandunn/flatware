@@ -1,6 +1,7 @@
 module Flatware
   class CheckpointHandler
     attr_reader :formatter, :checkpoints
+
     def initialize(formatter, fails_fast)
       @fail_fast = fails_fast
       @formatter = formatter

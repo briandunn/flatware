@@ -1,5 +1,6 @@
 require 'flatware/formatters/console/summary'
 require 'cucumber/formatter/console'
+
 module Flatware
   module Formatters
     class Console
@@ -15,7 +16,6 @@ module Flatware
       }
 
       STATUSES = FORMATS.keys
-
 
       attr_reader :out, :err
 
