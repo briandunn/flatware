@@ -1,19 +1,7 @@
 require 'cucumber'
-require_relative 'cucumber/runtime'
+require 'flatware/cucumber/runtime'
 module Flatware
   module Cucumber
-    autoload :Formatter, 'flatware/cucumber/formatter'
-    autoload :ProgressString, 'flatware/cucumber/formatter'
-
-    FORMATS = {
-      :passed    => '.',
-      :failed    => 'F',
-      :undefined => 'U',
-      :pending   => 'P',
-      :skipped   => '-'
-    }
-
-    STATUSES = FORMATS.keys
 
     extend self
 

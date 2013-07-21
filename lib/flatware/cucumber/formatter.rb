@@ -1,4 +1,3 @@
-require 'cucumber/formatter/console'
 require 'flatware/checkpoint'
 require 'flatware/scenario_decorator'
 module Flatware
@@ -53,12 +52,5 @@ module Flatware
       end
     end
 
-    class ProgressString
-      extend ::Cucumber::Formatter::Console
-      def self.format(status)
-        return '' unless status
-        format_string FORMATS[status], status
-      end
-    end
   end
 end

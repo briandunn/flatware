@@ -1,4 +1,5 @@
 require 'cucumber/formatter/console'
+require 'flatware/formatters/console'
 require 'flatware/checkpoint'
 module Flatware
   module Formatters
@@ -51,7 +52,7 @@ module Flatware
 
         def count_summary(results)
           return "" unless results.any?
-          status_counts = Cucumber::STATUSES.map do |status|
+          status_counts = STATUSES.map do |status|
             count = results.select(&with_status(status)).size
             format_string "#{count} #{status}", status if count > 0
           end.compact.join ", "
