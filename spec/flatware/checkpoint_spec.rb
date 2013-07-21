@@ -1,6 +1,6 @@
 require 'flatware/checkpoint'
 describe Flatware::Checkpoint do
-  subject(:checkpoint) { described_class.new [], scenarios }
+  let(:checkpoint) { described_class.new [], scenarios }
 
   describe "#failures?" do
     subject { checkpoint.failures? }

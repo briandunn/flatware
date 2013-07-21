@@ -1,6 +1,7 @@
 require 'spec_helper'
+require 'flatware/formatters/console/summary'
 
-describe Flatware::Summary do
+describe Flatware::Formatters::Console::Summary do
   let(:summary) { described_class.new steps, scenarios, io }
   let(:io) { StringIO.new }
   let(:passed) { stub status: :passed, failed?: false }

@@ -1,17 +1,16 @@
 module Flatware
   class CheckpointHandler
-    extend Forwardable
-    def_delegators :summary, :had_failures?
+    attr_reader :formatter, :checkpoints
 
-    attr_reader :checkpoints, :out
-    def initialize(out, fails_fast)
-      @fail_fast, @out = fails_fast, out
+    def initialize(formatter, fails_fast)
+      @fail_fast = fails_fast
+      @formatter = formatter
       @checkpoints = []
     end
 
     def handle!(checkpoint)
-      @checkpoints << checkpoint
-      if checkpoint.failures? && @fail_fast
+      checkpoints << checkpoint
+      if checkpoint.failures? && fail_fast?
         Fireable::kill # Killing everybody
         @done = true
       end
@@ -25,15 +24,15 @@ module Flatware
       @fail_fast
     end
 
+    def had_failures?
+      scenarios.any? { |s| s.status == :failed }
+    end
+
     def summarize
-      summary.summarize
+      formatter.summarize(steps, scenarios)
     end
 
     private
-
-    def summary
-      @summary ||= Summary.new(steps, scenarios, out)
-    end
 
     def steps
       checkpoints.map(&:steps).flatten

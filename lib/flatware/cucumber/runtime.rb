@@ -1,4 +1,5 @@
 require 'cucumber'
+require 'flatware/cucumber/formatter'
 
 module Flatware
   module Cucumber
