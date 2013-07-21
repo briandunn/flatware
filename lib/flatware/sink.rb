@@ -1,5 +1,4 @@
 require 'flatware'
-require 'flatware/cucumber/formatter'
 module Flatware
   class Sink
     PORT = 'ipc://sink'
@@ -22,8 +21,10 @@ module Flatware
     end
 
     class Server
-      def initialize(jobs, out=$stdout, error=$stderr, fail_fast=false)
-        @jobs, @out, @error, @fail_fast = jobs, out, error, fail_fast
+      def initialize(jobs, formatter, options={})
+        @jobs, @formatter = jobs, formatter
+        options = {fail_fast: false}.merge options
+        @fail_fast = options[:fail_fast]
       end
 
       def start
@@ -38,7 +39,7 @@ module Flatware
       end
 
       def checkpoint_handler
-        @checkpoint_handler ||= CheckpointHandler.new(out, fail_fast?)
+        @checkpoint_handler ||= CheckpointHandler.new(formatter, fail_fast?)
       end
 
       def listen
@@ -46,7 +47,7 @@ module Flatware
           result = socket.recv
           case result
           when Result
-            print result.progress
+            formatter.result result
           when Checkpoint
             checkpoint_handler.handle! result
           when Job
@@ -68,23 +69,11 @@ module Flatware
         @fail_fast
       end
 
-      attr_reader :out, :jobs
-
-      def print(*args)
-        out.print *args
-      end
-
-      def puts(*args)
-        out.puts *args
-      end
+      attr_reader :jobs, :formatter
 
       def summarize_remaining
         return if remaining_work.empty?
-        puts
-        puts "The following features have not been run:"
-        for job in remaining_work
-          puts job.id
-        end
+        formatter.summarize_remaining remaining_work
       end
 
       def log(*args)
