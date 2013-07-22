@@ -19,10 +19,14 @@ module Flatware
       print_counts 'step', steps
     end
 
+    def had_failures?
+      scenarios.any? &with_status(:failed)
+    end
+
     private
 
     def print_failed_scenarios(scenarios)
-      return unless scenarios.any? &with_status(:failed)
+      return unless had_failures?
 
       io.puts format_string "Failing Scenarios:", :failed
       scenarios.select(&with_status(:failed)).sort_by(&:file_colon_line).each do |scenario|

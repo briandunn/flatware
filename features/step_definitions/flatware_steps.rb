@@ -83,7 +83,6 @@ When /^I time the suite with (#{runners})$/ do |runner|
   @durations[runner] = duration do
     run_simple commands[runner], false
   end
-  assert_exit_status 0
 end
 
 Then /^(#{runners}) is the fastest$/ do |runner|
@@ -162,4 +161,5 @@ end
 Then 'the failure list only includes one feature' do
   all_output.match /Failing Scenarios:\n(.+?)(?=\n\n)/m
   $1.split("\n").should have(1).feature
+  assert_exit_status 1
 end
