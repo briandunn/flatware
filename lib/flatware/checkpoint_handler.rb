@@ -19,9 +19,23 @@ module Flatware
     end
 
     def summarize
-      steps = @checkpoints.map(&:steps).flatten
-      scenarios = @checkpoints.map(&:scenarios).flatten
-      Summary.new(steps, scenarios, @out).summarize
+      summary.summarize
+    end
+
+    def steps
+      @steps ||= @checkpoints.map(&:steps).flatten
+    end
+
+    def scenarios
+      @scenarios ||= @checkpoints.map(&:scenarios).flatten
+    end
+
+    def summary
+      @summary ||= Summary.new(steps, scenarios, @out)
+    end
+
+    def had_failures?
+      summary.had_failures?
     end
   end
 end
