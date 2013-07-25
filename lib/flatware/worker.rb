@@ -26,6 +26,7 @@ module Flatware
       report_for_duty
       fireable.until_fired task do |job|
         job.worker = id
+        Sink.started job
         Cucumber.run job.id, job.args
         Sink.finished job
         report_for_duty

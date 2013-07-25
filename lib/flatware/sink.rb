@@ -18,7 +18,7 @@ module Flatware
       end
     end
 
-    %w[finished progress checkpoint].each do |message|
+    %w[finished started progress checkpoint].each do |message|
       define_singleton_method message do |content|
         push [message.to_sym, content]
       end
