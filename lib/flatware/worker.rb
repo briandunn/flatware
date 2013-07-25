@@ -1,9 +1,14 @@
 require 'benchmark'
 module Flatware
   class Worker
+    attr_reader :id
 
-    def self.listen!
-      new.listen
+    def initialize(id)
+      @id = id
+    end
+
+    def self.listen!(id=0)
+      new(id).listen
     end
 
     def self.spawn(worker_count)
@@ -11,7 +16,7 @@ module Flatware
         fork do
           $0 = "flatware worker #{i}"
           ENV['TEST_ENV_NUMBER'] = i.to_s
-          listen!
+          listen!(i)
         end
       end
     end
@@ -22,6 +27,7 @@ module Flatware
         report_for_duty
         fireable.until_fired task do |job|
           log 'working!'
+          job.worker = id
           Cucumber.run job.id, job.args
           Sink.finished job
           report_for_duty

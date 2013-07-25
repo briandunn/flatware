@@ -19,7 +19,9 @@ module Flatware
 
   Error = Class.new StandardError
 
-  Job = Struct.new :id, :args
+  Job = Struct.new :id, :args do
+    attr_accessor :worker
+  end
 
   extend self
   def socket(type, options={})

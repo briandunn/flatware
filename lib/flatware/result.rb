@@ -1,9 +1,10 @@
 module Flatware
   class Result
-    attr_reader :progress
+    attr_reader :progress, :worker
 
     def initialize(progress)
       @progress = progress
+      @worker   = ENV['TEST_ENV_NUMBER'].to_i
     end
 
     class << self
