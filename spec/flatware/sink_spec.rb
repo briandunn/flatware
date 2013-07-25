@@ -35,15 +35,16 @@ describe Flatware::Sink do
   context 'there is outstanding work' do
     context 'and a Result object is received' do
       it 'prints the result' do
-        result    = Flatware::Result.new 'F'
-        job       = Flatware::Job.new('foo', 'bar')
-        formatter = double 'Formatter', result: nil, summarize: nil
+        result    = double
+        job       = double
+        formatter = double 'Formatter', summarize: nil
         socket    = double 'Socket'
-        socket.stub(:recv).and_return result, job
+        socket.stub(:recv).and_return [:progress, result], [:finished, job]
         Flatware::Fireable.stub(kill: nil, bind: nil)
         Flatware.stub socket: socket
 
-        formatter.should_receive(:result).with result
+        formatter.should_receive(:progress).with result
+        formatter.should_receive(:finished).with job
         Flatware::Sink.start_server [job], formatter
       end
     end

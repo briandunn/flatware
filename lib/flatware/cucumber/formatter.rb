@@ -8,7 +8,7 @@ module Flatware
       end
 
       def after_features(*)
-        Sink.push collector.checkpoint
+        Sink.checkpoint collector.checkpoint
       end
 
       def after_step_result(_, _, _, status, *)
@@ -23,7 +23,7 @@ module Flatware
       attr_reader :collector
 
       def send_progress(status)
-        Sink.push Result.status status
+        Sink.progress Result.new status
       end
 
       class Collector

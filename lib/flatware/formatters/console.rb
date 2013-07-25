@@ -23,7 +23,9 @@ module Flatware
         @out, @err = stdout, stderr
       end
 
-      def result(result)
+      def finished(*); end
+
+      def progress(result)
         out.print format result.progress
       end
 

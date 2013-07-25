@@ -7,16 +7,20 @@ module Flatware
         client.push message
       end
 
-      def finished(job)
-        push job
-      end
-
       def start_server(*args)
         Server.new(*args).start
       end
 
+      private
+
       def client
         @client ||= Client.new
+      end
+    end
+
+    %w[finished progress checkpoint].each do |message|
+      define_singleton_method message do |content|
+        push [message.to_sym, content]
       end
     end
 
@@ -44,17 +48,15 @@ module Flatware
 
       def listen
         until done?
-          result = socket.recv
-          case result
-          when Result
-            formatter.result result
-          when Checkpoint
-            checkpoint_handler.handle! result
-          when Job
-            completed_jobs << result
-            log "COMPLETED SCENARIO"
+          message, content = socket.recv
+          case message
+          when :checkpoint
+            checkpoint_handler.handle! content
+          when :finished
+            completed_jobs << content
+            formatter.finished content
           else
-            log "i don't know that message, bro.", result
+            formatter.send message, content
           end
         end
         checkpoint_handler.summarize
