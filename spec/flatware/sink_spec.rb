@@ -10,7 +10,7 @@ describe Flatware::Sink do
 
     before do
       unless @child_io = IO.popen("-")
-        formatter = double 'Formatter', summarize_remaining: nil, summarize: nil
+        formatter = double 'Formatter', summarize_remaining: nil, summarize: nil, jobs: nil
         described_class.start_server [job], formatter
       end
     end
@@ -27,7 +27,7 @@ describe Flatware::Sink do
 
   context 'there is no work' do
     it 'sumarizes' do
-      formatter = double 'Formatter'
+      formatter = double 'Formatter', jobs: nil
       formatter.should_receive :summarize
       Flatware::Sink.start_server [], formatter
     end
@@ -38,7 +38,7 @@ describe Flatware::Sink do
       it 'prints the result' do
         result    = double
         job       = double
-        formatter = double 'Formatter', summarize: nil
+        formatter = double 'Formatter', summarize: nil, jobs: nil
         socket    = double 'Socket'
         socket.stub(:recv).and_return [:progress, result], [:finished, job]
         Flatware::Fireable.stub(kill: nil, bind: nil)

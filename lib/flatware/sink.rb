@@ -39,6 +39,7 @@ module Flatware
         end
 
         Flatware::Fireable::bind
+        formatter.jobs jobs
         listen
       ensure
         Flatware::Fireable::kill
