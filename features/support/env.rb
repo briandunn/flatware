@@ -29,3 +29,10 @@ Before do
     @announce_env = true
   end
 end
+
+After do
+  if travis?
+    system 'flatware clear'
+    Process.waitall
+  end
+end
