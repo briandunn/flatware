@@ -1,8 +1,11 @@
 module Flatware
   class CheckpointHandler
+    extend Forwardable
+    def_delegators :summary, :had_failures?
+
+    attr_reader :checkpoints, :out
     def initialize(out, fails_fast)
-      @fail_fast = fails_fast
-      @out = out
+      @fail_fast, @out = fails_fast, out
       @checkpoints = []
     end
 
@@ -18,24 +21,26 @@ module Flatware
       @done
     end
 
+    def fail_fast?
+      @fail_fast
+    end
+
     def summarize
       summary.summarize
     end
 
+    private
+
+    def summary
+      @summary ||= Summary.new(steps, scenarios, out)
+    end
+
     def steps
-      @steps ||= @checkpoints.map(&:steps).flatten
+      checkpoints.map(&:steps).flatten
     end
 
     def scenarios
-      @scenarios ||= @checkpoints.map(&:scenarios).flatten
-    end
-
-    def summary
-      @summary ||= Summary.new(steps, scenarios, @out)
-    end
-
-    def had_failures?
-      summary.had_failures?
+      checkpoints.map(&:scenarios).flatten
     end
   end
 end
