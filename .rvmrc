@@ -1,3 +1,0 @@
-rvm use --create 1.9.3@flatware
-
-export PATH="`pwd`/bin:$PATH"
