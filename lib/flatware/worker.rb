@@ -1,10 +1,11 @@
 require 'benchmark'
 module Flatware
   class Worker
-    attr_reader :id
+    attr_reader :id, :task
 
     def initialize(id)
       @id = id
+      @task = Flatware.socket ZMQ::REQ, connect: Sink::DISPATCH_PORT
     end
 
     def self.listen!(id=0)
@@ -22,37 +23,15 @@ module Flatware
     end
 
     def listen
-      time = Benchmark.realtime do
-        fireable
-        report_for_duty
-        fireable.until_fired task do |job|
-          log 'working!'
-          job.worker = id
-          Cucumber.run job.id, job.args
-          Sink.finished job
-          report_for_duty
-          log 'waiting'
-        end
+      loop do
+        task.send [:ready, id]
+        message, job = task.recv
+        break if message == :seppuku
+        job.worker = id
+        Cucumber.run job.id, job.args
+        Sink.finished job
       end
-      log time
-    end
-
-    private
-
-    def log(*args)
-      Flatware.log *args
-    end
-
-    def fireable
-      @fireable ||= Fireable.new
-    end
-
-    def task
-      @task ||= Flatware.socket ZMQ::REQ, connect: Dispatcher::PORT
-    end
-
-    def report_for_duty
-      task.send 'ready'
+      Flatware.close
     end
   end
 end

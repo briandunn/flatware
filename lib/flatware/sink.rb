@@ -1,20 +1,17 @@
 require 'flatware'
 module Flatware
   class Sink
-    PORT = 'ipc://sink'
+    RESULT_PORT   = 'ipc://sink'
+    DISPATCH_PORT = 'ipc://dispatch'
     class << self
-      def push(message)
-        client.push message
-      end
 
-      def start_server(*args)
-        Server.new(*args).start
+      def socket
+        @socket ||= Flatware.socket(ZMQ::PUSH, connect: RESULT_PORT)
       end
 
       private
-
-      def client
-        @client ||= Client.new
+      def push(message)
+        socket.send message
       end
     end
 
@@ -25,10 +22,17 @@ module Flatware
     end
 
     class Server
+      attr_reader :sockets
+
       def initialize(jobs, formatter, options={})
         @jobs, @formatter = jobs, formatter
+        @queue = jobs.dup
+
         options = {fail_fast: false}.merge options
         @fail_fast = options[:fail_fast]
+        results  = Flatware.socket(ZMQ::PULL, bind: RESULT_PORT)
+        dispatch = Flatware.socket(ZMQ::REP,  bind: DISPATCH_PORT)
+        @sockets = Poller.new results, dispatch
       end
 
       def start
@@ -38,7 +42,9 @@ module Flatware
           exit 1
         end
 
-        before_firing { listen }
+        Fireable::bind
+        listen
+        Fireable::kill
         Flatware.close
       end
 
@@ -47,9 +53,19 @@ module Flatware
       end
 
       def listen
-        until done?
+        workers = []
+        sockets.each do |socket|
           message, content = socket.recv
           case message
+          when :ready
+            p workers
+            workers.push content
+            if job = @queue.pop
+              socket.send [:job, job]
+            else
+              socket.send [:seppuku]
+              workers.delete content
+            end
           when :checkpoint
             checkpoint_handler.handle! content
           when :finished
@@ -58,6 +74,7 @@ module Flatware
           else
             formatter.send message, content
           end
+          break if workers.empty? && done?
         end
         checkpoint_handler.summarize
         exit 1 if checkpoint_handler.had_failures?
@@ -78,47 +95,16 @@ module Flatware
         formatter.summarize_remaining remaining_work
       end
 
-      def log(*args)
-        Flatware.log *args
-      end
-
-      def before_firing(&block)
-        Flatware::Fireable::bind
-        block.call
-        Flatware::Fireable::kill
-      end
-
       def completed_jobs
         @completed_jobs ||= []
       end
 
       def done?
-        log remaining_work
         remaining_work.empty? || checkpoint_handler.done?
       end
 
       def remaining_work
         jobs - completed_jobs
-      end
-
-      def fireable
-        @fireable ||= Fireable.new
-      end
-
-      def socket
-        @socket ||= Flatware.socket(ZMQ::PULL, bind: PORT)
-      end
-    end
-
-    class Client
-      def push(message)
-        socket.send message
-      end
-
-      private
-
-      def socket
-        @socket ||= Flatware.socket(ZMQ::PUSH, connect: PORT)
       end
     end
   end

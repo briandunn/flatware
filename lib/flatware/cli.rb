@@ -1,4 +1,5 @@
 require 'thor'
+require 'flatware/processor_info'
 module Flatware
   class CLI < Thor
 
@@ -25,18 +26,11 @@ module Flatware
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
       Flatware.verbose = options[:log]
-      Worker.spawn workers
-      log "flatware options:", options
-      log "cucumber options:", cucumber_args
       jobs = Cucumber.extract_jobs_from_args cucumber_args
-      fork do
-        log "dispatch"
-        $0 = 'flatware dispatcher'
-        Dispatcher.start jobs
-      end
-      log "bossman"
       $0 = 'flatware sink'
-      Sink.start_server jobs, Formatters.load_by_name(options['formatter']), fail_fast: options['fail-fast']
+      sink = Sink::Server.new(jobs, Formatters.load_by_name(options['formatter']), fail_fast: options['fail-fast'])
+      Worker.spawn workers
+      sink.start
       Process.waitall
     end
 
@@ -61,7 +55,7 @@ module Flatware
     def clear
       `ps -c -opid,command`.split("\n").map do |row|
         row =~ /(\d+).*flatware/ and $1.to_i
-      end.compact.each do |pid|
+      end.compact.reject(&$$.method(:==)).each do |pid|
         Process.kill 6, pid
       end
     end

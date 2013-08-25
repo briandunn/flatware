@@ -2,10 +2,11 @@ digraph {
   node [color=cornflowerblue];
   subgraph {
     node [shape=record, fontsize=10.0];
-    worker [label="worker | <req> REQ | <push> PUSH"];
-    sink   [label="sink   | <rep> REP | <pull> PULL"];
+    worker [label="worker | <sub> SUB | <req> REQ | <push> PUSH"];
+    sink   [label="sink   | <pub> PUB | <rep> REP | <pull> PULL"];
   }
   subgraph {
+    sink:pub    -> worker:sub [label=kill];
     worker:push -> sink:pull  [label=results];
     worker:req  -> sink:rep   [label=ready];
     sink:rep    -> worker:req [label=job];
