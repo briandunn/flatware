@@ -5,6 +5,11 @@ module Flatware
       new.listen
     end
 
+    def initialize
+      @fireable = Fireable.new
+      @task     = Flatware.socket ZMQ::REQ, connect: Dispatcher::PORT
+    end
+
     def self.spawn(worker_count)
       worker_count.times do |i|
         fork do
@@ -16,7 +21,6 @@ module Flatware
     end
 
     def listen
-      fireable
       report_for_duty
       fireable.until_fired task do |job|
         Cucumber.run job.id, job.args
@@ -27,13 +31,7 @@ module Flatware
 
     private
 
-    def fireable
-      @fireable ||= Fireable.new
-    end
-
-    def task
-      @task ||= Flatware.socket ZMQ::REQ, connect: Dispatcher::PORT
-    end
+    attr_reader :fireable, :task
 
     def report_for_duty
       task.send 'ready'
