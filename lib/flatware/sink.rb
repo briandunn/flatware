@@ -52,9 +52,6 @@ module Flatware
             checkpoint_handler.handle! result
           when Job
             completed_jobs << result
-            log "COMPLETED SCENARIO"
-          else
-            log "i don't know that message, bro.", result
           end
         end
         checkpoint_handler.summarize
@@ -91,7 +88,6 @@ module Flatware
       end
 
       def done?
-        log remaining_work
         remaining_work.empty? || checkpoint_handler.done?
       end
 

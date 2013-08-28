@@ -30,11 +30,9 @@ module Flatware
       log "cucumber options:", cucumber_args
       jobs = Cucumber.extract_jobs_from_args cucumber_args
       fork do
-        log "dispatch"
         $0 = 'flatware dispatcher'
         Dispatcher.start jobs
       end
-      log "bossman"
       $0 = 'flatware sink'
       Sink.start_server jobs, Formatters.load_by_name(options['formatter']), fail_fast: options['fail-fast']
       Process.waitall

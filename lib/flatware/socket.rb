@@ -1,4 +1,3 @@
-require 'forwardable'
 require 'ffi-rzmq'
 
 module Flatware
@@ -10,30 +9,23 @@ module Flatware
   Job = Struct.new :id, :args
 
   extend self
-  def socket(type, options={})
-    Socket.new(context.socket(type)).tap do |socket|
-      sockets.push socket
-      if port = options[:connect]
-        socket.connect port
-      end
-      if port = options[:bind]
-        socket.bind port
-      end
-      sleep 0.05
-    end
+
+  def socket(*args)
+    context.socket(*args)
   end
 
   def close
-    sockets.each &:close
-    context.terminate
+    context.close
     @context = nil
   end
 
   def log(*message)
     if verbose?
-      $stderr.print "#{$$} "
+      $stderr.print "#$0 "
       $stderr.puts *message
+      $stderr.flush
     end
+    message
   end
 
   attr_writer :verbose
@@ -41,26 +33,72 @@ module Flatware
     !!@verbose
   end
 
-  private
   def context
-    @context ||= ZMQ::Context.new
+    @context ||= Context.new
   end
 
-  def sockets
-    @sockets ||= []
+  class Context
+    attr_reader :sockets, :c
+
+    def initialize
+      @c = ZMQ::Context.new
+      @sockets = []
+    end
+
+    def socket(type, options={})
+      Socket.new(c.socket(type)).tap do |socket|
+        sockets.push socket
+        if port = options[:connect]
+          Flatware.log "connect #{port}"
+          socket.connect port
+          sleep 0.05
+        end
+        if port = options[:bind]
+          Flatware.log "bind #{port}"
+          socket.bind port
+        end
+      end
+    end
+
+    def close
+      sockets.each &:close
+      c.terminate
+      Flatware.log "terminated context"
+    end
   end
 
-  Socket = Struct.new :s do
-    extend Forwardable
-    def_delegators :s, :bind, :connect, :setsockopt
+  class Socket
+    attr_reader :s
+    def initialize(socket)
+      @s = socket
+    end
+
+    def setsockopt(*args)
+      s.setsockopt(*args)
+    end
+
     def send(message)
+      Flatware.log "#@type #@port send #{message}"
       result = s.send_string(Marshal.dump(message))
       raise Error, ZMQ::Util.error_string, caller if result == -1
       message
     end
 
+    def connect(port)
+      @type = 'connected'
+      @port = port
+      s.connect(port)
+    end
+
+    def bind(port)
+      @type = 'bound'
+      @port = port
+      s.bind(port)
+    end
+
     def close
-      s.setsockopt(ZMQ::LINGER, 1)
+      setsockopt ZMQ::LINGER, 1
+      Flatware.log "close #@type #@port"
       s.close
     end
 
@@ -68,7 +106,9 @@ module Flatware
       message = ''
       result = s.recv_string(message)
       raise Error, ZMQ::Util.error_string, caller if result == -1
-      Marshal.load message
+      message = Marshal.load message
+      Flatware.log "#@type #@port recv #{message}"
+      message
     end
   end
 end
