@@ -1,7 +1,7 @@
 require 'ostruct'
 A = OpenStruct.new.tap do |a|
-  a.number = Transform /^(\d+)$/ do |num|
-    num.to_i
+  a.number = Transform /^(\d+(?:\.\d+)?)$/ do |num|
+    num.to_f
   end
 end
 
