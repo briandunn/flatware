@@ -10,7 +10,8 @@ describe Flatware::Sink do
 
     before do
       unless @child_io = IO.popen("-")
-        described_class.start_server [job]
+        formatter = double 'Formatter', summarize_remaining: nil, summarize: nil
+        described_class.start_server [job], formatter
       end
     end
 

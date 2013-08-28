@@ -4,6 +4,8 @@ $:.unshift Pathname.new(__FILE__).dirname.join('../../lib').to_s
 
 ENV['PATH'] = [Pathname.new('.').expand_path.join('bin').to_s, ENV['PATH']].join(':')
 
+require 'flatware/pids'
+
 Before { @dirs = ['tmp', "aruba#{ENV['TEST_ENV_NUMBER']}"] }
 
 require 'aruba/cucumber'
@@ -36,6 +38,10 @@ After do
     Process.waitall
   end
 end
+
+Before { @flatware_pids = Flatware.pids }
+After { (Flatware.pids - @flatware_pids).should have(0).zombies }
+
 
 After '~@non-zero' do
   assert_exit_status 0

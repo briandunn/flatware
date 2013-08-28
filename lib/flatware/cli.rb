@@ -1,4 +1,5 @@
 require 'thor'
+require 'flatware/pids'
 module Flatware
   class CLI < Thor
 
@@ -57,9 +58,7 @@ module Flatware
 
     desc "clear", "kills all flatware processes"
     def clear
-      `ps -c -opid,command`.split("\n").map do |row|
-        row =~ /(\d+).*flatware/ and $1.to_i
-      end.compact.each do |pid|
+      (Flatware.pids - [$$]).each do |pid|
         Process.kill 6, pid
       end
     end

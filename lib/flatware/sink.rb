@@ -34,7 +34,10 @@ module Flatware
           exit 1
         end
 
-        before_firing { listen }
+        Flatware::Fireable::bind
+        listen
+      ensure
+        Flatware::Fireable::kill
         Flatware.close
       end
 
@@ -75,12 +78,6 @@ module Flatware
 
       def log(*args)
         Flatware.log *args
-      end
-
-      def before_firing(&block)
-        Flatware::Fireable::bind
-        block.call
-        Flatware::Fireable::kill
       end
 
       def completed_jobs
