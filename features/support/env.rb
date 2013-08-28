@@ -36,3 +36,11 @@ After do
     Process.waitall
   end
 end
+
+After '~@non-zero' do
+  assert_exit_status 0
+end
+
+After '@non-zero' do
+  assert_exit_status 1
+end

@@ -1,3 +1,4 @@
+@non-zero
 Feature: fail on first error
   In order to get feedback sooner
   I can opt out of running the whole sweet if there is a problem

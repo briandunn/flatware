@@ -13,6 +13,7 @@ Feature: Output
     2 steps (2 passed)
     """
 
+    @non-zero
   Scenario: failure
     Given the following scenario:
     """
@@ -22,11 +23,13 @@ Feature: Output
     When I run flatware
     Then the output contains a backtrace
 
+    @non-zero
   Scenario: multiple failure
     Given a cucumber suite with two features that each fail
     When I run flatware
     Then the output contains a summary of failing features
 
+    @non-zero
   Scenario: outlines
     Given the following scenario:
     """
