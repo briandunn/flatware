@@ -10,7 +10,7 @@ describe Flatware::Worker do
       task.recv
       task.send 'seppuku'
 
-      Process.waitall
+      waitall
       child_pids.should_not include pid
     end
 
@@ -19,7 +19,7 @@ describe Flatware::Worker do
       Flatware::Fireable.bind
       wait_until { child_pids.include? pid }
       Flatware::Fireable.kill
-      Process.wait pid
+      wait pid
       child_pids.should_not include pid
     end
   end

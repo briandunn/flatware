@@ -12,8 +12,7 @@ describe Flatware::Dispatcher do
         Flatware.close
       end
       pid = fork { described_class.start [:job] }
-      Process.waitall
-      exit_statuses = Process.waitall.map(&:last)
+      exit_statuses = waitall.map(&:last)
       exit_statuses.all?(&:success?).should be
       child_pids.should_not include pid
     end
@@ -31,7 +30,7 @@ describe Flatware::Dispatcher do
       socket.recv.should eq 'seppuku'
       Flatware.close
       Process.kill 'INT', pid
-      Process.waitall
+      waitall
     end
   end
 end

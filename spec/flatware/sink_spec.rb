@@ -19,7 +19,7 @@ describe Flatware::Sink do
       wait_until { !child_pids.empty? }
       pid = child_pids.first
       Process.kill 'INT', pid
-      Process.wait pid
+      wait pid
       child_io.read.should match /SystemExit:/
       child_pids.should_not include pid
     end
