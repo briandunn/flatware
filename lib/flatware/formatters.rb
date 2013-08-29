@@ -1,9 +1,26 @@
 module Flatware
   module Formatters
-    def self.load_by_name(name)
-      require "flatware/formatters/#{name}"
-      klass = const_get name.capitalize
-      klass.new $stdout, $stderr
+    def self.load_by_name(names)
+      formatters = names.map do |name|
+        require "flatware/formatters/#{name}"
+        klass = const_get name.capitalize
+        klass.new $stdout, $stderr
+      end
+      Broadcaster.new formatters
+    end
+  end
+
+  class Broadcaster
+    attr_reader :formatters
+
+    def initialize(formatters)
+      @formatters = formatters
+    end
+
+    def method_missing(name, *args)
+      formatters.each do |formatter|
+        formatter.send name, *args if formatter.respond_to? name
+      end
     end
   end
 end
