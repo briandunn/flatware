@@ -20,20 +20,22 @@ module Flatware
     end
 
     worker_option
+    method_option 'child-pids', type: :boolean, default: false, desc: "output the child pids"
     method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
     method_option 'formatter', type: :string, default: 'console', desc: "The formatter to use for output"
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
       Flatware.verbose = options[:log]
-      Worker.spawn workers
+      worker_pids = Worker.spawn workers
       log "flatware options:", options
       log "cucumber options:", cucumber_args
       jobs = Cucumber.extract_jobs_from_args cucumber_args
-      fork do
+      dispatcher_pid = fork do
         log "dispatch"
         $0 = 'flatware dispatcher'
         Dispatcher.start jobs
       end
+      output_pids(@worker_pids + [@dispatcher_pid]) if options['child-pids']
       log "bossman"
       $0 = 'flatware sink'
       Sink.start_server jobs, Formatters.load_by_name(options['formatter']), fail_fast: options['fail-fast']
@@ -82,6 +84,12 @@ module Flatware
 
     def workers
       options[:workers]
+    end
+
+    def output_pids(pids)
+      pids.compact.each do |child_pid|
+        $stdout.puts "child-pid: #{child_pid}"
+      end
     end
   end
 end

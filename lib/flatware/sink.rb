@@ -83,7 +83,12 @@ module Flatware
       def before_firing(&block)
         Flatware::Fireable::bind
         block.call
-        Flatware::Fireable::kill
+      ensure
+        begin
+          Flatware::Fireable::kill
+        rescue Flatware::Error => error
+          log "error while trying to send kill message on exit", error.message
+        end
       end
 
       def completed_jobs

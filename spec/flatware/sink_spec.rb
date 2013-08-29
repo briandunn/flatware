@@ -10,7 +10,10 @@ describe Flatware::Sink do
 
     before do
       unless @child_io = IO.popen("-")
-        described_class.start_server [job]
+        formatter = double 'Formatter'
+        formatter.should_receive :summarize
+        formatter.should_receive :summarize_remaining
+        described_class.start_server [job], formatter
       end
     end
 
@@ -19,7 +22,8 @@ describe Flatware::Sink do
       pid = child_pids.first
       Process.kill 'INT', pid
       Process.wait pid
-      child_io.read.should match /SystemExit:/
+      child_io_output = child_io.read
+      child_io_output.should match /SystemExit:/
       child_pids.should_not include pid
     end
   end

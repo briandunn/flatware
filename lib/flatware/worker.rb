@@ -7,7 +7,7 @@ module Flatware
     end
 
     def self.spawn(worker_count)
-      worker_count.times do |i|
+      worker_count.times.map do |i|
         fork do
           $0 = "flatware worker #{i}"
           ENV['TEST_ENV_NUMBER'] = i.to_s

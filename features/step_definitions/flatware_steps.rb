@@ -6,6 +6,12 @@ A = OpenStruct.new.tap do |a|
 end
 
 module Support
+  FAILING_FEATURE = <<-FEATURE
+    Feature: flunking
+
+    Scenario: flunk
+      Given flunk
+    FEATURE
   def without_bundler_rubyopt(&block)
     rubyopt = ENV['RUBYOPT']
     ENV['RUBYOPT'] = ''
@@ -130,16 +136,25 @@ Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count,
   match[:count].to_i.should eq count
 end
 
+Given /^a cucumber suite with a feature that fails$/ do
+  create_flunk_step_definition
+
+  write_file "features/failing_feature_singular.feature", Support::FAILING_FEATURE
+end
+
+Then /^I see that none of the child pids exist as processes$/ do
+  all_output.split("\n").map do |row|
+    row =~ /child-pid:\s*(\d+)/ and $1
+  end.compact.each do |pid|
+    `ps -p #{pid}`.should_not include(pid)
+  end
+end
+
 Given /^a cucumber suite with two features that each fail$/ do
   create_flunk_step_definition
 
   2.times do |feature_number|
-    write_file "features/failing_feature_#{feature_number}.feature", <<-FEATURE
-    Feature: flunking
-
-    Scenario: flunk
-      Given flunk
-    FEATURE
+    write_file "features/failing_feature_#{feature_number}.feature", Support::FAILING_FEATURE
   end
 end
 
