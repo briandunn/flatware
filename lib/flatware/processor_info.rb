@@ -16,5 +16,9 @@ module Flatware
     def self.count
       new.count
     end
+
+    def self.operating_system
+      new.operating_system
+    end
   end
 end
