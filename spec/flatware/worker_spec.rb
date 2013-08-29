@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'flatware/dispatcher'
 
 describe Flatware::Worker do
   context 'when a worker is started' do

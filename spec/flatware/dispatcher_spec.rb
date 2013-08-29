@@ -2,30 +2,29 @@ require 'spec_helper'
 
 describe Flatware::Dispatcher do
   context 'when a dispatcher is started' do
-
-    before do
-      @pid = fork do
-        $0 = described_class.to_s
-        described_class.start [:job]
-      end
+    after { Flatware.close }
+    it 'exits when fired' do
+      pid = fork { described_class.start [:job] }
+      Flatware::Fireable.bind
+      wait_until { child_pids.include? pid }
+      Flatware::Fireable.kill
+      Process.wait pid
+      exit_statuses = Process.waitall.map(&:last)
+      exit_statuses.all?(&:success?).should be
+      child_pids.should_not include pid
     end
 
-    attr_reader :pid
-
-    context 'when a publisher has bound the die socket' do
-
-      before { Flatware::Fireable::bind }
-
-      context 'when the publisher sends the die message' do
-
-        it 'the dispatcher exits' do
-          wait_until { child_pids.include? pid }
-          Flatware::Fireable::kill
-          exit_statuses = Process.waitall.map(&:last)
-          exit_statuses.all?(&:success?).should be
-          child_pids.should_not include pid
-        end
-      end
+    it 'dispatches jobs' do
+      pid = fork { described_class.start [:job1, :job2] }
+      socket = Flatware.socket ZMQ::REQ, connect: described_class::PORT
+      socket.send 'ready'
+      socket.recv.should eq :job1
+      socket.send 'ready'
+      socket.recv.should eq :job2
+      socket.send 'ready'
+      socket.recv.should eq 'seppuku'
+      Process.kill 'INT', pid
+      Process.wait pid
     end
   end
 end
