@@ -27,11 +27,32 @@ module Flatware
       end
 
       def summarize(steps, scenarios)
-        client.send_message steps: steps, scenarios: scenarios
+        client.send_message [
+          :summarize, {
+            steps: steps.map(&method(:step_as_json)),
+            scenarios: scenarios.map(&method(:scenario_as_json))
+          }
+        ]
       end
 
-      def summarize_remaining(jobs)
-        client.send_message remaining: jobs
+      private
+
+      def step_as_json(step)
+        { status: step.status }.tap do |h|
+          h.merge(exception: {
+            class: step.exception.class,
+            message: step.exception.message,
+            backtrace: step.exception.backtrace
+          }) if step.exception
+        end
+      end
+
+      def scenario_as_json(scenario)
+        {
+          status: scenario.status,
+          file_colon_line: scenario.file_colon_line,
+          name: scenario.name
+        }
       end
 
       class Client
