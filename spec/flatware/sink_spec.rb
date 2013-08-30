@@ -50,4 +50,28 @@ describe Flatware::Sink do
       end
     end
   end
+
+  describe '#start_server' do
+    let(:formatter) { double 'Formatter', summarize: nil, jobs: nil, finished: nil }
+    before do
+      Flatware::Fireable.stub(kill: nil, bind: nil)
+      socket = double 'Socket'
+      socket.stub(:recv).and_return [:checkpoint, checkpoint], [:finished, :job]
+      Flatware.stub socket: socket
+    end
+
+    subject { described_class.start_server [:job], formatter }
+
+    context 'when there are failures' do
+      let(:checkpoint) { double 'Checkpoint', steps: [], scenarios: [], failures?: true }
+
+      it { should be_false }
+    end
+
+    context 'when everything passes' do
+      let(:checkpoint) { double 'Checkpoint', steps: [], scenarios: [], failures?: false }
+
+      it { should be_true }
+    end
+  end
 end

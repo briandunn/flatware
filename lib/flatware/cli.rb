@@ -35,8 +35,9 @@ module Flatware
         Dispatcher.start jobs
       end
       $0 = 'flatware sink'
-      Sink.start_server jobs, Formatters.load_by_name(options['formatters']), fail_fast: options['fail-fast']
+      passed = Sink.start_server jobs, Formatters.load_by_name(options['formatters']), fail_fast: options['fail-fast']
       Process.waitall
+      exit passed ? 0 : 1
     end
 
     worker_option

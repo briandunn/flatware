@@ -64,7 +64,7 @@ module Flatware
           end
         end
         checkpoint_handler.summarize
-        exit 1 if checkpoint_handler.had_failures?
+        !checkpoint_handler.had_failures?
       rescue Error => e
         raise unless e.message == "Interrupted system call"
       end
