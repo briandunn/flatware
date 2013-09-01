@@ -51,12 +51,10 @@ module Flatware
       Socket.new(c.socket(type)).tap do |socket|
         sockets.push socket
         if port = options[:connect]
-          Flatware.log "connect #{port}"
           socket.connect port
           sleep 0.05
         end
         if port = options[:bind]
-          Flatware.log "bind #{port}"
           socket.bind port
         end
       end
@@ -64,7 +62,7 @@ module Flatware
 
     def close
       sockets.each &:close
-      c.terminate
+      raise(Error, ZMQ::Util.error_string, caller) unless c.terminate == 0
       Flatware.log "terminated context"
     end
   end
@@ -80,28 +78,30 @@ module Flatware
     end
 
     def send(message)
-      Flatware.log "#@type #@port send #{message}"
       result = s.send_string(Marshal.dump(message))
       raise Error, ZMQ::Util.error_string, caller if result == -1
+      Flatware.log "#@type #@port send #{message}"
       message
     end
 
     def connect(port)
       @type = 'connected'
       @port = port
-      s.connect(port)
+      raise(Error, ZMQ::Util.error_string, caller) unless s.connect(port) == 0
+      Flatware.log "connect #@port"
     end
 
     def bind(port)
       @type = 'bound'
       @port = port
-      s.bind(port)
+      raise(Error, ZMQ::Util.error_string, caller) unless s.bind(port) == 0
+      Flatware.log "bind #@port"
     end
 
     def close
-      setsockopt ZMQ::LINGER, 1
+      setsockopt ZMQ::LINGER, 0
+      raise(Error, ZMQ::Util.error_string, caller) unless s.close == 0
       Flatware.log "close #@type #@port"
-      s.close
     end
 
     def recv
