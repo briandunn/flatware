@@ -10,4 +10,10 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 RSpec.configure do |config|
   config.include ProcessSupport
   config.include WaitingSupport
+  config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.around verbose: true do |example|
+    Flatware.verbose = true
+    example.run
+    Flatware.verbose = false
+  end
 end
