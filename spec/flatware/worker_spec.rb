@@ -15,12 +15,14 @@ describe Flatware::Worker do
     end
 
     it 'exits when fired' do
+      fork do
+        Flatware::Fireable.bind
+        task = Flatware.socket ZMQ::REP, bind: Flatware::Dispatcher::PORT
+        task.recv.should eq 'ready'
+        Flatware::Fireable.kill
+      end
       pid = fork { described_class.listen! }
-      Flatware::Fireable.bind
-      wait_until { child_pids.include? pid }
-      Flatware::Fireable.kill
       wait pid
-      child_pids.should_not include pid
     end
   end
 end
