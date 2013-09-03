@@ -25,3 +25,11 @@ Feature: cucumber task
     0 steps
     """
     And I see log messages
+
+    @non-zero
+  Scenario: provide erroneous cucumber options
+    When I run flatware with "cucumber --foo bar"
+    Then the output contains the following:
+    """
+    invalid option: --foo
+    """

@@ -26,10 +26,10 @@ module Flatware
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
       Flatware.verbose = options[:log]
-      Worker.spawn workers
       log "flatware options:", options
       log "cucumber options:", cucumber_args
       jobs = Cucumber.extract_jobs_from_args cucumber_args
+      Worker.spawn workers
       fork do
         $0 = 'flatware dispatcher'
         Dispatcher.start jobs
