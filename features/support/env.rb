@@ -11,6 +11,10 @@ Before { @dirs = ['tmp', "aruba#{ENV['TEST_ENV_NUMBER']}"] }
 require 'aruba/cucumber'
 require 'rspec/expectations'
 require 'flatware/processor_info'
+
+require File.join(Pathname.new(__FILE__).dirname, 'flatware/spawn_process')
+Aruba.process = Flatware::SpawnProcess
+
 World(Module.new do
   def max_workers
     return 3 if ENV['TRAVIS'] == 'true'
@@ -39,9 +43,11 @@ After do
   end
 end
 
-Before { @flatware_pids = Flatware.pids }
-After { (Flatware.pids - @flatware_pids).should have(0).zombies }
-
+After do |scenario|
+  if processes.count > 0
+    (Flatware.pids_of_group(processes[0][1].pid)).should have(0).zombies
+  end
+end
 
 After '~@non-zero' do
   assert_exit_status 0
