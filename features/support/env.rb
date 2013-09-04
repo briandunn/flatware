@@ -43,10 +43,10 @@ Before { @flatware_pids = Flatware.pids }
 After { (Flatware.pids - @flatware_pids).should have(0).zombies }
 
 
-After '~@non-zero' do
-  assert_exit_status 0
+After '~@non-zero' do |scenario|
+  scenario.status == :passed and assert_exit_status 0
 end
 
-After '@non-zero' do
-  assert_exit_status 1
+After '@non-zero' do |scenario|
+  scenario.status == :passed and assert_exit_status 1
 end
