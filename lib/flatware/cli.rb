@@ -25,6 +25,7 @@ module Flatware
     method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
+      Process.setpgrp
       Flatware.verbose = options[:log]
       log "flatware options:", options
       log "cucumber options:", cucumber_args
