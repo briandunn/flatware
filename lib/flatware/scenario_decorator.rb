@@ -1,24 +1,21 @@
 module Flatware
   class ScenarioDecorator
-    attr_reader :status
+    extend Forwardable
+    def_delegators :scenario, :name, :file_colon_line
+
+    attr_reader :status, :exception
 
     def initialize(scenario)
-      @scenario, @status = scenario, scenario.status
-      @scenario = scenario.scenario_outline if example_row?
-    end
-
-    def name
-      @scenario.name
-    end
-
-    def file_colon_line
-      @scenario.file_colon_line
+      @scenario, @status, @exception = scenario, scenario.status, scenario.exception
+      @scenario, @exception = scenario.scenario_outline, scenario.exception if example_row?
     end
 
     private
 
+    attr_reader :scenario
+
     def example_row?
-      @scenario.respond_to? :scenario_outline
+      scenario.respond_to? :scenario_outline
     end
   end
 end

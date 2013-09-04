@@ -16,7 +16,8 @@ module Flatware
 
         def summarize
           2.times { io.puts }
-          print_steps :failed
+          print_failures(steps, 'step')
+          print_failures(scenarios.select(&:failed_outside_step?), 'scenario')
           print_failed_scenarios scenarios
           print_counts 'scenario', scenarios
           print_counts 'step', steps
@@ -34,8 +35,9 @@ module Flatware
           io.puts
         end
 
-        def print_steps(status)
-          print_elements steps.select(&with_status(status)), status, 'steps'
+        def print_failures(collection, label)
+          failures = collection.select(&with_status(:failed))
+          print_elements failures, :failed, pluralize(label, failures.size)
         end
 
         def print_counts(label, collection)

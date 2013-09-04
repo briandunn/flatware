@@ -131,6 +131,12 @@ Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count,
   match[:count].to_i.should eq count
 end
 
+Then /^I see that (#{A.number}) (scenario|step)s? failed$/ do |count, thing|
+  match = all_output.match /failed (?<count>\d+) #{thing}s?/
+  match.should be
+  match[:count].to_i.should eq count
+end
+
 Given /^a cucumber suite with two features that each fail$/ do
   create_flunk_step_definition
 
@@ -163,4 +169,10 @@ Then 'the failure list only includes one feature' do
   all_output.match /Failing Scenarios:\n(.+?)(?=\n\n)/m
   $1.split("\n").should have(1).feature
   assert_exit_status 1
+end
+
+Given /^an? (after|before) hook that will raise on (@.+)$/ do |side, tag|
+  write_file "features/support/#{rand}.rb", <<-RB
+    #{side.capitalize}('#{tag}') { 1.should eq 2 }
+  RB
 end

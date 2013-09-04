@@ -11,7 +11,8 @@ describe Flatware::Checkpoint do
           double('scenario',
             status: :passed,
             file_colon_line: nil,
-            name: nil
+            name: nil,
+            exception: nil
           )
         ]
       end
@@ -25,7 +26,8 @@ describe Flatware::Checkpoint do
           double('scenario',
             status: :failed,
             file_colon_line: nil,
-            name: nil
+            name: nil,
+            exception: nil
           )
         ]
       end

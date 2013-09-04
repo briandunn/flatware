@@ -1,14 +1,26 @@
 require 'flatware/checkpoint'
 require 'flatware/scenario_decorator'
+require 'flatware/sink'
+require 'ostruct'
 module Flatware
   module Cucumber
     class Formatter
+
       def initialize(step_mother, *)
         @collector = Collector.new step_mother
+        @scenarios = []
+        @in_a_step = false
       end
 
       def after_features(*)
-        Sink.checkpoint collector.checkpoint
+        checkpoint = collector.checkpoint
+        scenarios.select(&:exception).map(&:file_colon_line).each do |file_colon_line|
+          scenario = checkpoint.scenarios.detect do |scenario|
+            scenario.file_colon_line == file_colon_line
+          end
+          scenario.failed_outside_step!(file_colon_line) if scenario
+        end
+        Sink.checkpoint checkpoint
       end
 
       def after_step_result(_, _, _, status, *)
@@ -19,8 +31,51 @@ module Flatware
         send_progress(status) if status
       end
 
+      def exception(exception, status)
+        unless @in_a_step
+          current_scenario.exception = exception
+          send_progress(status)
+        end
+      end
+
+      def respond_to?(x)
+        super
+      end
+
+      def before_outline_table(*)
+        @in_examples = true
+      end
+
+      def after_outline_table(*)
+        @in_examples = false
+      end
+
+      def before_table_cell(*)
+        @in_a_step = @in_examples
+      end
+
+      def after_table_cell(*)
+        @in_a_step = ! @in_examples
+      end
+
+      def before_step(*)
+        @in_a_step = true
+      end
+
+      def after_step(*)
+        @in_a_step = false
+      end
+
+      def scenario_name(_, name, file_colon_line, *)
+        scenarios.push OpenStruct.new file_colon_line: file_colon_line, name: name
+      end
+
       private
-      attr_reader :collector
+      attr_reader :collector, :scenarios
+
+      def current_scenario
+        scenarios.last
+      end
 
       def send_progress(status)
         Sink.progress Result.new status
@@ -51,6 +106,5 @@ module Flatware
         end
       end
     end
-
   end
 end

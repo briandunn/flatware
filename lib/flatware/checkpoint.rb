@@ -20,7 +20,7 @@ module Flatware
 
     def serialize_scenarios(scenarios)
       scenarios.map do |scenario|
-        ScenarioResult.new scenario.status, scenario.file_colon_line, scenario.name
+        ScenarioResult.new scenario.status, scenario.file_colon_line, scenario.name, scenario.exception
       end
     end
 

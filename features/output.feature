@@ -82,3 +82,43 @@ Feature: Output
     0 scenarios
     1 step (1 undefined)
     """
+
+    @non-zero
+  Scenario: Failures in hooks print a backtrace
+    Given the following scenario:
+    """
+    @fail-after
+    Scenario Outline: Fail after outline
+      Then later I <action>!
+
+    Scenarios:
+      | action |
+      | failed |
+
+    @fail-before
+    Scenario Outline: Fail before outline
+      But before I <action>!
+
+    Scenarios:
+      | action |
+      | failed |
+
+    # Scenario: Pass
+    #   Then this one is in the clear
+
+    Scenario: Fail
+      Then flunk
+
+    @fail-before
+    Scenario: Fail in before hook
+      Then this one is doomed!
+
+    @fail-after
+    Scenario: Fail in after hook
+      Then this one is doomed!
+    """
+    And an after hook that will raise on @fail-after
+    And a before hook that will raise on @fail-before
+    When I run flatware
+    Then I see that 5 scenarios where run
+    And I see that 4 scenarios failed
