@@ -1,3 +1,4 @@
+require 'forwardable'
 module Flatware
   class ScenarioDecorator
     extend Forwardable

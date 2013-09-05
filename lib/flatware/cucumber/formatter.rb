@@ -58,6 +58,10 @@ module Flatware
         @in_a_step = ! @in_examples
       end
 
+      def after_table_row(table_row)
+        exception(table_row.exception, :failed) if table_row.exception
+      end
+
       def before_step(*)
         @in_a_step = true
       end
