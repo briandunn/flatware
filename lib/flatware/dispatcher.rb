@@ -1,19 +1,17 @@
 module Flatware
   class Dispatcher
-    PORT = 'ipc://dispatch'
-
-    def self.start(jobs)
-      trap 'INT' do
-        Flatware.close
-        exit 1
+    def self.spawn(jobs, endpoint)
+      fork do
+        $0 = 'flatware dispatcher'
+        trap('INT') { exit 1 }
+        new(jobs, endpoint).dispatch!
       end
-      new(jobs).dispatch!
     end
 
-    def initialize(jobs)
+    def initialize(jobs, endpoint)
       @jobs     = jobs
       @fireable = Fireable.new
-      @dispatch = Flatware.socket ZMQ::REP, bind: PORT
+      @dispatch = Flatware.socket ZMQ::REP, bind: endpoint
     end
 
     def dispatch!

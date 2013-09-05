@@ -1,34 +1,20 @@
 require 'flatware'
 module Flatware
-  class Sink
-    PORT = 'ipc://sink'
-    class << self
-      def push(message)
-        client.push message
-      end
+  module Sink
+    extend self
 
-      def start_server(*args)
-        Server.new(*args).start
-      end
-
-      private
-
-      def client
-        @client ||= Client.new
-      end
-    end
-
-    %w[finished started progress checkpoint].each do |message|
-      define_singleton_method message do |content|
-        push [message.to_sym, content]
-      end
+    def start_server(*args)
+      Server.new(*args).start
     end
 
     class Server
-      def initialize(jobs, formatter, options={})
+      attr_reader :socket
+
+      def initialize(jobs, formatter, endpoint, options={})
         @jobs, @formatter = jobs, formatter
         options = {fail_fast: false}.merge options
         @fail_fast = options[:fail_fast]
+        @socket = Flatware.socket(ZMQ::PULL, bind: endpoint)
       end
 
       def start
@@ -100,22 +86,6 @@ module Flatware
 
       def fireable
         @fireable ||= Fireable.new
-      end
-
-      def socket
-        @socket ||= Flatware.socket(ZMQ::PULL, bind: PORT)
-      end
-    end
-
-    class Client
-      def push(message)
-        socket.send message
-      end
-
-      private
-
-      def socket
-        @socket ||= Flatware.socket(ZMQ::PUSH, connect: PORT)
       end
     end
   end

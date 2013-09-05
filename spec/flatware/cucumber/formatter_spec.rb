@@ -7,7 +7,7 @@ describe Flatware::Cucumber::Formatter do
   let(:sink) { double 'Sink', progress: nil }
 
   before do
-    stub_const 'Flatware::Sink', sink
+    stub_const 'Flatware::Sink', double('Sink', client: sink)
       mother.stub(:scenarios).and_return [],
         [double('Scenario', file_colon_line: 'file:11', status: nil, exception: nil, name: nil)]
 
@@ -22,7 +22,7 @@ describe Flatware::Cucumber::Formatter do
       formatter.exception(exception, :failed)
       formatter.after_step
 
-      Flatware::Sink.should_receive(:checkpoint).with do |checkpoint|
+      sink.should_receive(:checkpoint).with do |checkpoint|
         checkpoint.scenarios.select(&:failed_outside_step?).size == 0
       end
 
@@ -39,7 +39,7 @@ describe Flatware::Cucumber::Formatter do
       formatter.after_table_cell
       formatter.after_outline_table
 
-      Flatware::Sink.should_receive(:checkpoint).with do |checkpoint|
+      sink.should_receive(:checkpoint).with do |checkpoint|
         checkpoint.scenarios.select(&:failed_outside_step?).size == 0
       end
 
@@ -51,7 +51,7 @@ describe Flatware::Cucumber::Formatter do
     it 'marks the scenario as failing outside of a step' do
       formatter.exception(exception, :failed)
 
-      Flatware::Sink.should_receive(:checkpoint).with do |checkpoint|
+      sink.should_receive(:checkpoint).with do |checkpoint|
         checkpoint.scenarios.select(&:failed_outside_step?).size == 1
       end
 

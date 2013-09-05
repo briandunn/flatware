@@ -2,11 +2,15 @@ require 'spec_helper'
 
 describe Flatware::Worker do
   context 'when a worker is started' do
+    let(:dispatch_endpoint) { 'ipc://test-dispatch' }
+    let(:sink_endpoint) { 'ipc://test-sink' }
     after { Flatware.close }
 
+    let(:worker) { described_class.new 1, dispatch_endpoint, sink_endpoint }
+
     it 'exits when dispatch is done' do
-      pid = fork { described_class.listen! }
-      task = Flatware.socket ZMQ::REP, bind: Flatware::Dispatcher::PORT
+      pid = fork { worker.listen }
+      task = Flatware.socket ZMQ::REP, bind: dispatch_endpoint
       task.recv
       task.send 'seppuku'
 
@@ -17,12 +21,11 @@ describe Flatware::Worker do
     it 'exits when fired' do
       fork do
         Flatware::Fireable.bind
-        task = Flatware.socket ZMQ::REP, bind: Flatware::Dispatcher::PORT
+        task = Flatware.socket ZMQ::REP, bind: dispatch_endpoint
         task.recv.should eq 'ready'
         Flatware::Fireable.kill
       end
-      pid = fork { described_class.listen! }
-      wait pid
+      wait fork { worker.listen }
     end
   end
 end

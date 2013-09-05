@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Flatware::Sink do
   before(:all) { Flatware.close }
+  let(:endpoint) { 'ipc://sink-test' }
 
   context 'when I have work to do, but am interupted' do
     let(:job) { double 'job', id: 'int.feature' }
@@ -12,7 +13,7 @@ describe Flatware::Sink do
       orig = trap 'INT', 'DEFAULT'
       unless @child_io = IO.popen("-")
         formatter = double 'Formatter', summarize_remaining: nil, summarize: nil, jobs: nil
-        described_class.start_server [job], formatter
+        described_class.start_server [job], formatter, endpoint
       end
       trap 'INT', orig
     end
@@ -30,7 +31,7 @@ describe Flatware::Sink do
     it 'sumarizes' do
       formatter = double 'Formatter', jobs: nil
       formatter.should_receive :summarize
-      Flatware::Sink.start_server [], formatter
+      Flatware::Sink.start_server [], formatter, endpoint
     end
   end
 
@@ -47,7 +48,7 @@ describe Flatware::Sink do
 
         formatter.should_receive(:progress).with result
         formatter.should_receive(:finished).with job
-        Flatware::Sink.start_server [job], formatter
+        Flatware::Sink.start_server [job], formatter, endpoint
       end
     end
   end
@@ -61,7 +62,7 @@ describe Flatware::Sink do
       Flatware.stub socket: socket
     end
 
-    subject { described_class.start_server [:job], formatter }
+    subject { described_class.start_server [:job], formatter, endpoint }
 
     context 'when there are failures' do
       let(:checkpoint) { double 'Checkpoint', steps: [], scenarios: [], failures?: true }

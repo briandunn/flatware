@@ -20,7 +20,7 @@ module Flatware
           end
           scenario.failed_outside_step!(file_colon_line) if scenario
         end
-        Sink.checkpoint checkpoint
+        Sink::client.checkpoint checkpoint
       end
 
       def after_step_result(_, _, _, status, *)
@@ -82,7 +82,7 @@ module Flatware
       end
 
       def send_progress(status)
-        Sink.progress Result.new status
+        Sink::client.progress Result.new status
       end
 
       class Collector

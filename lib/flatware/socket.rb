@@ -1,9 +1,6 @@
 require 'ffi-rzmq'
 
 module Flatware
-  SINK_PORT     = 'ipc://sink'
-  DISPATCH_PORT = 'ipc://dispatch'
-
   Error = Class.new StandardError
 
   Job = Struct.new :id, :args do
