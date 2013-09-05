@@ -1,8 +1,9 @@
+require 'flatware/processor_info'
 module Flatware
   extend self
   # All the pids of all the processes called flatware on this machine
   def pids
-    pids_command.split("\n").map do |row|
+    pids_command.map do |row|
       row =~ /(\d+).*flatware/ and $1.to_i
     end.compact
   end
@@ -10,15 +11,15 @@ module Flatware
   def pids_command
     case ProcessorInfo.operating_system
     when 'Darwin'
-      `ps -c -opid,command,pgid`
+      `ps -c -opid,pgid,command`
     when 'Linux'
-      `ps -opid,command,pgid`
-    end
+      `ps -opid,pgid,command`
+    end.split("\n")[1..-1]
   end
 
   def pids_of_group(group_pid)
-    pids_command.split("\n").map do |row|
-      row =~ /(\d+).*flatware.*(#{group_pid})/ and $1.to_i
+    pids_command.map(&:split).map do |pid, pgid, _|
+      pid.to_i if pgid.to_i == group_pid
     end.compact
   end
 end
