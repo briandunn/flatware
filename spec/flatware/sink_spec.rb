@@ -9,18 +9,19 @@ describe Flatware::Sink do
     attr_reader :child_io
 
     before do
+      orig = trap 'INT', 'DEFAULT'
       unless @child_io = IO.popen("-")
         formatter = double 'Formatter', summarize_remaining: nil, summarize: nil, jobs: nil
         described_class.start_server [job], formatter
       end
+      trap 'INT', orig
     end
 
     it 'exits' do
-      wait_until { !child_pids.empty? }
-      pid = child_pids.first
+      pid = child_io.pid
       Process.kill 'INT', pid
       wait pid
-      child_io.read.should match /SystemExit:/
+      child_io.read.should match /(SystemExit|Interrupt):/
       child_pids.should_not include pid
     end
   end
