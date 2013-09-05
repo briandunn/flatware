@@ -6,15 +6,6 @@ A = OpenStruct.new.tap do |a|
 end
 
 module Support
-  def without_bundler_rubyopt(&block)
-    rubyopt = ENV['RUBYOPT']
-    ENV['RUBYOPT'] = ''
-    val = yield
-  ensure
-    ENV['RUBYOPT'] = rubyopt
-    return val
-  end
-
   def create_flunk_step_definition
     write_file "features/step_definitions/flunky_steps.rb", <<-RB
       Then('flunk') { false.should be_true }
@@ -93,7 +84,7 @@ end
 When /^I run flatware(?: with "([^"]+)")?$/ do |args|
   command = (['flatware', '-w', max_workers] + [args]).compact.join(" ")
   @duration = duration do
-    without_bundler_rubyopt { run_simple command }
+    run_simple command
   end
 end
 
