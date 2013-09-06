@@ -10,7 +10,7 @@ Feature: cucumber task
     """
 
   Scenario: provide only cucumber options
-    When I run flatware with "cucumber -t~@wip"
+    When I run flatware with "--cucumber-args '-t~@wip'"
     Then the output contains the following:
     """
     0 scenarios
@@ -18,7 +18,7 @@ Feature: cucumber task
     """
 
   Scenario: provide flatware options and cucumber options
-    When I run flatware with "-l cucumber -t~@wip"
+    When I run flatware with "-l --cucumber-args '-t~@wip'"
     Then the output contains the following:
     """
     0 scenarios
@@ -28,7 +28,7 @@ Feature: cucumber task
 
     @non-zero
   Scenario: provide erroneous cucumber options
-    When I run flatware with "cucumber --foo bar"
+    When I run flatware with "--cucumber-args '--foo bar'"
     Then the output contains the following:
     """
     invalid option: --foo

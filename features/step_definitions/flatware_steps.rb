@@ -153,7 +153,7 @@ Then 'the output contains a summary of failing features' do
 end
 
 Then 'I see log messages' do
-  assert_partial_output 'flatware options:', all_output
+  assert_partial_output 'flatware worker 0 connect', all_output
 end
 
 Then 'the failure list only includes one feature' do

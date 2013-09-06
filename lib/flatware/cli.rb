@@ -11,33 +11,29 @@ module Flatware
       method_option :workers, aliases: "-w", type: :numeric, default: processors, desc: "Number of concurent processes to run"
     end
 
-    class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
-
-    default_task :default
-    worker_option
-    desc "default [FLATWARE_OPTS]", "parallelizes cucumber with default arguments"
-    def default(*)
-      invoke :cucumber
+    def self.endpoint_options
+      method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
+      method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     end
 
+    def self.server_options
+      method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
+      method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
+      method_option 'cucumber-args', type: :string, default: ''
+    end
+
+    class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
+
+    default_task :cucumber
+
+    endpoint_options
     worker_option
-    method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
-    method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
-    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
-    desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
-    def cucumber(*)
-      Process.setpgrp
-      Flatware.verbose = options[:log]
-      log "flatware options:", options
-      log "cucumber options:", cucumber_args
-      jobs = Cucumber.extract_jobs_from_args cucumber_args
-      Worker.spawn workers, options['dispatch-endpoint'], options['sink-endpoint']
-      Dispatcher.spawn jobs, options['dispatch-endpoint']
-      $0 = 'flatware sink'
-      passed = Sink.start_server jobs, Formatters.load_by_name(options['formatters']), options['sink-endpoint'], fail_fast: options['fail-fast']
-      Process.waitall
-      exit passed ? 0 : 1
+    server_options
+    desc "cucumber", "parallelizes cucumber"
+    def cucumber
+      jobs = Cucumber.extract_jobs_from_args options['cucumber-args'].split
+      invoke :listen, [], options.merge(wait: false)
+      start_server(jobs)
     end
 
     worker_option
@@ -56,7 +52,6 @@ module Flatware
       Process.waitall
     end
 
-
     desc "clear", "kills all flatware processes"
     def clear
       (Flatware.pids - [$$]).each do |pid|
@@ -64,38 +59,34 @@ module Flatware
       end
     end
 
-    method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
-    method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
-    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+    server_options
+    endpoint_options
     desc "serve", "serves"
     def serve
-      jobs = Cucumber.extract_jobs_from_args []
-      Dispatcher.spawn jobs, options['dispatch-endpoint']
-      $0 = 'flatware sink'
-      passed = Sink.start_server jobs, Formatters.load_by_name(options['formatters']), options['sink-endpoint'], fail_fast: options['fail-fast']
-      Process.waitall
-      exit passed ? 0 : 1
+      start_server Cucumber.extract_jobs_from_args options['cucumber-args'].split
     end
 
     worker_option
-    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+    endpoint_options
     desc "listen", "listens"
+    method_option 'wait', default: true, desc: 'block until all workers are done'
     def listen
-      Flatware.verbose = true
+      Process.setpgrp
+      Flatware.verbose = options[:log]
       Worker.spawn workers, options['dispatch-endpoint'], options['sink-endpoint']
-      Process.waitall
+      Process.waitall if options['wait']
     end
 
     private
 
-    def cucumber_args
-      if index = ARGV.index('cucumber')
-        ARGV[index + 1..-1]
-      else
-        []
-      end
+    def start_server(jobs)
+      Process.setpgrp
+      Flatware.verbose = options[:log]
+      Dispatcher.spawn jobs, options['dispatch-endpoint']
+      $0 = 'flatware sink'
+      success = Sink.start_server jobs, Formatters.load_by_name(options['formatters']), options['sink-endpoint'], fail_fast: options['fail-fast']
+      Process.waitall
+      exit success ? 0 : 1
     end
 
     def log(*args)
