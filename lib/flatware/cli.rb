@@ -64,6 +64,30 @@ module Flatware
       end
     end
 
+    method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
+    method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
+    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
+    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+    desc "serve", "serves"
+    def serve
+      jobs = Cucumber.extract_jobs_from_args []
+      Dispatcher.spawn jobs, options['dispatch-endpoint']
+      $0 = 'flatware sink'
+      passed = Sink.start_server jobs, Formatters.load_by_name(options['formatters']), options['sink-endpoint'], fail_fast: options['fail-fast']
+      Process.waitall
+      exit passed ? 0 : 1
+    end
+
+    worker_option
+    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
+    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+    desc "listen", "listens"
+    def listen
+      Flatware.verbose = true
+      Worker.spawn workers, options['dispatch-endpoint'], options['sink-endpoint']
+      Process.waitall
+    end
+
     private
 
     def cucumber_args
