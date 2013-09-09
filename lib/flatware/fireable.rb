@@ -1,6 +1,8 @@
+require 'flatware/socket'
 require 'flatware/poller'
 
 module Flatware
+  Fired = Class.new(Error)
   class Fireable
     PORT = 'ipc://die'
 
@@ -18,15 +20,25 @@ module Flatware
       end
     end
 
+    def fired?
+      @fired ||= die.recv(ZMQ::NonBlocking) == 'seppuku'
+    end
+
+    def ensure_employment!
+      raise Fired if fired?
+    end
+
     attr_reader :die
 
     def until_fired(socket, &block)
       poller = Poller.new socket, die
       poller.each do |s|
         message = s.recv
-        break if message == 'seppuku'
+        break if message == 'seppuku' or fired?
         block.call message
       end
+    rescue Fired => e
+      # quietly bow out. Being asked to quit is a clean exit.
     ensure
       Flatware.close
     end

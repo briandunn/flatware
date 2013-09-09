@@ -154,9 +154,6 @@ end
 
 Then 'I see log messages' do
   assert_partial_output 'flatware dispatcher connect', all_output
-  @dirs.inject @root do |root, dir|
-    root.join dir
-  end.join('0.log').read.should match /worker 0/
 end
 
 Then 'the failure list only includes one feature' do

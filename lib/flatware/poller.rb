@@ -1,3 +1,4 @@
+require 'flatware/socket'
 module Flatware
   class Poller
     attr_reader :sockets, :zmq_poller

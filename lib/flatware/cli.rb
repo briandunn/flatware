@@ -1,5 +1,6 @@
 require 'thor'
 require 'flatware/pids'
+require 'flatware/cucumber'
 module Flatware
   class CLI < Thor
 
