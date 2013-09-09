@@ -11,10 +11,10 @@ module Flatware
       attr_reader :socket
 
       def initialize(jobs, formatter, endpoint, options={})
-        @jobs, @formatter = jobs, formatter
-        options = {fail_fast: false}.merge options
+        @jobs, @formatter, @completed_jobs = jobs, formatter, []
         @fail_fast = options[:fail_fast]
         @socket = Flatware.socket(ZMQ::PULL, bind: endpoint)
+        @checkpoint_handler = CheckpointHandler.new(formatter, options[:fail_fast])
       end
 
       def start
@@ -30,10 +30,6 @@ module Flatware
       ensure
         Flatware::Fireable::kill
         Flatware.close
-      end
-
-      def checkpoint_handler
-        @checkpoint_handler ||= CheckpointHandler.new(formatter, fail_fast?)
       end
 
       def listen
@@ -57,11 +53,7 @@ module Flatware
 
       private
 
-      def fail_fast?
-        @fail_fast
-      end
-
-      attr_reader :jobs, :formatter
+      attr_reader :jobs, :formatter, :checkpoint_handler, :completed_jobs
 
       def summarize_remaining
         return if remaining_work.empty?
@@ -72,20 +64,12 @@ module Flatware
         Flatware.log *args
       end
 
-      def completed_jobs
-        @completed_jobs ||= []
-      end
-
       def done?
         remaining_work.empty? || checkpoint_handler.done?
       end
 
       def remaining_work
         jobs - completed_jobs
-      end
-
-      def fireable
-        @fireable ||= Fireable.new
       end
     end
   end

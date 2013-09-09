@@ -10,10 +10,7 @@ module Flatware
 
     def handle!(checkpoint)
       checkpoints << checkpoint
-      if checkpoint.failures? && fail_fast?
-        Fireable::kill # Killing everybody
-        @done = true
-      end
+      @done = checkpoint.failures? && fail_fast?
     end
 
     def done?
