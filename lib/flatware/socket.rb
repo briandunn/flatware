@@ -1,6 +1,7 @@
 require 'ffi-rzmq'
 
 module Flatware
+  EAGAIN = 35
   Error = Class.new StandardError
 
   Job = Struct.new :id, :args do
@@ -101,10 +102,11 @@ module Flatware
       Flatware.log "close #@type #@port"
     end
 
-    def recv
+    def recv(flag=0)
       message = ''
-      result = s.recv_string(message)
-      raise Error, ZMQ::Util.error_string, caller if result == -1
+      result = s.recv_string(message, flag)
+      return if result == -1 && FFI.errno == EAGAIN && flag == ZMQ::NonBlocking
+      raise(Error, ZMQ::Util.error_string, caller) if result == -1
       message = Marshal.load message
       Flatware.log "#@type #@port recv #{message}"
       message
