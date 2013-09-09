@@ -1,8 +1,9 @@
 require 'pathname'
+root = Pathname.new(__FILE__).dirname.join '../../'
 
-$:.unshift Pathname.new(__FILE__).dirname.join('../../lib').to_s
+$:.unshift root.join('lib').to_s
 
-ENV['PATH'] = [Pathname.new('.').expand_path.join('bin').to_s, ENV['PATH']].join(':')
+ENV['PATH'] = [root.join('bin').to_s, ENV['PATH']].join(':')
 
 require 'flatware/pids'
 
@@ -12,7 +13,7 @@ require 'aruba/cucumber'
 require 'rspec/expectations'
 require 'flatware/processor_info'
 
-require File.join(Pathname.new(__FILE__).dirname, 'flatware/spawn_process')
+require root.join 'features/support/flatware/spawn_process'
 Aruba.process = Flatware::SpawnProcess
 
 World(Module.new do
@@ -43,7 +44,7 @@ After do
   end
 end
 
-After do |scenario|
+After do
   if processes.count > 0
     (Flatware.pids_of_group(processes[0][1].pid)).should have(0).zombies
   end
