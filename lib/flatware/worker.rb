@@ -1,22 +1,30 @@
+require 'flatware/cucumber'
+require 'flatware/fireable'
 require 'flatware/sink/client'
 module Flatware
   class Worker
     attr_reader :id
 
     def initialize(id, dispatch_endpoint, sink_endpoint)
+      $0        = "flatware worker #{id}"
       @id       = id
       @fireable = Fireable.new
       @sink     = Sink::Client.new sink_endpoint
       @task     = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
     end
 
+    def self.listen(*args)
+      new(ENV['TEST_ENV_NUMBER'].to_i,*args).listen
+    end
+
     def self.spawn(worker_count, dispatch_endpoint, sink_endpoint)
       worker_count.times do |i|
-        fork do
-          $0 = "flatware worker #{i}"
-          ENV['TEST_ENV_NUMBER'] = i.to_s
-          new(i, dispatch_endpoint, sink_endpoint).listen
-        end
+        Kernel.spawn({'TEST_ENV_NUMBER' => i.to_s}, <<-CMD.gsub("\n", ' '))
+          ruby -I#{Pathname.new(__FILE__).dirname.expand_path.join '..' }
+          -r#{__FILE__}
+          -e 'Flatware.verbose = #{Flatware.verbose?}'
+          -e 'Flatware::Worker.listen "#{dispatch_endpoint}", "#{sink_endpoint}"' >> #{i}.log 2>&1
+        CMD
       end
     end
 

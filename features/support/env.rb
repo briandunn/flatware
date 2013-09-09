@@ -28,6 +28,7 @@ World(Module.new do
 end)
 
 Before do
+  @root = root
   if travis?
     @announce_stdout = true
     @announce_stderr = true
