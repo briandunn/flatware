@@ -1,47 +1,34 @@
 require 'spec_helper'
 describe Flatware::Fireable do
+  let(:controll_socket) { double 'controll socket', recv: 'seppuku', setsockopt: nil }
+  subject(:fireable) { described_class.new }
+  let(:poller) { double 'poller' }
+  before do
+    Flatware::Poller.stub new: poller
+    Flatware.should_receive(:socket).and_return controll_socket
+  end
+  let(:client_socket) { double 'client socket', recv: 'client message' }
 
-  let! :kill_socket do
-    Flatware.socket ZMQ::PUB, bind: described_class::PORT
+  it "yields messages that come in on the given socket" do
+    poller.stub(:each).and_yield(client_socket)
+    fireable.until_fired client_socket do |message|
+      message.should eq 'client message'
+    end
   end
 
-  let(:fireable) { described_class.new }
-  let(:port) { 'ipc://test' }
-  let!(:rep_socket) { Flatware.socket ZMQ::REP, bind: port }
-  let!(:req_socket) { Flatware.socket ZMQ::REQ, connect: port }
+  it "exits cleanly when sent the die message" do
+    poller.stub(:each).and_yield(controll_socket)
+    called = nil
 
-  context "in process" do
-    before { fireable }
-    it "yields messages that come in on the given socket" do
-      req_socket.send :hi!
-      kill_socket.send 'seppuku'
-
-      actual_message = nil
-      fireable.until_fired rep_socket do |message|
-        actual_message = message
-      end
-      actual_message.should eq :hi!
+    fireable.until_fired client_socket do |message|
+      called = true
     end
-
-    it "exits cleanly when sent the die message" do
-      Flatware.should_receive :close
-      called = false
-      kill_socket.send 'seppuku'
-      fireable.until_fired rep_socket do |message|
-        called = true
-      end
-      called.should_not be
-    end
+    called.should_not be
   end
 
   it 'exits cleanly when employment is checked' do
-    client_socket = double 'client socket', recv: 'message'
-    controll_socket = double 'controll socket', recv: 'seppuku', setsockopt: nil
-    poller = double 'poller'
     poller.stub(:each).and_yield(client_socket)
     Flatware.should_receive :close
-    Flatware::Poller.stub new: poller
-    Flatware.should_receive(:socket).and_return controll_socket
     fireable.until_fired client_socket do
       fireable.ensure_employment!
     end

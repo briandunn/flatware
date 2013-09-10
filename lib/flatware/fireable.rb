@@ -4,7 +4,7 @@ require 'flatware/poller'
 module Flatware
   Fired = Class.new(Error)
   class Fireable
-    PORT = 'ipc://die'
+    PORT = 'tcp://127.0.0.1:7892'
 
     def self.bind
       @kill = Flatware.socket(ZMQ::PUB, bind: PORT)
