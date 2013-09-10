@@ -22,7 +22,7 @@ describe Flatware::Socket do
       end
 
       it 'returns nil when there is no message' do
-        FFI.stub errno: 35
+        FFI.stub errno: Errno::EAGAIN::Errno
         socket.recv(ZMQ::NonBlocking).should be_nil
       end
     end
