@@ -1,7 +1,6 @@
 require 'ffi-rzmq'
 
 module Flatware
-  EAGAIN = 35
   Error = Class.new StandardError
 
   Job = Struct.new :id, :args do
@@ -37,6 +36,16 @@ module Flatware
     @context ||= Context.new
   end
 
+  def raise_errno
+    raise error_for_errno
+  end
+
+  def error_for_errno
+    Errno.constants.map do |c|
+      {Errno.const_get(c).const_get(:Errno) => Errno.const_get(c) }
+    end.reduce(:merge)[FFI.errno] || Error
+  end
+
   class Context
     attr_reader :sockets, :c
 
@@ -60,13 +69,13 @@ module Flatware
 
     def close
       sockets.each &:close
-      raise(Error, ZMQ::Util.error_string, caller) unless c.terminate == 0
+      raise_errno unless c.terminate == 0
       Flatware.log "terminated context"
     end
   end
 
   class Socket
-    attr_reader :s
+    attr_reader :s, :endpoint
     def initialize(socket)
       @s = socket
     end
@@ -75,41 +84,50 @@ module Flatware
       s.setsockopt(*args)
     end
 
-    def send(message)
-      result = s.send_string(Marshal.dump(message))
-      raise Error, ZMQ::Util.error_string, caller if result == -1
-      Flatware.log "#@type #@port send #{message}"
+    def send(message, flag=0)
+      result = s.send_string(Marshal.dump(message), flag)
+      return message if non_blocking?(result, flag)
+      Flatware.log "#@type #@endpoint send #{message}"
       message
     end
 
-    def connect(port)
+    def connect(endpoint)
       @type = 'connected'
-      @port = port
-      raise(Error, ZMQ::Util.error_string, caller) unless s.connect(port) == 0
-      Flatware.log "connect #@port"
+      @endpoint = endpoint
+      raise_errno unless s.connect(endpoint) == 0
+      Flatware.log "connect #@endpoint"
     end
 
-    def bind(port)
+    def bind(endpoint)
       @type = 'bound'
-      @port = port
-      raise(Error, ZMQ::Util.error_string, caller) unless s.bind(port) == 0
-      Flatware.log "bind #@port"
+      @endpoint = endpoint
+      raise_errno unless s.bind(endpoint) == 0
+      Flatware.log "bind #@endpoint"
     end
 
     def close
       setsockopt ZMQ::LINGER, 0
-      raise(Error, ZMQ::Util.error_string, caller) unless s.close == 0
-      Flatware.log "close #@type #@port"
+      raise_errno unless s.close == 0
+      Flatware.log "close #@type #@endpoint"
     end
 
     def recv(flag=0)
       message = ''
       result = s.recv_string(message, flag)
-      return if result == -1 && FFI.errno == EAGAIN && flag == ZMQ::NonBlocking
-      raise(Error, ZMQ::Util.error_string, caller) if result == -1
+      return if non_blocking?(result, flag)
       message = Marshal.load message
-      Flatware.log "#@type #@port recv #{message}"
+      Flatware.log "#@type #@endpoint recv #{message}"
       message
+    end
+
+    private
+
+    def raise_errno
+      Flatware.raise_errno
+    end
+
+    def non_blocking?(result, flag)
+      Flatware.error_for_errno == Errno::EAGAIN && flag == ZMQ::NonBlocking or raise_errno if result == -1
     end
   end
 end
