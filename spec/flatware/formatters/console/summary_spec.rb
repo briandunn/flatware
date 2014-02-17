@@ -9,7 +9,7 @@ describe Flatware::Formatters::Console::Summary do
   let(:failed2) { double 'failed step 2', status: :failed, failed?: true, exception: exception, file_colon_line: "features/failed_2.feature:8", name: "failed_2", failed_outside_step?: false }
 
   let(:exception) do
-    stub backtrace: %w'backtrace', message: 'message', class: 'class'
+    double 'Exception',  backtrace: %w'backtrace', message: 'message', class: 'class'
   end
 
   let(:steps) { [] }
