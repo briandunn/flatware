@@ -27,17 +27,10 @@ module Flatware
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
-      Process.setpgrp
-      Flatware.verbose = options[:log]
-      log "flatware options:", options
-      log "cucumber options:", cucumber_args
       jobs = Cucumber.extract_jobs_from_args cucumber_args
-      Worker.spawn workers, options['dispatch-endpoint'], options['sink-endpoint']
-      Dispatcher.spawn jobs, options['dispatch-endpoint']
-      $0 = 'flatware sink'
-      passed = Sink.start_server jobs, Formatters.load_by_name(options['formatters']), options['sink-endpoint'], fail_fast: options['fail-fast']
-      Process.waitall
-      exit passed ? 0 : 1
+      Worker.spawn workers, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
+      formatter = Formatters.load_by_name(:cucumber, options['formatters'])
+      start_sink jobs, formatter
     end
 
     worker_option
@@ -65,6 +58,16 @@ module Flatware
     end
 
     private
+
+    def start_sink(jobs, formatter)
+     $0 = 'flatware sink'
+      Process.setpgrp
+      Flatware.verbose = options[:log]
+      Dispatcher.spawn jobs, options['dispatch-endpoint']
+      passed = Sink.start_server jobs, formatter, options['sink-endpoint'], fail_fast: options['fail-fast']
+      Process.waitall
+      exit passed ? 0 : 1
+    end
 
     def cucumber_args
       if index = ARGV.index('cucumber')

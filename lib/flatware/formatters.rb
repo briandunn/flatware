@@ -1,9 +1,10 @@
 module Flatware
   module Formatters
-    def self.load_by_name(names)
+    def self.load_by_name(runner, names)
       formatters = names.map do |name|
-        require "flatware/formatters/#{name}"
-        klass = const_get name.capitalize
+        require "flatware/formatters/#{runner}/#{name}"
+        namespace = const_get({cucumber: 'Cucumber'}.fetch(runner))
+        klass = namespace.const_get name.capitalize
         klass.new $stdout, $stderr
       end
       Broadcaster.new formatters

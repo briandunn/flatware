@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'flatware/formatters/console/summary'
+require 'flatware/formatters/cucumber/console/summary'
 
-describe Flatware::Formatters::Console::Summary do
+describe Flatware::Formatters::Cucumber::Console::Summary do
   let(:summary) { described_class.new steps, scenarios, io }
   let(:io) { StringIO.new }
   let(:passed) { double 'passed step', status: :passed, failed?: false, failed_outside_step?: false }
