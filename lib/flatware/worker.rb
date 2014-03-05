@@ -27,7 +27,13 @@ module Flatware
       fireable.until_fired task do |job|
         job.worker = id
         sink.started job
-        runner.run job.id, job.args
+        begin
+          runner.run job.id, job.args
+        rescue Errno::ENOENT
+          job.failed = true
+          sink.finished job
+          raise
+        end
         sink.finished job
         report_for_duty
       end

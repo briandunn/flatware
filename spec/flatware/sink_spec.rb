@@ -39,7 +39,7 @@ describe Flatware::Sink do
     context 'and a Result object is received' do
       it 'prints the result' do
         result    = double
-        job       = double
+        job       = double failed?: false
         formatter = double 'Formatter', summarize: nil, jobs: nil
         socket    = double 'Socket'
         socket.stub(:recv).and_return [:progress, result], [:finished, job]
@@ -54,15 +54,16 @@ describe Flatware::Sink do
   end
 
   describe '#start_server' do
+    let(:job) { double failed?: false }
     let(:formatter) { double 'Formatter', summarize: nil, jobs: nil, finished: nil }
     before do
       Flatware::Fireable.stub(kill: nil, bind: nil)
       socket = double 'Socket'
-      socket.stub(:recv).and_return [:checkpoint, checkpoint], [:finished, :job]
+      socket.stub(:recv).and_return [:checkpoint, checkpoint], [:finished, job]
       Flatware.stub socket: socket
     end
 
-    subject { described_class.start_server [:job], formatter, endpoint }
+    subject { described_class.start_server [job], formatter, endpoint }
 
     context 'when there are failures' do
       let(:checkpoint) { double 'Checkpoint', steps: [], scenarios: [], failures?: true }

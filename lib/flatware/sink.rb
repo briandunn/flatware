@@ -50,12 +50,16 @@ module Flatware
           end
         end
         checkpoint_handler.summarize
-        !checkpoint_handler.had_failures?
+        !failures?
       rescue Error => e
         raise unless e.message == "Interrupted system call"
       end
 
       private
+
+      def failures?
+        checkpoint_handler.had_failures? || completed_jobs.any?(&:failed?)
+      end
 
       def fail_fast?
         @fail_fast
