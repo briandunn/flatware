@@ -1,6 +1,6 @@
 require 'cucumber/formatter/console'
 require 'flatware/formatters/cucumber/console'
-require 'flatware/checkpoint'
+require 'flatware/cucumber/checkpoint'
 
 module Flatware::Formatters::Cucumber
   class Console

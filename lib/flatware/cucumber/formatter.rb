@@ -1,4 +1,4 @@
-require 'flatware/checkpoint'
+require 'flatware/cucumber/checkpoint'
 require 'flatware/scenario_decorator'
 require 'flatware/sink'
 require 'ostruct'
