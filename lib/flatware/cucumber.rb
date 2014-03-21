@@ -1,5 +1,7 @@
 require 'cucumber'
 require 'flatware/cucumber/runtime'
+require 'flatware/cucumber/checkpoint'
+
 module Flatware
   module Cucumber
 

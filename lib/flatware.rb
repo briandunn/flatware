@@ -1,5 +1,4 @@
 module Flatware
-  require 'flatware/checkpoint'
   require 'flatware/checkpoint_handler'
   require 'flatware/processor_info'
   require 'flatware/cli'
