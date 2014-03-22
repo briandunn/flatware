@@ -1,5 +1,3 @@
-require 'flatware/cucumber/checkpoint'
-require 'flatware/scenario_decorator'
 require 'flatware/sink'
 require 'ostruct'
 module Flatware

@@ -27,6 +27,7 @@ module Flatware
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
+      require 'flatware/cucumber'
       jobs = Cucumber.extract_jobs_from_args cucumber_args
       Worker.spawn workers, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
       formatter = Formatters.load_by_name(:cucumber, options['formatters'])

@@ -1,4 +1,3 @@
-require 'flatware/scenario_result'
 module Flatware
   module Cucumber
     class Checkpoint
