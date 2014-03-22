@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Flatware::ScenarioDecorator do
+describe Flatware::Cucumber::ScenarioDecorator do
   let :scenario do
     double 'Scenario', file_colon_line: "features/file_line.feature:3",
       name: "scenario_name", status: :passed, exception: 'scenario exception'
@@ -17,7 +17,7 @@ describe Flatware::ScenarioDecorator do
   end
 
   context 'with scenario' do
-    subject { Flatware::ScenarioDecorator.new(scenario) }
+    subject { described_class.new(scenario) }
     its(:file_colon_line) { should eq scenario.file_colon_line }
     its(:name) { should eq scenario.name }
     its(:status) { should eq scenario.status }
@@ -25,7 +25,7 @@ describe Flatware::ScenarioDecorator do
   end
 
   context 'with example row' do
-    subject { Flatware::ScenarioDecorator.new(example_row) }
+    subject { described_class.new(example_row) }
     its(:file_colon_line) { should eq example_row.scenario_outline.file_colon_line }
     its(:name) { should eq example_row.scenario_outline.name }
     its(:status) { should eq example_row.status }

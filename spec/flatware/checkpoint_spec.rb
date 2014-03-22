@@ -1,5 +1,5 @@
-require 'flatware/checkpoint'
-describe Flatware::Checkpoint do
+require 'spec_helper'
+describe Flatware::Cucumber::Checkpoint do
   let(:checkpoint) { described_class.new [], scenarios }
 
   describe "#failures?" do
