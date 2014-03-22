@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Flatware::StepResult do
+describe Flatware::Cucumber::StepResult do
   context 'with an exception' do
     let(:status) { :failed }
     let(:exception) { Exception.new }

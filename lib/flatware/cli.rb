@@ -27,6 +27,7 @@ module Flatware
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
+      require 'flatware/cucumber'
       jobs = Cucumber.extract_jobs_from_args cucumber_args
       Flatware.verbose = options[:log]
       Worker.spawn [workers, jobs.size].min, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']

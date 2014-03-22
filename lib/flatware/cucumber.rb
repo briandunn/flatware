@@ -1,6 +1,10 @@
 require 'cucumber'
 require 'flatware/cucumber/runtime'
 require 'flatware/cucumber/checkpoint'
+require 'flatware/cucumber/result'
+require 'flatware/cucumber/scenario_decorator'
+require 'flatware/cucumber/scenario_result'
+require 'flatware/cucumber/step_result'
 
 module Flatware
   module Cucumber
