@@ -9,7 +9,8 @@ RSpec::Core::RakeTask.new :spec do |spec|
 end
 
 Cucumber::Rake::Task.new :cucumber do |task|
-  task.cucumber_opts = %w[--tags ~@wip -f progress]
+  task.cucumber_opts = %w[--tags ~@wip --format progress]
+  task.fork = false
 end
 
 desc "generate connection diagram"
@@ -17,4 +18,4 @@ task :diagram do
   system "dot connections.dot -Tpng > connections.png"
 end
 
-task :default => [:spec, :cucumber]
+task default: [:spec, :cucumber]
