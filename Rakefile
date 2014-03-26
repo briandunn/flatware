@@ -20,4 +20,4 @@ task :diagram do
   system "dot connections.dot -Tpng > connections.png"
 end
 
-task :default => [:spec, :cucumber]
+task default: [:spec, :cucumber]
