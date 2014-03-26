@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.email = "brian@hashrocket.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.md"
   ]
   s.files = `git ls-files -- lib/*`.split "\n"
   s.homepage = "http://github.com/briandunn/flatware"
