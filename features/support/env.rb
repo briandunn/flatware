@@ -24,6 +24,10 @@ World(Module.new do
   def travis?
     ENV['TRAVIS'] == 'true'
   end
+
+  def forked?
+    !last_exit_status.nil?
+  end
 end)
 
 Before do
@@ -49,9 +53,13 @@ After do |scenario|
 end
 
 After '~@non-zero' do |scenario|
-  scenario.status == :passed and assert_exit_status 0
+  if forked? and scenario.status == :passed
+    assert_exit_status 0
+  end
 end
 
 After '@non-zero' do |scenario|
-  scenario.status == :passed and assert_exit_status 1
+  if forked? and scenario.status == :passed
+     assert_exit_status 1
+  end
 end
