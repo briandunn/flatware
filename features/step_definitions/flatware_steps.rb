@@ -21,6 +21,10 @@ module Support
     RB
   end
 
+  def flatware_process
+    processes.find {|name, _| name.include? 'flatware' }.last
+  end
+
   def duration(&block)
     started_at = Time.now
     yield
@@ -93,7 +97,7 @@ Then /^the suite finishes in less than (#{A.number}) seconds$/ do |seconds|
 end
 
 Then /^the output contains the following:$/ do |string|
-  assert_partial_output string, all_output
+  assert_partial_output string, flatware_process.output
 end
 
 Given 'the following scenario:' do |scenario|
