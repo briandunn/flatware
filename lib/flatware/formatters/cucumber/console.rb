@@ -26,7 +26,9 @@ module Flatware::Formatters::Cucumber
       out.print format result.progress
     end
 
-    def summarize(steps, scenarios)
+    def summarize(checkpoints)
+      steps = checkpoints.flat_map(&:steps)
+      scenarios = checkpoints.flat_map(&:scenarios)
       Summary.new(steps, scenarios, out).summarize
     end
 
