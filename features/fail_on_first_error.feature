@@ -11,6 +11,6 @@ Feature: fail on first error
 
   Scenario: failing fast is faster
     Given more slow failing features than workers
-    When I time the suite with fail-fast
-    And I time the suite with flatware
+    When I time the cucumber suite with fail-fast
+    And I time the cucumber suite with flatware
     Then fail-fast is the fastest

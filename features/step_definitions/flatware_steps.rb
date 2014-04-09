@@ -64,7 +64,7 @@ end
 
 runners = Regexp.union %w[cucumber flatware fail-fast]
 
-When /^I time the suite with (#{runners})$/ do |runner|
+When /^I time the cucumber suite with (#{runners})$/ do |runner|
   @durations ||= {}
   commands = {
     'cucumber'  => 'cucumber --format progress',
