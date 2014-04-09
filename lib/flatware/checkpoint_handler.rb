@@ -24,21 +24,11 @@ module Flatware
     end
 
     def summarize
-      formatter.summarize(steps, scenarios)
+      formatter.summarize(checkpoints)
     end
 
     def had_failures?
       checkpoints.any? &:failures?
-    end
-
-    private
-
-    def steps
-      checkpoints.map(&:steps).flatten
-    end
-
-    def scenarios
-      checkpoints.map(&:scenarios).flatten
     end
   end
 end
