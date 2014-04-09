@@ -25,6 +25,16 @@ module Support
     processes.find {|name, _| name.include? 'flatware' }.last
   end
 
+  def run_simple(*args)
+    begin
+      super
+    rescue ChildProcess::TimeoutError => e
+      terminate_processes!
+      puts all_output
+      raise
+    end
+  end
+
   def duration(&block)
     started_at = Time.now
     yield
