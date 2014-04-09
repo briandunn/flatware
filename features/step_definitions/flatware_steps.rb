@@ -121,6 +121,10 @@ Given 'the following scenario:' do |scenario|
   FEATURE
 end
 
+Given 'the following spec:' do |spec|
+  write_file 'spec/spec_spec.rb', spec
+end
+
 Then 'the output contains a backtrace' do
 
   trace = <<-TXT.gsub(/^ +/, '')
