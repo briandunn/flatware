@@ -35,6 +35,20 @@ module Flatware
     end
 
     worker_option
+    method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
+    method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
+    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
+    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+    desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
+    def rspec
+      require 'flatware/rspec'
+      jobs = RSpec.extract_jobs_from_args []
+      Worker.spawn workers, RSpec, options['dispatch-endpoint'], options['sink-endpoint']
+      formatter = Formatters.load_by_name(:rspec, options['formatters'])
+      start_sink jobs, formatter
+    end
+
+    worker_option
     desc "fan [COMMAND]", "executes the given job on all of the workers"
     def fan(*command)
       Flatware.verbose = options[:log]

@@ -28,7 +28,7 @@ module Flatware
         job.worker = id
         sink.started job
         begin
-          runner.run job.id, job.args
+          runner.run job
         rescue Errno::ENOENT
           job.failed = true
           sink.finished job

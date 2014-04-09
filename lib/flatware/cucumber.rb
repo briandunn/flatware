@@ -21,8 +21,8 @@ module Flatware
       @jobs = config.feature_files.map { |file| Job.new file, options }
     end
 
-    def run(feature_files=[], options=[])
-      runtime.run feature_files, options
+    def run(job)
+      runtime.run job.id, job.args
     end
 
     def runtime

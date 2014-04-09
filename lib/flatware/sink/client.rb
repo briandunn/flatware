@@ -9,16 +9,12 @@ module Flatware
         @socket = Flatware.socket ZMQ::PUSH, connect: sink_endpoint
       end
 
-      %w[finished started progress checkpoint].each do |message|
-        define_method message do |content|
-          push [message.to_sym, content]
-        end
+      def method_missing(message, content)
+         push message.to_sym, content
       end
 
-      private
-
-      def push(message)
-        @socket.send message
+      def push(message, content=nil)
+        @socket.send [message, content].compact
       end
     end
   end

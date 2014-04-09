@@ -66,7 +66,17 @@ Given 'a sleepy cucumber suite' do
   step 'a cucumber suite with two features that each sleep for 1 second'
 end
 
-runners = Regexp.union %w[cucumber flatware fail-fast]
+Given 'a sleepy rspec suite' do
+  Flatware::ProcessorInfo.count.times do |core|
+    write_file "spec/sleep_#{core}_spec.rb", <<-RB
+      describe "processor #{core}" do
+        it { sleep(0.5).should be }
+      end
+    RB
+  end
+end
+
+runners = Regexp.union %w[rspec cucumber flatware fail-fast]
 
 When /^I time the cucumber suite with (#{runners})$/ do |runner|
   @durations ||= {}
@@ -76,7 +86,18 @@ When /^I time the cucumber suite with (#{runners})$/ do |runner|
     'flatware'  => "flatware -l -w #{max_workers}"
   }
   @durations[runner] = duration do
-    run_simple commands[runner], false
+    run_simple commands.fetch(runner), false
+  end
+end
+
+When /^I time the rspec suite with (#{runners})$/ do |runner|
+  @durations ||= {}
+  commands = {
+    'rspec'     => 'rspec --format progress',
+    'flatware'  => "flatware rspec -l -w #{max_workers}"
+  }
+  @durations[runner] = duration do
+    run_simple commands.fetch(runner), false
   end
 end
 

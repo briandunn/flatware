@@ -1,4 +1,5 @@
 require 'spec_helper'
+
 describe Flatware::Cucumber::Checkpoint do
   let(:checkpoint) { described_class.new [], scenarios }
 
