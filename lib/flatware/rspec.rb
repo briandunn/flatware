@@ -1,6 +1,8 @@
 require 'rspec/core'
-require 'flatware/rspec/formatter'
+require 'rspec/expectations'
 require 'flatware/formatters/rspec/console'
+require 'flatware/rspec/formatter'
+require 'flatware/rspec/summary'
 
 module Flatware
   module RSpec

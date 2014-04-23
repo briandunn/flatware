@@ -111,6 +111,13 @@ Then /^the output contains the following:$/ do |string|
   assert_partial_output string, flatware_process.output
 end
 
+Then /^the output contains the following lines:$/ do |string|
+  normalize_space = ->(string) { string.split("\n").map(&:strip).join("\n") }
+  expected_lines = normalize_space[string]
+  actual_lines = normalize_space[unescape(flatware_process.output)]
+  actual_lines.should include expected_lines
+end
+
 Given 'the following scenario:' do |scenario|
   create_flunk_step_definition
 
