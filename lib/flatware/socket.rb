@@ -54,7 +54,6 @@ module Flatware
         sockets.push socket
         if port = options[:connect]
           socket.connect port
-          sleep 0.05
         end
         if port = options[:bind]
           socket.bind port
