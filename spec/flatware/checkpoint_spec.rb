@@ -17,7 +17,7 @@ describe Flatware::Cucumber::Checkpoint do
         ]
       end
 
-      it { should be_false }
+      it { should_not be }
     end
 
     context "when any scenarios failed" do
@@ -32,7 +32,7 @@ describe Flatware::Cucumber::Checkpoint do
         ]
       end
 
-      it { should be_true }
+      it { should be }
     end
   end
 end

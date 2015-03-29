@@ -92,8 +92,8 @@ When /^I time the cucumber suite with (#{runners})$/ do |runner|
 end
 
 Then /^(#{runners}) is the fastest$/ do |runner|
-  @durations.should have_at_least(2).values
-  @durations[runner].should == @durations.values.min
+  expect(@durations.size).to be >= 2
+  expect(@durations[runner]).to eq @durations.values.min
 end
 
 When /^I run flatware(?: with "([^"]+)")?$/ do |args|
@@ -183,7 +183,7 @@ end
 
 Then 'the failure list only includes one feature' do
   all_output.match /Failing Scenarios:\n(.+?)(?=\n\n)/m
-  $1.split("\n").should have(1).feature
+  expect($1.split("\n").size).to eq 1
   assert_exit_status 1
 end
 
