@@ -1,4 +1,5 @@
-require 'flatware/cucumber/formatter'
+require 'flatware'
+require 'flatware/cucumber'
 
 describe Flatware::Cucumber::Formatter do
 
@@ -18,20 +19,23 @@ describe Flatware::Cucumber::Formatter do
 
   context 'when an exception happens in a step' do
     it 'does not mark the scenario as failing outside of a step' do
+      checkpoint = nil
+      allow(sink).to receive(:checkpoint) {|cp| checkpoint = cp }
+
       formatter.before_step
       formatter.exception(exception, :failed)
       formatter.after_step
 
-      sink.should_receive(:checkpoint).with do |checkpoint|
-        checkpoint.scenarios.select(&:failed_outside_step?).size == 0
-      end
-
       formatter.after_features
+
+      expect(checkpoint.scenarios.select(&:failed_outside_step?).size).to eq 0
     end
   end
 
   context 'when an exception happens in an outline table row' do
     it 'does not mark the scenario as failing outside of a step' do
+      checkpoint = nil
+      allow(sink).to receive(:checkpoint) {|cp| checkpoint = cp }
 
       formatter.before_outline_table
       formatter.before_table_cell
@@ -39,23 +43,22 @@ describe Flatware::Cucumber::Formatter do
       formatter.after_table_cell
       formatter.after_outline_table
 
-      sink.should_receive(:checkpoint).with do |checkpoint|
-        checkpoint.scenarios.select(&:failed_outside_step?).size == 0
-      end
-
       formatter.after_features
+
+      expect(checkpoint.scenarios.select(&:failed_outside_step?).size).to eq 0
     end
   end
 
   context 'when an exception happens outside a step' do
     it 'marks the scenario as failing outside of a step' do
+      checkpoint = nil
+      allow(sink).to receive(:checkpoint) {|cp| checkpoint = cp }
+
       formatter.exception(exception, :failed)
 
-      sink.should_receive(:checkpoint).with do |checkpoint|
-        checkpoint.scenarios.select(&:failed_outside_step?).size == 1
-      end
-
       formatter.after_features
+
+      expect(checkpoint.scenarios.select(&:failed_outside_step?).size).to eq 1
     end
   end
 end

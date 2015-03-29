@@ -83,13 +83,13 @@ describe Flatware::Sink do
     context 'when there are failures' do
       let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: true }
 
-      it { should be_false }
+      it { should_not be }
     end
 
     context 'when everything passes' do
       let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: false }
 
-      it { should be_true }
+      it { should be }
     end
   end
 end
