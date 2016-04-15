@@ -10,15 +10,14 @@ describe Flatware::Sink do
   end
 
   context 'when I have work to do, but am interupted' do
-    let(:job) { double 'job', id: 'int.feature' }
-
     attr_reader :child_io
+    let(:job) { double 'job', id: 'int.feature' }
+    let(:formatter) { double 'Formatter', summarize_remaining: nil, summarize: nil, jobs: nil }
 
     before do
       # disable rspec trap
       orig = trap 'INT', 'DEFAULT'
-
-      unless @child_io = IO.popen("-")
+      unless @child_io = IO.popen(?-)
         allow(formatter).to receive(:summarize_remaining) { puts 'signal was captured' }
         described_class.start_server jobs: [job], formatter: formatter, sink: sink_endpoint, dispatch: dispatch_endpoint
       end

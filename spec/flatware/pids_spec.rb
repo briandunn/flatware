@@ -10,7 +10,7 @@ describe 'pids' do
         $0 = "flatware child"
         sleep 1
       }
-      Flatware.pids_of_group(group_leader_pid).should include group_leader_pid, child_pid
+      expect(Flatware.pids_of_group(group_leader_pid)).to include group_leader_pid, child_pid
     end
   end
 end

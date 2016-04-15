@@ -16,7 +16,7 @@ describe Flatware::Worker do
       task.send 'seppuku'
 
       waitall
-      child_pids.should_not include pid
+      expect(child_pids).to_not include pid
     end
   end
 end

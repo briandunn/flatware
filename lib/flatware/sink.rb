@@ -19,6 +19,7 @@ module Flatware
 
       def start
         trap 'INT' do
+          puts "Interrupted!"
           checkpoint_handler.summarize
           summarize_remaining
           exit 1

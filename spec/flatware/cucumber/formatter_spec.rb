@@ -9,7 +9,7 @@ describe Flatware::Cucumber::Formatter do
 
   before do
     stub_const 'Flatware::Sink', double('Sink', client: sink)
-      mother.stub(:scenarios).and_return [],
+      allow(mother).to receive(:scenarios).and_return [],
         [double('Scenario', file_colon_line: 'file:11', status: nil, exception: nil, name: nil)]
 
     formatter.scenario_name nil, nil, 'file:11'

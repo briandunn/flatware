@@ -25,4 +25,4 @@ Feature: Survives weird uses of gherkin
     @non-zero
   Scenario: fail with feedback when features do not exist
     When I run flatware
-    Then the exit status should be 1
+    Then the exit status should not be 0

@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.version = Flatware::VERSION
   s.authors = ["Brian Dunn"]
   s.date = Date.today.to_s
-  s.summary = "A distributed cucumber runner"
-  s.description = "A distributed cucumber runner"
+  s.summary = "A distributed cucumber and rspec runner"
+  s.description = "A distributed cucumber and rspec runner"
   s.email = "brian@hashrocket.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency %<ffi-rzmq>, '~> 2.0'
   s.add_dependency %<thor>, '~> 0.13'
   s.add_dependency %<cucumber>, ['>= 1.3.0', '< 2.0']
-  s.add_development_dependency %<aruba>, '~> 0.5.1'
+  s.add_dependency %<rspec>, '>= 3.4'
+  s.add_development_dependency %<aruba>, '~> 0.14'
   s.add_development_dependency %<rake>, '~> 10.1.0'
-  s.add_development_dependency %<rspec>, '~> 3.2.0'
 end

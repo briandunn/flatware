@@ -21,8 +21,12 @@ module Support
     RB
   end
 
+  def all_output
+    all_commands.map(&:output).join
+  end
+
   def flatware_process
-    processes.find {|name, _| name.include? 'flatware' }.last
+    all_commands.find {|command| command.commandline.include? 'flatware' }
   end
 
   def run_simple(*args)
@@ -45,7 +49,7 @@ end
 World(Support)
 
 Given 'I am using a multi core machine' do
-  Flatware::ProcessorInfo.count.should > 1
+  expect(Flatware::ProcessorInfo.count).to be > 1
 end
 
 Given /^a cucumber suite with two features that each sleep for (#{A.number}) seconds?$/ do |sleepyness|
@@ -104,18 +108,18 @@ When /^I run flatware(?: with "([^"]+)")?$/ do |args|
 end
 
 Then /^the suite finishes in less than (#{A.number}) seconds$/ do |seconds|
-  @duration.should < seconds
+  expect(@duration).to be < seconds
 end
 
 Then /^the output contains the following:$/ do |string|
-  assert_partial_output string, flatware_process.output
+  expect(flatware_process).to have_output Regexp.new Regexp.escape string
 end
 
 Then /^the output contains the following lines:$/ do |string|
   normalize_space = ->(string) { string.split("\n").map(&:strip).join("\n") }
   expected_lines = normalize_space[string]
-  actual_lines = normalize_space[unescape(flatware_process.output)]
-  actual_lines.should include expected_lines
+  actual_lines = normalize_space[sanitize_text(flatware_process.output)]
+  expect(actual_lines).to include expected_lines
 end
 
 Given 'the following scenario:' do |scenario|
@@ -138,13 +142,13 @@ Then 'the output contains a backtrace' do
     features/flunk.feature:4:in `Given flunk'
   TXT
 
-  assert_partial_output trace, all_output
+  expect(flatware_process).to have_output Regexp.new Regexp.escape trace
 end
 
 Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count, thing|
   match = all_output.match(/^(?<count>\d+) #{thing}s?/)
   expect(match).to(be, "No match found for output #{all_output}")
-  match[:count].to_i.should eq count
+  expect(match[:count].to_i).to eq count
 end
 
 Then 'I see that not all scenarios were run' do
@@ -154,8 +158,8 @@ end
 
 Then /^I see that (#{A.number}) (scenario|step)s? failed$/ do |count, thing|
   match = all_output.match /failed (?<count>\d+) #{thing}s?/
-  match.should be
-  match[:count].to_i.should eq count
+  expect(match).to be
+  expect(match[:count].to_i).to eq count
 end
 
 Given /^a cucumber suite with two features that each fail$/ do
@@ -171,24 +175,27 @@ Given /^a cucumber suite with two features that each fail$/ do
 end
 
 Then 'the output contains a summary of failing features' do
-
   trace = <<-TXT.gsub /^ +/, ''
     Failing Scenarios:
     features/failing_feature_0.feature:3 # Scenario: flunk
     features/failing_feature_1.feature:3 # Scenario: flunk
   TXT
 
-  assert_partial_output trace, all_output
+  expect(flatware_process).to have_output Regexp.new Regexp.escape trace
+end
+
+Then 'I see log messages' do
+  expect(flatware_process).to have_output Regexp.new 'flatware sink bind'
 end
 
 Then 'the failure list only includes one feature' do
   all_output.match /Failing Scenarios:\n(.+?)(?=\n\n)/m
   expect($1.split("\n").size).to eq 1
-  assert_exit_status 1
+  expect(all_commands.map(&:exit_status)).to eq [1]
 end
 
 Given /^an? (after|before) hook that will raise on (@.+)$/ do |side, tag|
   write_file "features/support/#{rand}.rb", <<-RB
-    #{side.capitalize}('#{tag}') { 1.should eq 2 }
+    #{side.capitalize}('#{tag}') { expect(1).to eq 2 }
   RB
 end
