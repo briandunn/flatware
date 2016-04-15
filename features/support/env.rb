@@ -13,7 +13,7 @@ require 'rspec/expectations'
 require 'flatware/processor_info'
 
 require File.join(Pathname.new(__FILE__).dirname, 'flatware/spawn_process')
-Aruba.process = Flatware::SpawnProcess
+# Aruba.process = Flatware::SpawnProcess
 
 World(Module.new do
   def max_workers
@@ -23,10 +23,6 @@ World(Module.new do
 
   def travis?
     ENV['TRAVIS'] == 'true'
-  end
-
-  def forked?
-    !last_exit_status.nil?
   end
 end)
 
@@ -41,8 +37,8 @@ Before do
 end
 
 After do |scenario|
-  if processes.count > 0
-    zombie_pids = Flatware.pids_of_group(processes[0][1].pid)
+  if all_commands.count > 0
+    zombie_pids = Flatware.pids_of_group(all_commands[0].pid)
 
     (Flatware.pids - [$$]).each do |pid|
       Process.kill 6, pid
@@ -52,14 +48,21 @@ After do |scenario|
   end
 end
 
+After do
+  if travis?
+    system 'flatware clear'
+    Process.waitall
+  end
+end
+
 After '~@non-zero' do |scenario|
-  if forked? and scenario.status == :passed
-    assert_exit_status 0
+  if flatware_process and scenario.status == :passed
+    expect(flatware_process.exit_status).to eq 0
   end
 end
 
 After '@non-zero' do |scenario|
-  if forked? and scenario.status == :passed
-     assert_exit_status 1
+  if flatware_process and scenario.status == :passed
+    expect(flatware_process.exit_status).to eq 1
   end
 end
