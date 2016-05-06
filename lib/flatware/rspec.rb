@@ -18,6 +18,7 @@ module Flatware
 
     def self.run(job, options={})
       ::RSpec::Core::Runner.run(%w[--format Flatware::RSpec::Formatter] + [job], $stderr, $stdout)
+      ::RSpec.reset
     end
   end
 end

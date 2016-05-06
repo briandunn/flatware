@@ -9,4 +9,8 @@ Flatware::RSpec::Summary = Struct.new(:duration, :example_count, :failure_count,
   def failed_examples
 
   end
+
+  def fully_formatted
+    "fully formatted!"
+  end
 end
