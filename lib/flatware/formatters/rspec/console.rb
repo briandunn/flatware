@@ -15,13 +15,9 @@ module Flatware::Formatters::RSpec
     end
 
     def summarize(checkpoints)
-      summary = checkpoints.map(&:summary).reduce :+
-      formatter.dump_summary *summary.to_a
-      formatter.failed_examples.clear
-      for example in checkpoints.flat_map(&:failed_examples)
-        formatter.failed_examples << example
-      end
-      formatter.dump_failures
+      result = checkpoints.reduce :+
+      formatter.dump_summary result.summary
+      formatter.dump_failures result
     end
 
     private
