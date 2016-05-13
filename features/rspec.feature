@@ -1,3 +1,4 @@
+@wip
 Feature: rspec task
 
   @non-zero
@@ -5,7 +6,7 @@ Feature: rspec task
     Given the following spec:
     """
     describe "fail" do
-      it { true.should eq false }
+      it { expect(true).to eq false }
     end
     """
     When I run `flatware rspec`
@@ -22,7 +23,7 @@ Feature: rspec task
 Failures:
 
   1) fail should eq false
-     Failure/Error: it { true.should eq false }
+     Failure/Error: it { expect(true).to eq false }
 
        expected: false
             got: true

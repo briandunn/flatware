@@ -20,7 +20,7 @@ module Flatware
       config = ::Cucumber::Cli::Configuration.new(out_stream, error_stream)
       config.parse! args
       options = raw_args - args
-      @jobs = config.feature_files.map { |file| Job.new file, options }
+      @jobs = config.feature_files.map { |file| Job.new file, options }.to_a
     end
 
     def run(feature_files=[], options=[])
