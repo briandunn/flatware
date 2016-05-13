@@ -101,7 +101,8 @@ Then /^(#{runners}) is the fastest$/ do |runner|
 end
 
 When /^I run flatware(?: with "([^"]+)")?$/ do |args|
-  command = (['flatware', '-w', max_workers] + [args]).compact.join(" ")
+  command = ['flatware', args, '-w', max_workers].flatten.compact.join(" ")
+
   @duration = duration do
     run_simple command
   end

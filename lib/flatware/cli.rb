@@ -3,6 +3,8 @@ require 'flatware/pids'
 module Flatware
   class CLI < Thor
 
+    default_command :cucumber
+
     def self.processors
       @processors ||= ProcessorInfo.count
     end
@@ -13,22 +15,15 @@ module Flatware
 
     class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
 
-    default_task :default
-    worker_option
-    desc "default [FLATWARE_OPTS]", "parallelizes cucumber with default arguments"
-    def default(*)
-      invoke :cucumber
-    end
-
     worker_option
     method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
     method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
-    desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
-    def cucumber(*)
+    desc "cucumber [FLATWARE_OPTS] [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
+    def cucumber(*args)
       require 'flatware/cucumber'
-      jobs = Cucumber.extract_jobs_from_args cucumber_args
+      jobs = Cucumber.extract_jobs_from_args args
       Flatware.verbose = options[:log]
       Worker.spawn [workers, jobs.size].min, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
       formatter = Formatters.load_by_name(:cucumber, options['formatters'])
@@ -81,14 +76,6 @@ module Flatware
       passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], fail_fast: options['fail-fast']
       Process.waitall
       exit passed ? 0 : 1
-    end
-
-    def cucumber_args
-      if index = ARGV.index('cucumber')
-        ARGV[index + 1..-1]
-      else
-        []
-      end
     end
 
     def log(*args)
