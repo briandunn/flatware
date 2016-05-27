@@ -36,16 +36,15 @@ Before do
   end
 end
 
-After do
-  if travis?
-    system 'flatware clear'
-    Process.waitall
-  end
-end
-
 After do |scenario|
   if processes.count > 0
-    (Flatware.pids_of_group(processes[0][1].pid)).should have(0).zombies
+    zombie_pids = Flatware.pids_of_group(processes[0][1].pid)
+
+    (Flatware.pids - [$$]).each do |pid|
+      Process.kill 6, pid
+    end
+    Process.waitall
+    expect(zombie_pids.size).to eq 0
   end
 end
 
