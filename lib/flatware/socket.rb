@@ -108,16 +108,19 @@ module Flatware
     end
 
     def close
-      setsockopt ZMQ::LINGER, 0
       raise(Error, ZMQ::Util.error_string, caller) unless s.close == 0
       Flatware.log "close #@type #@port"
     end
 
-    def recv
+    def recv(block=true)
       message = ''
-      result = s.recv_string(message)
-      raise Error, ZMQ::Util.error_string, caller if result == -1
-      message = Marshal.load message
+      if block
+       result = s.recv_string(message)
+       raise Error, ZMQ::Util.error_string, caller if result == -1
+      else
+        s.recv_string(message, ZMQ::NOBLOCK)
+      end
+      message = Marshal.load(message) if message != ''
       Flatware.log "#@type #@port recv #{message}"
       message
     end

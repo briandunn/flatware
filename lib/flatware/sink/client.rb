@@ -5,8 +5,12 @@ module Flatware
     attr_accessor :client
 
     class Client
+      attr_reader :die
+
       def initialize(sink_endpoint)
         @socket = Flatware.socket ZMQ::PUSH, connect: sink_endpoint
+        @die = Flatware.socket ZMQ::SUB, connect: 'ipc://die'
+        die.setsockopt ZMQ::SUBSCRIBE, ''
       end
 
       %w[finished started progress checkpoint].each do |message|
@@ -18,7 +22,12 @@ module Flatware
       private
 
       def push(message)
-        @socket.send message
+        if die.recv(false) == 'seppuku'
+          Flatware.close
+          exit(0)
+        else
+          @socket.send message
+        end
       end
     end
   end
