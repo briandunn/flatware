@@ -57,8 +57,8 @@ module Flatware
       @sockets = []
     end
 
-    def socket(type, options={})
-      Socket.new(c.socket(type)).tap do |socket|
+    def socket(zmq_type, options={})
+      Socket.new(c.socket(zmq_type)).tap do |socket|
         sockets.push socket
         if port = options[:connect]
           socket.connect port
