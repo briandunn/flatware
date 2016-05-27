@@ -28,6 +28,7 @@ module Flatware
     desc "[FLATWARE_OPTS] cucumber [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*)
       jobs = Cucumber.extract_jobs_from_args cucumber_args
+      Flatware.verbose = options[:log]
       Worker.spawn workers, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
       formatter = Formatters.load_by_name(:cucumber, options['formatters'])
       start_sink jobs, formatter
@@ -62,7 +63,6 @@ module Flatware
     def start_sink(jobs, formatter)
      $0 = 'flatware sink'
       Process.setpgrp
-      Flatware.verbose = options[:log]
       Dispatcher.spawn jobs, options['dispatch-endpoint']
       passed = Sink.start_server jobs, formatter, options['sink-endpoint'], fail_fast: options['fail-fast']
       Process.waitall

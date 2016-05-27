@@ -27,6 +27,8 @@ module Flatware
         break if message == 'seppuku'
         block.call message
       end
+    rescue => e
+      Flatware.log e
     ensure
       Flatware.close
     end

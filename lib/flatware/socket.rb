@@ -14,6 +14,14 @@ module Flatware
 
   extend self
 
+  def logger
+    @logger ||= Logger.new($stderr)
+  end
+
+  def logger=(logger)
+    @logger = logger
+  end
+
   def socket(*args)
     context.socket(*args)
   end
@@ -24,10 +32,10 @@ module Flatware
   end
 
   def log(*message)
-    if verbose?
-      $stderr.print "#$0 "
-      $stderr.puts *message
-      $stderr.flush
+    if Exception === message.first
+      logger.error message.first
+    elsif verbose?
+      logger.info ([$0] + message).join(' ')
     end
     message
   end
