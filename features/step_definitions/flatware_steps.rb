@@ -152,10 +152,6 @@ Then 'the output contains a summary of failing features' do
   assert_partial_output trace, all_output
 end
 
-Then 'I see log messages' do
-  assert_partial_output 'flatware sink bind', all_output
-end
-
 Then 'the failure list only includes one feature' do
   all_output.match /Failing Scenarios:\n(.+?)(?=\n\n)/m
   $1.split("\n").should have(1).feature

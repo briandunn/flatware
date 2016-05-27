@@ -17,15 +17,6 @@ Feature: cucumber task
     0 steps
     """
 
-  Scenario: provide flatware options and cucumber options
-    When I run flatware with "-l cucumber -t~@wip"
-    Then the output contains the following:
-    """
-    0 scenarios
-    0 steps
-    """
-    And I see log messages
-
     @non-zero
   Scenario: provide erroneous cucumber options
     When I run flatware with "cucumber --foo bar"
