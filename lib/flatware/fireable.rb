@@ -31,7 +31,6 @@ module Flatware
     attr_reader :die
 
     def until_fired(socket, &block)
-      puts "READY TO DIE"
       poller = Poller.new socket, die
       poller.each do |s|
         message = s.recv

@@ -9,10 +9,8 @@ describe Flatware::Dispatcher do
         socket = Flatware.socket ZMQ::REQ, connect: endpoint
         socket.send 'ready'
         socket.recv
-        puts "READY TO KILL"
         Flatware::Fireable.kill
         Flatware.close
-        puts "FORK EXIT"
       end
       pid = described_class.spawn [:job], endpoint
       exit_statuses = waitall.map(&:last)

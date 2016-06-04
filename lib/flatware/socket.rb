@@ -104,7 +104,7 @@ module Flatware
     end
 
     def monitor
-      name = "inproc://monitor"
+      name = "inproc://monitor#{rand(1000)}"
       LibZMQ.zmq_socket_monitor(s.socket, name, ZMQ::EVENT_ALL)
       Monitor.new(name)
     end
@@ -112,7 +112,6 @@ module Flatware
     class Monitor
       def initialize(port)
         @socket = Flatware.socket ZMQ::PAIR
-        @socket.setsockopt ZMQ::LINGER, 0
         @socket.connect port
       end
 
