@@ -11,7 +11,8 @@ module Flatware
     def initialize(jobs, endpoint)
       @jobs     = jobs
       @fireable = Fireable.new
-      @dispatch = Flatware.socket ZMQ::REP, bind: endpoint
+      @dispatch = Flatware.socket ZMQ::REP
+      @dispatch.bind endpoint
     end
 
     def dispatch!

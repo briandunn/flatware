@@ -2,7 +2,7 @@ require 'spec_helper'
 describe Flatware::Fireable do
 
   let! :kill_socket do
-    Flatware.socket ZMQ::PUB, bind: described_class::PORT
+    Flatware.socket ZMQ::PUB
   end
 
   let!(:fireable) { described_class.new }
@@ -13,6 +13,13 @@ describe Flatware::Fireable do
   context "in process" do
     it "yields messages that come in on the given socket" do
       req_socket.send :hi!
+      monitor = kill_socket.monitor
+
+      kill_socket.bind described_class::PORT
+      loop do
+        break if monitor.recv == :EVENT_ACCEPTED
+      end
+
       kill_socket.send 'seppuku'
 
       actual_message = nil
@@ -23,8 +30,14 @@ describe Flatware::Fireable do
     end
 
     it "exits cleanly when sent the die message" do
-      Flatware.should_receive :close
+      expect(Flatware).to receive(:close).and_call_original
+
       called = false
+      kill_socket.bind described_class::PORT
+      monitor = kill_socket.monitor
+      loop do
+        break if monitor.recv == :EVENT_ACCEPTED
+      end
       kill_socket.send 'seppuku'
       fireable.until_fired rep_socket do |message|
         called = true

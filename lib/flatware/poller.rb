@@ -8,7 +8,8 @@ module Flatware
     end
 
     def each(&block)
-      while (result = zmq_poller.poll) != 0
+      while (puts "WAITING FOR SIG"; result = zmq_poller.poll) != 0
+        puts "GOT SIG"
         raise Error, ZMQ::Util.error_string, caller if result == -1
         for socket in zmq_poller.readables.map &find_wrapped_socket
           yield socket

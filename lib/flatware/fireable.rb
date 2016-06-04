@@ -5,7 +5,16 @@ module Flatware
     PORT = 'ipc://die'
 
     def self.bind
-      @kill = Flatware.socket(ZMQ::PUB, bind: PORT)
+      @kill = Flatware.socket ZMQ::PUB
+      monitor = @kill.monitor
+      @kill.bind PORT
+      while message = monitor.recv
+        if message == :EVENT_ACCEPTED
+          break
+        else
+          puts message
+        end
+      end
     end
 
     def self.kill
@@ -13,14 +22,16 @@ module Flatware
     end
 
     def initialize
-      @die = Flatware.socket(ZMQ::SUB, connect: PORT).tap do |die|
-        die.setsockopt ZMQ::SUBSCRIBE, ''
-      end
+      @die = Flatware.socket ZMQ::SUB
+      monitor = @die.monitor
+      @die.connect PORT
+      @die.setsockopt ZMQ::SUBSCRIBE, ''
     end
 
     attr_reader :die
 
     def until_fired(socket, &block)
+      puts "READY TO DIE"
       poller = Poller.new socket, die
       poller.each do |s|
         message = s.recv
