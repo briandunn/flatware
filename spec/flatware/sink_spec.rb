@@ -10,20 +10,32 @@ describe Flatware::Sink do
     attr_reader :child_io
 
     before do
+      # disable rspec trap
       orig = trap 'INT', 'DEFAULT'
+
       unless @child_io = IO.popen("-")
-        formatter = double 'Formatter', summarize_remaining: nil, summarize: nil, jobs: nil
+        formatter = double 'Formatter', summarize: nil, jobs: nil
+        allow(formatter).to receive(:summarize_remaining) { puts 'signal was captured' }
         described_class.start_server [job], formatter, endpoint
       end
+
       trap 'INT', orig
     end
 
     it 'exits' do
       pid = child_io.pid
-      Process.kill 'INT', pid
-      wait pid
-      child_io.read.should match /(SystemExit|Interrupt):/
-      child_pids.should_not include pid
+      sleep 0.1
+      retries = 0
+
+      begin
+        Process.kill 'INT', pid
+        wait pid
+      rescue Timeout::Error
+        retries += 1
+        retry if retries < 3
+      end
+      expect(child_io.read).to match(/signal was captured/)
+      expect(child_pids).to_not include pid
     end
   end
 
