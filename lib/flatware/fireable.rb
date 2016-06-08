@@ -11,8 +11,6 @@ module Flatware
       while message = monitor.recv
         if message == :EVENT_ACCEPTED
           break
-        else
-          puts message
         end
       end
     end
