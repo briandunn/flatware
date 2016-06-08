@@ -80,17 +80,18 @@ module Flatware
   end
 
   class Socket
-    attr_reader :s
+    attr_reader :socket
+
     def initialize(socket)
-      @s = socket
+      @socket = socket
     end
 
     def setsockopt(*args)
-      s.setsockopt(*args)
+      socket.setsockopt(*args)
     end
 
     def send(message)
-      result = s.send_string(Marshal.dump(message))
+      result = socket.send_string(Marshal.dump(message))
       raise Error, ZMQ::Util.error_string, caller if result == -1
       Flatware.log "#@type #@port send #{message}"
       message
@@ -99,13 +100,13 @@ module Flatware
     def connect(port)
       @type = 'connected'
       @port = port
-      raise(Error, ZMQ::Util.error_string, caller) unless s.connect(port) == 0
+      raise(Error, ZMQ::Util.error_string, caller) unless socket.connect(port) == 0
       Flatware.log "connect #@port"
     end
 
     def monitor
       name = "inproc://monitor#{SecureRandom.hex(10)}"
-      LibZMQ.zmq_socket_monitor(s.socket, name, ZMQ::EVENT_ALL)
+      LibZMQ.zmq_socket_monitor(socket.socket, name, ZMQ::EVENT_ALL)
       Monitor.new(name)
     end
 
@@ -135,22 +136,22 @@ module Flatware
     def bind(port)
       @type = 'bound'
       @port = port
-      raise(Error, ZMQ::Util.error_string, caller) unless s.bind(port) == 0
+      raise(Error, ZMQ::Util.error_string, caller) unless socket.bind(port) == 0
       Flatware.log "bind #@port"
     end
 
     def close
-      raise(Error, ZMQ::Util.error_string, caller) unless s.close == 0
+      raise(Error, ZMQ::Util.error_string, caller) unless socket.close == 0
       Flatware.log "close #@type #@port"
     end
 
     def recv(block: true, marshal: true)
       message = ''
       if block
-       result = s.recv_string(message)
+       result = socket.recv_string(message)
        raise Error, ZMQ::Util.error_string, caller if result == -1
       else
-        s.recv_string(message, ZMQ::NOBLOCK)
+        socket.recv_string(message, ZMQ::NOBLOCK)
       end
       if message != '' and marshal
         message = Marshal.load(message)

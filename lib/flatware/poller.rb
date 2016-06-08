@@ -21,14 +21,14 @@ module Flatware
     def find_wrapped_socket
       ->(s) do
         sockets.find do |socket|
-          socket.s == s
+          socket.socket == s
         end
       end
     end
 
     def register_sockets
       sockets.each do |socket|
-        zmq_poller.register_readable socket.s
+        zmq_poller.register_readable socket.socket
       end
     end
   end
