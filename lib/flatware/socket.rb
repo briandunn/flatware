@@ -104,7 +104,7 @@ module Flatware
     end
 
     def monitor
-      name = "inproc://monitor#{rand(1000)}"
+      name = "inproc://monitor#{SecureRandom.hex(10)}"
       LibZMQ.zmq_socket_monitor(s.socket, name, ZMQ::EVENT_ALL)
       Monitor.new(name)
     end
