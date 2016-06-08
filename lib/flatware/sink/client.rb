@@ -22,7 +22,7 @@ module Flatware
       private
 
       def push(message)
-        if die.recv(false) == 'seppuku'
+        if die.recv(block: false) == 'seppuku'
           Flatware.close
           exit(0)
         else
