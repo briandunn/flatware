@@ -118,7 +118,7 @@ end
 
 Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count, thing|
   match = all_output.match(/^(?<count>\d+) #{thing}s?/)
-  match.should be
+  expect(match).to(be, "No match found for output #{all_output}")
   match[:count].to_i.should eq count
 end
 

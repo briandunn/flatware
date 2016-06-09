@@ -44,7 +44,7 @@ After do |scenario|
       Process.kill 6, pid
     end
     Process.waitall
-    expect(zombie_pids.size).to eq 0
+    expect(zombie_pids.size).to(eq(0), "Zombie pids: #{zombie_pids.size}, should be 0")
   end
 end
 
