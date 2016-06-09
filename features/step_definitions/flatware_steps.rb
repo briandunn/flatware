@@ -8,7 +8,7 @@ end
 module Support
   def create_flunk_step_definition
     write_file "features/step_definitions/flunky_steps.rb", <<-RB
-      Then('flunk') { raise :hell }
+      Then('flunk') { raise StandardError.new('hell') }
     RB
   end
 
