@@ -1,4 +1,5 @@
 require 'ffi-rzmq'
+require 'securerandom'
 
 module Flatware
   Error = Class.new StandardError
