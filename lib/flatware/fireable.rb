@@ -21,7 +21,7 @@ module Flatware
 
     def initialize
       @die = Flatware.socket ZMQ::SUB
-      monitor = @die.monitor
+      Thread.current[:die] = @die
       @die.connect PORT
       @die.setsockopt ZMQ::SUBSCRIBE, ''
     end

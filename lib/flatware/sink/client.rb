@@ -9,8 +9,10 @@ module Flatware
 
       def initialize(sink_endpoint)
         @socket = Flatware.socket ZMQ::PUSH, connect: sink_endpoint
-        @die = Flatware.socket ZMQ::SUB, connect: 'ipc://die'
-        die.setsockopt ZMQ::SUBSCRIBE, ''
+        @die = Thread.current[:die] or begin
+          die = Flatware.socket(ZMQ::SUB, connect: 'ipc://die')
+          die.setsockopt ZMQ::SUBSCRIBE, ''
+        end
       end
 
       %w[finished started progress checkpoint].each do |message|

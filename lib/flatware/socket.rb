@@ -91,6 +91,10 @@ module Flatware
       socket.setsockopt(*args)
     end
 
+    def name
+      socket.name
+    end
+
     def send(message)
       result = socket.send_string(Marshal.dump(message))
       raise Error, ZMQ::Util.error_string, caller if result == -1
