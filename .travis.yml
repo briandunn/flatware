@@ -1,6 +1,6 @@
 language: ruby
-before_install: sudo apt-get install libzmq3-dev
+before_install:
+  - sudo apt-get install -qq libzmq3-dev
+  - gem update bundler
 rvm:
-  - 2.1
-  - 2.0
-  - 1.9.3
+  - 2.3.1
