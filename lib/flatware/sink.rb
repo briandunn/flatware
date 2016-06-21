@@ -39,8 +39,8 @@ module Flatware
         poller.each do |socket|
           message, content = socket.recv
 
-          case socket
-          when dispatch
+          case message
+          when :ready
             workers << content
             job = que.shift
             if job and not done?
@@ -49,16 +49,13 @@ module Flatware
               workers.delete content
               dispatch.send 'seppuku'
             end
+          when :checkpoint
+            checkpoint_handler.handle! content
+          when :finished
+            completed_jobs << content
+            formatter.finished content
           else
-            case message
-            when :checkpoint
-              checkpoint_handler.handle! content
-            when :finished
-              completed_jobs << content
-              formatter.finished content
-            else
-              formatter.send message, content
-            end
+            formatter.send message, content
           end
           break if workers.empty? and done?
         end

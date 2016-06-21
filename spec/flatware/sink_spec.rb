@@ -4,7 +4,10 @@ describe Flatware::Sink do
   before(:all) { Flatware.close }
   let(:sink_endpoint) { 'ipc://sink-test' }
   let(:dispatch_endpoint) { 'ipc://dispatch-test' }
-  let(:formatter) { double 'Formatter', summarize: nil, jobs: nil, progress: nil, finished: nil, summarize_remaining: nil }
+  let :formatter do
+    double 'Formatter', ready: nil,
+      summarize: nil, jobs: nil, progress: nil, finished: nil, summarize_remaining: nil
+  end
 
   context 'when I have work to do, but am interupted' do
     let(:job) { double 'job', id: 'int.feature' }
