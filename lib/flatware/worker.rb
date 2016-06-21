@@ -30,9 +30,9 @@ module Flatware
         sink.started job
         begin
           runner.run job.id, job.args
-        rescue Errno::ENOENT
+        rescue => e
+          Flatware.log e
           job.failed = true
-          sink.finished job
         end
         sink.finished job
         report_for_duty

@@ -8,12 +8,13 @@ module Flatware
     end
 
     class Server
-      attr_reader :sink, :dispatch, :poller
+      attr_reader :sink, :dispatch, :poller, :workers
 
-      def initialize(jobs:, formatter:, dispatch:, sink:, fail_fast: false)
+      def initialize(jobs:, formatter:, dispatch:, sink:, fail_fast: false, worker_count: 0)
         @jobs, @formatter, @fail_fast = jobs, formatter, fail_fast
         @sink = Flatware.socket(ZMQ::PULL, bind: sink)
         @dispatch = Flatware.socket(ZMQ::REP, bind: dispatch)
+        @workers = Set.new worker_count.times.to_a
         @poller = Poller.new(@sink, @dispatch)
       end
 
@@ -35,13 +36,11 @@ module Flatware
 
       def listen
         que = jobs.dup
-        workers = Set.new
         poller.each do |socket|
           message, content = socket.recv
 
           case message
           when :ready
-            workers << content
             job = que.shift
             if job and not done?
               dispatch.send job
