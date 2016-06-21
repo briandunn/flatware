@@ -6,7 +6,6 @@ module Flatware
     def initialize(id, runner, dispatch_endpoint, sink_endpoint)
       @id       = id
       @runner   = runner
-      @fireable = Fireable.new
       @sink     = Sink::Client.new sink_endpoint
       @task     = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
     end
@@ -24,7 +23,9 @@ module Flatware
     def listen
       Sink.client = sink
       report_for_duty
-      fireable.until_fired task do |job|
+      loop do
+        job = task.recv
+        break if job == 'seppuku'
         job.worker = id
         sink.started job
         begin
@@ -32,11 +33,11 @@ module Flatware
         rescue Errno::ENOENT
           job.failed = true
           sink.finished job
-          raise
         end
         sink.finished job
         report_for_duty
       end
+      Flatware.close
     end
 
     private
@@ -44,7 +45,7 @@ module Flatware
     attr_reader :fireable, :task, :sink, :runner
 
     def report_for_duty
-      task.send 'ready'
+      task.send [:ready, id]
     end
   end
 end

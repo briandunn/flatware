@@ -2,7 +2,9 @@ require 'spec_helper'
 
 describe Flatware::Sink do
   before(:all) { Flatware.close }
-  let(:endpoint) { 'ipc://sink-test' }
+  let(:sink_endpoint) { 'ipc://sink-test' }
+  let(:dispatch_endpoint) { 'ipc://dispatch-test' }
+  let(:formatter) { double 'Formatter', summarize: nil, jobs: nil, progress: nil, finished: nil, summarize_remaining: nil }
 
   context 'when I have work to do, but am interupted' do
     let(:job) { double 'job', id: 'int.feature' }
@@ -14,9 +16,8 @@ describe Flatware::Sink do
       orig = trap 'INT', 'DEFAULT'
 
       unless @child_io = IO.popen("-")
-        formatter = double 'Formatter', summarize: nil, jobs: nil
         allow(formatter).to receive(:summarize_remaining) { puts 'signal was captured' }
-        described_class.start_server [job], formatter, endpoint
+        described_class.start_server jobs: [job], formatter: formatter, sink: sink_endpoint, dispatch: dispatch_endpoint
       end
 
       trap 'INT', orig
@@ -41,50 +42,49 @@ describe Flatware::Sink do
 
   context 'there is no work' do
     it 'sumarizes' do
-      formatter = double 'Formatter', jobs: nil
-      formatter.should_receive :summarize
-      Flatware::Sink.start_server [], formatter, endpoint
+      worker = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
+      worker.send 'ready'
+      described_class.start_server jobs: [], formatter: formatter, sink: sink_endpoint, dispatch: dispatch_endpoint
+      expect(formatter).to have_received :summarize
     end
   end
 
   context 'there is outstanding work' do
     context 'and a Result object is received' do
       it 'prints the result' do
-        result    = double
-        job       = double failed?: false
-        formatter = double 'Formatter', summarize: nil, jobs: nil
-        socket    = double 'Socket'
-        socket.stub(:recv).and_return [:progress, result], [:finished, job]
-        Flatware::Fireable.stub(kill: nil, bind: nil)
-        Flatware.stub socket: socket
+        job       = OpenStruct.new failed?: false
+        socket    = Flatware.socket(ZMQ::PUSH, connect: sink_endpoint)
+        socket.send [:progress, 'progress']
+        socket.send [:finished, job]
 
-        formatter.should_receive(:progress).with result
-        formatter.should_receive(:finished).with job
-        Flatware::Sink.start_server [job], formatter, endpoint
+        described_class.start_server jobs: [job], formatter: formatter, sink: sink_endpoint, dispatch: dispatch_endpoint
+        expect(formatter).to have_received(:progress).with 'progress'
+        expect(formatter).to have_received(:finished).with job
       end
     end
   end
 
   describe '#start_server' do
-    let(:job) { double failed?: false }
-    let(:formatter) { double 'Formatter', summarize: nil, jobs: nil, finished: nil }
+    let(:job) { OpenStruct.new failed?: false }
+
     before do
-      Flatware::Fireable.stub(kill: nil, bind: nil)
-      socket = double 'Socket'
-      socket.stub(:recv).and_return [:checkpoint, checkpoint], [:finished, job]
-      Flatware.stub socket: socket
+      socket = Flatware.socket(ZMQ::PUSH, connect: sink_endpoint)
+      socket.send [:checkpoint, checkpoint]
+      socket.send [:finished, job]
     end
 
-    subject { described_class.start_server [job], formatter, endpoint }
+    subject do
+      described_class.start_server jobs: [job], formatter: formatter, sink: sink_endpoint, dispatch: dispatch_endpoint
+    end
 
     context 'when there are failures' do
-      let(:checkpoint) { double 'Checkpoint', steps: [], scenarios: [], failures?: true }
+      let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: true }
 
       it { should be_false }
     end
 
     context 'when everything passes' do
-      let(:checkpoint) { double 'Checkpoint', steps: [], scenarios: [], failures?: false }
+      let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: false }
 
       it { should be_true }
     end

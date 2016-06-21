@@ -8,13 +8,13 @@ module Flatware
     end
 
     class Server
-      attr_reader :socket
+      attr_reader :sink, :dispatch, :poller
 
-      def initialize(jobs, formatter, endpoint, options={})
-        @jobs, @formatter = jobs, formatter
-        options = {fail_fast: false}.merge options
-        @fail_fast = options[:fail_fast]
-        @socket = Flatware.socket(ZMQ::PULL, bind: endpoint)
+      def initialize(jobs:, formatter:, dispatch:, sink:, fail_fast: false)
+        @jobs, @formatter, @fail_fast = jobs, formatter, fail_fast
+        @sink = Flatware.socket(ZMQ::PULL, bind: sink)
+        @dispatch = Flatware.socket(ZMQ::REP, bind: dispatch)
+        @poller = Poller.new(@sink, @dispatch)
       end
 
       def start
@@ -23,12 +23,9 @@ module Flatware
           summarize_remaining
           exit 1
         end
-
-        Flatware::Fireable::bind
         formatter.jobs jobs
         listen
       ensure
-        Flatware::Fireable::kill
         Flatware.close
       end
 
@@ -37,22 +34,36 @@ module Flatware
       end
 
       def listen
-        until done?
+        que = jobs.dup
+        workers = Set.new
+        poller.each do |socket|
           message, content = socket.recv
-          case message
-          when :checkpoint
-            checkpoint_handler.handle! content
-          when :finished
-            completed_jobs << content
-            formatter.finished content
+
+          case socket
+          when dispatch
+            workers << content
+            job = que.shift
+            if job and not done?
+              dispatch.send job
+            else
+              workers.delete content
+              dispatch.send 'seppuku'
+            end
           else
-            formatter.send message, content
+            case message
+            when :checkpoint
+              checkpoint_handler.handle! content
+            when :finished
+              completed_jobs << content
+              formatter.finished content
+            else
+              formatter.send message, content
+            end
           end
+          break if workers.empty? and done?
         end
         checkpoint_handler.summarize
         !failures?
-      rescue Error => e
-        raise unless e.message == "Interrupted system call"
       end
 
       private
@@ -86,10 +97,6 @@ module Flatware
 
       def remaining_work
         jobs - completed_jobs
-      end
-
-      def fireable
-        @fireable ||= Fireable.new
       end
     end
   end

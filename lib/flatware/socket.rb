@@ -71,10 +71,7 @@ module Flatware
     end
 
     def close
-      LibZMQ.zmq_ctx_shutdown c.context
-      sockets.each do |socket|
-        socket.close
-      end
+      sockets.each(&:close)
       raise(Error, ZMQ::Util.error_string, caller) unless c.terminate == 0
       Flatware.log "terminated context"
     end

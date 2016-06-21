@@ -48,6 +48,7 @@ end
 Given 'more slow failing features than workers' do
   create_sleep_step_definition
   create_flunk_step_definition
+  @scenario_count = ((max_workers * 2) + 1)
   ((max_workers * 2) + 1).times do |feature_number|
     write_file "features/feature_#{feature_number}.feature", <<-FEATURE
       Feature: slowly die
@@ -109,7 +110,6 @@ end
 Then 'the output contains a backtrace' do
 
   trace = <<-TXT.gsub(/^ +/, '')
-    ./features/step_definitions/flunky_steps.rb:1:in `/^flunk$/'
     features/flunk.feature:4:in `Given flunk'
   TXT
 
@@ -122,6 +122,11 @@ Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count,
   match[:count].to_i.should eq count
 end
 
+Then 'I see that not all scenarios were run' do
+  match = all_output.match(/^(?<count>\d+) scenarios?/)
+  expect(@scenario_count).to be > match[:count].to_i
+end
+
 Then /^I see that (#{A.number}) (scenario|step)s? failed$/ do |count, thing|
   match = all_output.match /failed (?<count>\d+) #{thing}s?/
   match.should be
@@ -130,7 +135,6 @@ end
 
 Given /^a cucumber suite with two features that each fail$/ do
   create_flunk_step_definition
-
   2.times do |feature_number|
     write_file "features/failing_feature_#{feature_number}.feature", <<-FEATURE
     Feature: flunking

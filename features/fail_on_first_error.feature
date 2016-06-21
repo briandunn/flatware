@@ -4,10 +4,9 @@ Feature: fail on first error
   I can opt out of running the whole suite if there is a problem
 
   Scenario:
-    Given a cucumber suite with two features that each fail
-    When I run flatware with "--fail-fast"
-    Then I see that 1 scenario was run
-    And the failure list only includes one feature
+    Given more slow failing features than workers
+    When I run flatware with " --fail-fast"
+    Then I see that not all scenarios were run
 
   Scenario: failing fast is faster
     Given more slow failing features than workers
