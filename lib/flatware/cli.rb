@@ -29,7 +29,7 @@ module Flatware
     def cucumber(*)
       jobs = Cucumber.extract_jobs_from_args cucumber_args
       Flatware.verbose = options[:log]
-      Worker.spawn workers, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
+      Worker.spawn [workers, jobs.size].min, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
       formatter = Formatters.load_by_name(:cucumber, options['formatters'])
       start_sink jobs, formatter
     end
@@ -63,7 +63,7 @@ module Flatware
     def start_sink(jobs, formatter)
      $0 = 'flatware sink'
       Process.setpgrp
-      passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], fail_fast: options['fail-fast'], worker_count: workers
+      passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], fail_fast: options['fail-fast']
       Process.waitall
       exit passed ? 0 : 1
     end
