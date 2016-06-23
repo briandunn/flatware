@@ -5,18 +5,12 @@ describe Flatware::Worker do
     let(:dispatch_endpoint) { 'ipc://test-dispatch' }
     let(:sink_endpoint) { 'ipc://test-sink' }
     let(:runner) { double 'Runner', run: nil }
-    after { Flatware.close }
-
-    let(:worker) { described_class.new 1, runner, dispatch_endpoint, sink_endpoint }
 
     it 'exits when dispatch is done' do
-      pid = fork { worker.listen }
-      task = Flatware.socket ZMQ::REP, bind: dispatch_endpoint
-      task.recv
-      task.send 'seppuku'
+      socket = double 'Socket', recv: 'seppuku', send: nil
 
-      waitall
-      child_pids.should_not include pid
+      allow(Flatware).to receive(:socket) { socket }
+      described_class.new(1, runner, dispatch_endpoint, sink_endpoint).listen
     end
   end
 end

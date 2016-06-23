@@ -4,29 +4,24 @@ describe Flatware::Sink do
   before(:all) { Flatware.close }
   let(:sink_endpoint) { 'ipc://sink-test' }
   let(:dispatch_endpoint) { 'ipc://dispatch-test' }
-  let :formatter do
+  let! :formatter do
     double 'Formatter', ready: nil,
       summarize: nil, jobs: nil, progress: nil, finished: nil, summarize_remaining: nil
   end
 
   context 'when I have work to do, but am interupted' do
-    let(:job) { double 'job', id: 'int.feature' }
+    it 'exits' do
+      job = double 'job', id: 'int.feature'
 
-    attr_reader :child_io
-
-    before do
       # disable rspec trap
       orig = trap 'INT', 'DEFAULT'
 
-      unless @child_io = IO.popen("-")
+      unless child_io = IO.popen("-")
         allow(formatter).to receive(:summarize_remaining) { puts 'signal was captured' }
         described_class.start_server jobs: [job], formatter: formatter, sink: sink_endpoint, dispatch: dispatch_endpoint
       end
 
       trap 'INT', orig
-    end
-
-    it 'exits' do
       pid = child_io.pid
       sleep 0.1
       retries = 0
@@ -36,7 +31,11 @@ describe Flatware::Sink do
         wait pid
       rescue Timeout::Error
         retries += 1
-        retry if retries < 3
+        if retries < 3
+          retry
+        else
+          exit(1)
+        end
       end
       expect(child_io.read).to match(/signal was captured/)
       expect(child_pids).to_not include pid
