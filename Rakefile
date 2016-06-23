@@ -10,6 +10,7 @@ end
 
 Cucumber::Rake::Task.new :cucumber do |task|
   task.cucumber_opts = %w[--tags ~@wip -f progress]
+  task.fork = false
 end
 
 desc "generate connection diagram"
