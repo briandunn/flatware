@@ -1,13 +1,13 @@
 module Flatware
   class SerializedException
-    attr_reader :class, :message
+    attr_reader :class, :message, :cause
     attr_accessor :backtrace
-    def initialize(klass, message, backtrace)
-      @class, @message, @backtrace = serialized(klass), message, backtrace
+    def initialize(klass, message, backtrace, cause='')
+      @class, @message, @backtrace, @cause = serialized(klass), message, backtrace, cause
     end
 
     def self.from(exception)
-      new exception.class, exception.message, exception.backtrace
+      new exception.class, exception.message, exception.backtrace, exception.cause
     end
 
     private

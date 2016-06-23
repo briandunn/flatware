@@ -12,13 +12,13 @@ module Flatware
       def configuration.command; 'rspec' end
       options.configure(configuration)
       configuration.files_to_run.uniq.map do |arg|
-        Job.new(arg, [])
+        Job.new(arg, args)
       end
     end
 
     def self.run(job, options={})
       ::RSpec::Core::Runner.run(%w[--format Flatware::RSpec::Formatter] + [job], $stderr, $stdout)
-      ::RSpec.reset
+      ::RSpec.clear_examples
     end
   end
 end

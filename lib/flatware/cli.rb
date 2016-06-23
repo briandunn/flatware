@@ -36,10 +36,10 @@ module Flatware
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
-    def rspec
+    def rspec(*rspec_args)
       require 'flatware/rspec'
-      jobs = RSpec.extract_jobs_from_args []
-      Worker.spawn workers, RSpec, options['dispatch-endpoint'], options['sink-endpoint']
+      jobs = RSpec.extract_jobs_from_args rspec_args
+      Worker.spawn [workers, jobs.size].min, RSpec, options['dispatch-endpoint'], options['sink-endpoint']
       formatter = Formatters.load_by_name(:rspec, options['formatters'])
       start_sink jobs, formatter
     end

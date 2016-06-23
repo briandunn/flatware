@@ -1,50 +1,27 @@
 require 'flatware/serialized_exception'
+require 'rspec/core/formatters/console_codes'
 
 module Flatware
   module RSpec
     ProgressMessage = Struct.new(:progress)
 
-    class SerializedExampleGroup
-      attr_reader :example_group, :parent_groups, :metadata
-
-      def initialize(example_group)
-        @example_group = example_group.to_s
-        @metadata = Hash[metadata.to_a].except(:block)
-        @parent_groups = serialize_parent_groups(example_group.parent_groups)
-      end
-
-      def serialize_parent_groups(example_groups)
-        example_groups.map do |group|
-          self.class.new(group) unless group.to_s == example_group
-        end.compact
-      end
-    end
-
     class SerializedNotification
-      attr_reader :exception, :example
+      attr_reader :failed_example_count
+
       def initialize(notification)
-        @exception = SerializedException.from notification.exception
-        @example = SerializedExample.new notification.example
+        @string = notification.fully_formatted_failed_examples if notification.failed_examples.any?
       end
 
-      def fully_formatted(failure_number, colorizer=::RSpec::Core::Formatters::ConsoleCodes)
-        exception_presenter.fully_formatted(failure_number, colorizer)
+      def failed_examples
+        []
       end
 
-      private
-
-      def exception_presenter
-        ::RSpec::Core::Formatters::ExceptionPresenter.new(exception, example)
+      def fully_formatted(failure_number, colorizer)
+        @string.to_s
       end
-    end
 
-    class SerializedExample
-      attr_reader :metadata, :execution_result, :full_description
-      def initialize(example)
-        @metadata = example.metadata.reject {|k| %i[block example_group described_class].include? k }
-        @full_description = example.full_description
-        @execution_result = example.execution_result
-        @execution_result.exception = SerializedException.from @execution_result.exception
+      def fully_formatted_failed_examples
+        @string.to_s
       end
     end
 
@@ -64,7 +41,7 @@ module Flatware
       end
 
       def fully_formatted_failed_examples(colorizer=::RSpec::Core::Formatters::ConsoleCodes)
-        formatted = "\nFailures:\n"
+        formatted = ""
 
         failure_notifications.each_with_index do |failure, index|
           formatted << failure.fully_formatted(index.next, colorizer)
@@ -84,7 +61,7 @@ module Flatware
     class Formatter
       attr_reader :summary, :output, :failed_examples
 
-      def initialize(stdout=nil)
+      def initialize(stdout)
         @output = stdout
         @failed_examples = []
       end
@@ -94,7 +71,6 @@ module Flatware
       end
 
       def example_failed(example)
-        @failed_examples << example
         send_progress :failed
       end
 
@@ -106,8 +82,13 @@ module Flatware
         @summary = Summary.new summary.duration, summary.examples.size, summary.failed_examples.size, summary.pending_examples.size
       end
 
+      def dump_failures(notifications)
+        @failed_examples << notifications
+      end
+
       def close(*)
         Sink::client.checkpoint Checkpoint.new(summary, failed_examples)
+        @failed_examples = []
       end
 
       private
@@ -117,6 +98,6 @@ module Flatware
       end
     end
 
-    ::RSpec::Core::Formatters.register Formatter, :example_passed, :example_failed, :example_pending, :dump_summary, :close
+    ::RSpec::Core::Formatters.register Formatter, :example_passed, :example_failed, :example_pending, :dump_summary, :dump_failures, :close
   end
 end
