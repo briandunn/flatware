@@ -38,7 +38,7 @@ module Flatware
     desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
     def rspec(*rspec_args)
       require 'flatware/rspec'
-      jobs = RSpec.extract_jobs_from_args rspec_args
+      jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
       Flatware.verbose = options[:log]
       Worker.spawn workers, RSpec, options['dispatch-endpoint'], options['sink-endpoint']
       start_sink jobs: jobs, workers: workers

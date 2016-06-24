@@ -12,9 +12,6 @@ require 'aruba/cucumber'
 require 'rspec/expectations'
 require 'flatware/processor_info'
 
-require File.join(Pathname.new(__FILE__).dirname, 'flatware/spawn_process')
-# Aruba.process = Flatware::SpawnProcess
-
 World(Module.new do
   def max_workers
     return 3 if ENV['TRAVIS'] == 'true'
