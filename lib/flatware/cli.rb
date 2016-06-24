@@ -25,9 +25,9 @@ module Flatware
       require 'flatware/cucumber'
       jobs = Cucumber.extract_jobs_from_args args
       Flatware.verbose = options[:log]
-      Worker.spawn [workers, jobs.size].min, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
-      formatter = Formatters.load_by_name(:cucumber, options['formatters'])
-      start_sink jobs, formatter
+      worker_count = [workers, jobs.size].min
+      Worker.spawn worker_count, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
+      start_sink jobs: jobs, workers: worker_count
     end
 
     worker_option
@@ -36,12 +36,12 @@ module Flatware
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
-    def rspec
+    def rspec(*rspec_args)
       require 'flatware/rspec'
-      jobs = RSpec.extract_jobs_from_args []
+      jobs = RSpec.extract_jobs_from_args rspec_args
+      Flatware.verbose = options[:log]
       Worker.spawn workers, RSpec, options['dispatch-endpoint'], options['sink-endpoint']
-      formatter = Formatters.load_by_name(:rspec, options['formatters'])
-      start_sink jobs, formatter
+      start_sink jobs: jobs, workers: workers
     end
 
     worker_option
@@ -70,10 +70,11 @@ module Flatware
 
     private
 
-    def start_sink(jobs, formatter)
+    def start_sink(jobs:, workers:, runner: current_command_chain.first)
      $0 = 'flatware sink'
       Process.setpgrp
-      passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], fail_fast: options['fail-fast']
+      formatter = Formatters.load_by_name(runner, options['formatters'])
+      passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], fail_fast: options['fail-fast'], worker_count: workers
       Process.waitall
       exit passed ? 0 : 1
     end
