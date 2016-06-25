@@ -21,11 +21,17 @@ module Flatware
     end
 
     def listen
+      trap 'INT' do
+        Flatware.close!
+        @want_to_quit = true
+        exit(1)
+      end
+
       Sink.client = sink
       report_for_duty
       loop do
         job = task.recv
-        break if job == 'seppuku'
+        break if job == 'seppuku' or @want_to_quit
         job.worker = id
         sink.started job
         begin
@@ -37,7 +43,7 @@ module Flatware
         sink.finished job
         report_for_duty
       end
-      Flatware.close
+      Flatware.close unless @want_to_quit
     end
 
     private

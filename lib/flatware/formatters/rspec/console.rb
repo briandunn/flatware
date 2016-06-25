@@ -14,8 +14,10 @@ module Flatware::Formatters::RSpec
 
     def summarize(checkpoints)
       result = checkpoints.reduce :+
-      formatter.dump_failures result
-      formatter.dump_summary result.summary
+      if result
+        formatter.dump_failures result
+        formatter.dump_summary result.summary
+      end
     end
 
     private

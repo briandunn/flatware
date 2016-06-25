@@ -75,7 +75,6 @@ module Flatware
       Process.setpgrp
       formatter = Formatters.load_by_name(runner, options['formatters'])
       passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], fail_fast: options['fail-fast'], worker_count: workers
-      Process.waitall
       exit passed ? 0 : 1
     end
 

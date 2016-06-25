@@ -23,12 +23,16 @@ module Flatware
           puts "Interrupted!"
           checkpoint_handler.summarize
           summarize_remaining
+          puts "\n\nCleaning up. Please wait...\n"
+          Flatware.close!
+          Process.waitall
+          puts "thanks."
           exit 1
         end
         formatter.jobs jobs
-        listen
-      ensure
-        Flatware.close
+        listen.tap do
+          Flatware.close
+        end
       end
 
       def checkpoint_handler
