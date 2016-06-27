@@ -13,12 +13,22 @@ module Flatware
 
     extend self
 
-    attr_reader :jobs
+    attr_reader :args, :jobs, :raw_args
 
-    def extract_jobs_from_args(args=[], out_stream=$stdout, error_stream=$stderr)
-      raw_args = args.dup
+    def configure(args=[], out_stream=$stdout, error_stream=$stderr)
+      @raw_args = args.dup
+      @args = args
       config = ::Cucumber::Cli::Configuration.new(out_stream, error_stream)
       config.parse! args
+
+      config
+    end
+
+    def has_feature_files?(config)
+      (config.feature_files - config.feature_dirs).any?
+    end
+
+    def extract_jobs_from_config(config)
       options = raw_args - args
       @jobs = config.feature_files.map { |file| Job.new file, options }.to_a
     end

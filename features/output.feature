@@ -24,6 +24,14 @@ Feature: Output
     Then the output contains a backtrace
 
     @non-zero
+  Scenario: features dir does not exist
+    When I run flatware
+    Then the output contains the following:
+    """
+    Please create some feature files in the features directory.
+    """
+
+    @non-zero
   Scenario: multiple failure
     Given a cucumber suite with two features that each fail
     When I run flatware
