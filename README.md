@@ -5,7 +5,7 @@
 [code-climate-badge]: https://codeclimate.com/github/briandunn/flatware.png
 [code-climate]: https://codeclimate.com/github/briandunn/flatware
 
-Flatware is a distributed cucumber runner.
+Flatware is a distributed cucumber and rspec runner.
 
 ## Requirements
 
