@@ -5,13 +5,27 @@
 [code-climate-badge]: https://codeclimate.com/github/briandunn/flatware.png
 [code-climate]: https://codeclimate.com/github/briandunn/flatware
 
-Flatware is a distributed cucumber runner.
+Flatware parallelizes your test suite to significantly reduce test time.
 
 ## Requirements
 
-* ZeroMQ > 2.1
+* ZeroMQ > 4.0
 
 ## Installation
+
+### ZeroMQ
+
+#### Linux Ubuntu
+
+See this [webpage](https://tuananh.org/2015/06/16/how-to-install-zeromq-on-ubuntu/) for installation instructions.
+
+#### Mac OSX
+
+```
+brew install zeromq
+```
+
+### Flatware
 
 Add this to your Gemfile:
 
@@ -19,9 +33,15 @@ Add this to your Gemfile:
 gem 'flatware'
 ```
 
-and `bundle install`.
+then run
+
+```
+bundle install
+```
 
 ## Usage
+
+### Cucumber
 
 To run your entire suite with the default cucumber options, just:
 
@@ -29,17 +49,33 @@ To run your entire suite with the default cucumber options, just:
 $ flatware
 ```
 
+### RSpec
+
+To run your entire suite with the default rspec options, just:
+
+```
+$ flatware rspec
+```
+
+### Options
+
 If you'd like to limit the number of forked workers, you can pass the 'w' flag:
 
 ```
 $ flatware -w 3
 ```
 
-You can also pass most cucumber options to Flatware. For example, to run only
+You can also pass most cucumber/rspec options to Flatware. For example, to run only
 features that are not tagged 'javascript', you can:
 
 ```
 $ flatware cucumber -t ~@javascript
+```
+
+Additionally, for either cucumber or rspec you can specify a directory:
+
+```
+$ flatware rspec spec/features
 ```
 
 ## Typical Usage in a Rails App
@@ -71,43 +107,15 @@ Now you are ready to rock:
 $ flatware
 ```
 
-## Planned Features
+## How it works
 
-* Reliable enough to use as part of your Continuous Integration system
-* Always accounts for every feature you ask it to run
-* Use heuristics to run your slowest tests first
-* speak Cucumber's DRB protocol; if you know how to use Spork you know how to
-  use Flatware
-
-## Design Goals
-
-### Maintainable
-
-* Fully test at an integration level. Don't be afraid to change the code. If you
-  break it you'll know.
-* Couple as loosely as possible, and only to the most stable/public bits of
-  Cucumber.
-
-### Minimal
-
-* Projects define their own preperation scripts
-* Only distribute to local cores (for now)
-* Only handle cucumber
-
-### Robust
-
-* Depend on a dedicated messaging library
-* Be acountable for completed work; provide progress report regardless of
-  completing the suite.
-
-## Tinkering
-
-Flatware is tested with [aruba][]. In order to get a demo cucumber project you
-can add the `@no-clobber` tag to `features/flatware.feature` and run the test
-with `cucumber features/flatware.feature`. Now you should have a `./tmp/aruba`
-directory. CD there and `flatware` will be in your path so you can tinker away.
-
-[aruba]: https://github.com/cucumber/aruba
+Flatware relies on a message passing system to enable concurrency.
+The main process declares a worker for each cpu in the computer. Each
+worker forks from the main process and is then assigned a portion of the
+test suite.  As the worker runs the test suite it sends progress
+messages to the main process.  These messages are collected and when
+the last worker is finished the main process provides a report on the
+collected progress messages.
 
 ## Resources
 
