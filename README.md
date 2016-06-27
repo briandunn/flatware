@@ -90,14 +90,14 @@ $ flatware
 
 ### Minimal
 
-* Projects define their own preperation scripts
+* Projects define their own preparation scripts
 * Only distribute to local cores (for now)
 * Only handle cucumber
 
 ### Robust
 
 * Depend on a dedicated messaging library
-* Be acountable for completed work; provide progress report regardless of
+* Be accountable for completed work; provide progress report regardless of
   completing the suite.
 
 ## Tinkering
