@@ -5,7 +5,7 @@
 [code-climate-badge]: https://codeclimate.com/github/briandunn/flatware.png
 [code-climate]: https://codeclimate.com/github/briandunn/flatware
 
-Flatware is a distributed cucumber runner.
+Flatware is a distributed cucumber and rspec runner.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ Flatware is a distributed cucumber runner.
 
 Add this to your Gemfile:
 
-```
+```ruby
 gem 'flatware'
 ```
 
@@ -29,7 +29,7 @@ To run your entire suite with the default cucumber options, just:
 $ flatware
 ```
 
-If you'd like to limit the number of forked workers, you can pass the 'w' flag:
+If you'd like to limit the number of forked workers, you can pass the `w` flag:
 
 ```
 $ flatware -w 3
@@ -46,28 +46,28 @@ $ flatware cucumber -t ~@javascript
 
 Add the following to your config/database.yml:
 
-```
+```yml
 test:
   database: foo_test
 ```
 
 becomes:
 
-```
+```yml
 test:
   database: foo_test<%=ENV['TEST_ENV_NUMBER']%>
 ```
 
 Run the following:
 
-```
+```sh
 $ rake db:setup # if not already done
 $ flatware fan rake db:test:prepare
 ```
 
 Now you are ready to rock:
 
-```
+```sh
 $ flatware
 ```
 
@@ -90,14 +90,14 @@ $ flatware
 
 ### Minimal
 
-* Projects define their own preperation scripts
+* Projects define their own preparation scripts
 * Only distribute to local cores (for now)
 * Only handle cucumber
 
 ### Robust
 
 * Depend on a dedicated messaging library
-* Be acountable for completed work; provide progress report regardless of
+* Be accountable for completed work; provide progress report regardless of
   completing the suite.
 
 ## Tinkering
