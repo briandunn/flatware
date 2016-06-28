@@ -10,27 +10,35 @@ require 'flatware/formatters/cucumber/console'
 
 module Flatware
   module Cucumber
+    class Config
+      attr_reader :config, :args
+      def initialize(cucumber_config, args)
+        @config, @args = cucumber_config, args
+      end
+
+      def feature_dir
+        @config.feature_dirs.first
+      end
+
+      def jobs
+        feature_files.map { |file| Job.new file, args }.to_a
+      end
+
+      private
+
+      def feature_files
+        config.feature_files - config.feature_dirs
+      end
+    end
 
     extend self
 
-    attr_reader :args, :jobs, :raw_args
-
     def configure(args=[], out_stream=$stdout, error_stream=$stderr)
-      @raw_args = args.dup
-      @args = args
+      raw_args = args.dup
       config = ::Cucumber::Cli::Configuration.new(out_stream, error_stream)
       config.parse! args
 
-      config
-    end
-
-    def has_feature_files?(config)
-      (config.feature_files - config.feature_dirs).any?
-    end
-
-    def extract_jobs_from_config(config)
-      options = raw_args - args
-      @jobs = config.feature_files.map { |file| Job.new file, options }.to_a
+      Config.new config, raw_args
     end
 
     def run(feature_files=[], options=[])

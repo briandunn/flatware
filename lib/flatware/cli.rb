@@ -25,16 +25,15 @@ module Flatware
       require 'flatware/cucumber'
       config = Cucumber.configure args
 
-      unless Cucumber.has_feature_files?(config)
-        puts "Please create some feature files in the #{config.feature_dirs.first} directory."
+      unless config.jobs.any?
+        puts "Please create some feature files in the #{config.feature_dir} directory."
         exit 1
       end
 
-      jobs = Cucumber.extract_jobs_from_config(config)
       Flatware.verbose = options[:log]
-      worker_count = [workers, jobs.size].min
+      worker_count = [workers, config.jobs.size].min
       Worker.spawn worker_count, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
-      start_sink jobs: jobs, workers: worker_count
+      start_sink jobs: config.jobs, workers: worker_count
     end
 
     worker_option
