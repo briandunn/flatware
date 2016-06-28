@@ -3,8 +3,6 @@ require 'flatware/pids'
 module Flatware
   class CLI < Thor
 
-    default_command :cucumber
-
     def self.processors
       @processors ||= ProcessorInfo.count
     end

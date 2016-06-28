@@ -17,12 +17,12 @@ Feature: Survives weird uses of gherkin
       | sandwitches |       |
       | pancakes    |       |
     """
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the exit status should be 0
     And I see that 2 scenarios where run
     And I see that 6 steps where run
 
     @non-zero
   Scenario: fail with feedback when features do not exist
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the exit status should not be 0

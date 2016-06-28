@@ -5,7 +5,7 @@ Feature: fail on first error
 
   Scenario:
     Given more slow failing features than workers
-    When I run flatware with " --fail-fast"
+    When I run flatware with "cucumber --fail-fast"
     Then I see that not all scenarios were run
 
   Scenario: failing fast is faster

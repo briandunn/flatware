@@ -87,8 +87,8 @@ When /^I time the cucumber suite with (#{runners})$/ do |runner|
   @durations ||= {}
   commands = {
     'cucumber'  => 'cucumber --format progress',
-    'fail-fast' => "flatware -l -w #{max_workers} --fail-fast",
-    'flatware'  => "flatware -l -w #{max_workers}"
+    'fail-fast' => "flatware cucumber -l -w #{max_workers} --fail-fast",
+    'flatware'  => "flatware cucumber -l -w #{max_workers}"
   }
   @durations[runner] = duration do
     run_simple commands[runner], false

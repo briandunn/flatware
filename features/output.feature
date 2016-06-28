@@ -4,7 +4,7 @@ Feature: Output
 
   Scenario: success
     Given a cucumber suite with two features that each sleep for 1 second
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the output contains the following:
     """
     ..
@@ -20,12 +20,12 @@ Feature: Output
     Scenario: failure output
       Given flunk
     """
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the output contains a backtrace
 
     @non-zero
   Scenario: features dir does not exist
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the output contains the following:
     """
     Please create some feature files in the features directory.
@@ -34,7 +34,7 @@ Feature: Output
     @non-zero
   Scenario: multiple failure
     Given a cucumber suite with two features that each fail
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the output contains a summary of failing features
 
     @non-zero
@@ -51,7 +51,7 @@ Feature: Output
       | cow    | moo   |
       | flunk  | boom  |
     """
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the output contains the following:
     """
     ---UUUU
@@ -71,7 +71,7 @@ Feature: Output
     Scenario:
       Then there are two steps
     """
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the output contains the following:
     """
     1 scenario (1 undefined)
@@ -84,7 +84,7 @@ Feature: Output
     Background:
       Given some stuff
     """
-    When I run flatware
+    When I run flatware with "cucumber"
     Then the output contains the following:
     """
     0 scenarios
@@ -127,6 +127,6 @@ Feature: Output
     """
     And an after hook that will raise on @fail-after
     And a before hook that will raise on @fail-before
-    When I run flatware
+    When I run flatware with "cucumber"
     Then I see that 5 scenarios where run
     And I see that 4 scenarios failed
