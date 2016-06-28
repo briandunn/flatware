@@ -14,7 +14,7 @@ require 'flatware/processor_info'
 
 World(Module.new do
   def max_workers
-    return 3 if ENV['TRAVIS'] == 'true'
+    return 3 if travis?
     Flatware::ProcessorInfo.count
   end
 
@@ -42,13 +42,6 @@ After do |scenario|
     end
     Process.waitall
     expect(zombie_pids.size).to(eq(0), "Zombie pids: #{zombie_pids.size}, should be 0")
-  end
-end
-
-After do
-  if travis?
-    system 'flatware clear'
-    Process.waitall
   end
 end
 
