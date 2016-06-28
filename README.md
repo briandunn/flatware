@@ -46,7 +46,7 @@ bundle install
 To run your entire suite with the default cucumber options, just:
 
 ```
-$ flatware
+$ flatware cucumber
 ```
 
 ### RSpec
