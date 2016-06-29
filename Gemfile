@@ -1,3 +1,4 @@
 source 'https://rubygems.org'
-gemspec
+gemspec name: 'flatware'
 gem 'pry'
+gem 'wwtd'

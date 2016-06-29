@@ -3,3 +3,6 @@ before_install:
   - sudo apt-get install -qq libzmq3-dev
 rvm:
   - 2.3.1
+gemfile:
+  - gemfiles/cucumber2.gemfile
+  - gemfiles/cucumber1.gemfile

@@ -37,7 +37,7 @@ Feature: Output
     When I run flatware with "cucumber"
     Then the output contains a summary of failing features
 
-    @non-zero
+    @non-zero @cucumber-1
   Scenario: outlines
     Given the following scenario:
     """
@@ -62,6 +62,31 @@ Feature: Output
     6 steps (1 failed, 5 undefined)
     """
 
+    @non-zero @cucumber-2
+  Scenario: outlines
+    Given the following scenario:
+    """
+    Scenario Outline: old McDonnald
+      Given <animal>
+      When on his farm there was a <animal>
+      Then there was a <sound> <sound> here and a <sound> <sound> there
+
+    Scenarios:
+      | animal | sound |
+      | cow    | moo   |
+      | flunk  | boom  |
+    """
+    When I run flatware with "cucumber"
+    # Then the output contains the following:
+    # """
+    # UUUFUU
+    # """
+    And the output contains the following:
+    """
+    2 scenarios (1 failed, 1 undefined)
+    6 steps (1 failed, 5 undefined)
+    """
+
   Scenario: backgrounds
     Given the following scenario:
     """
@@ -78,6 +103,7 @@ Feature: Output
     2 steps (2 undefined)
     """
 
+    @cucumber-1
   Scenario: background without scenario
     Given the following scenario:
     """
@@ -91,7 +117,7 @@ Feature: Output
     1 step (1 undefined)
     """
 
-    @non-zero
+    @non-zero @cucumber-1
   Scenario: Failures in hooks print a backtrace
     Given the following scenario:
     """

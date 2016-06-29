@@ -30,7 +30,7 @@ module Flatware::Formatters::Cucumber
 
         io.puts format_string "Failing Scenarios:", :failed
         scenarios.select(&with_status(:failed)).sort_by(&:file_colon_line).each do |scenario|
-          io.puts format_string(scenario.file_colon_line, :failed) + format_string(" # Scenario: " + scenario.name, :comment)
+          io.puts format_string(scenario.file_colon_line, :failed) + format_string(" # " + scenario.name, :comment)
         end
         io.puts
       end

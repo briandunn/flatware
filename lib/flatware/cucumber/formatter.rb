@@ -4,7 +4,7 @@ module Flatware
   module Cucumber
     class Formatter
 
-      def initialize(step_mother, *)
+      def initialize(step_mother, path_or_io, options)
         @collector = Collector.new step_mother
         @scenarios = []
         @in_a_step = false
