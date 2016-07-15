@@ -5,7 +5,7 @@ module Flatware
       attr_reader :status, :exception
 
       def initialize(status, exception)
-        @status, @exception = status, serialized(exception)
+        @status, @exception = status, (serialized(exception) if exception)
       end
 
       def passed?
@@ -22,7 +22,8 @@ module Flatware
 
       private
       def serialized(e)
-        SerializedException.new(e.class, e.message, e.backtrace) if e
+        e.backtrace and e.backtrace.unshift e.backtrace.shift.sub(Dir.pwd, '.')
+        SerializedException.new(e.class, e.message, e.backtrace)
       end
     end
   end

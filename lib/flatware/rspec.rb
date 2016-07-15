@@ -11,10 +11,8 @@ module Flatware
       configuration = ::RSpec::Core::Configuration.new
       def configuration.command() 'rspec' end
       options.configure(configuration)
-      configuration.files_to_run.uniq.group_by.with_index do |_,i|
-        i % workers
-      end.values.map do |files|
-        Job.new(files, args)
+      configuration.files_to_run.uniq.map do |file|
+        Job.new(file, args)
       end
     end
 

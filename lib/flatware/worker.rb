@@ -10,12 +10,12 @@ module Flatware
       @task     = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
     end
 
-    def self.spawn(worker_count, runner, dispatch_endpoint, sink_endpoint)
-      worker_count.times do |i|
+    def self.spawn(count:, runner:, dispatch:, sink:)
+      count.times do |i|
         fork do
           $0 = "flatware worker #{i}"
           ENV['TEST_ENV_NUMBER'] = i.to_s
-          new(i, runner, dispatch_endpoint, sink_endpoint).listen
+          new(i, runner, dispatch, sink).listen
         end
       end
     end

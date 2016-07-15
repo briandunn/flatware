@@ -8,20 +8,22 @@ module Flatware
     end
 
     class Server
-      attr_reader :sink, :dispatch, :poller, :workers
+      attr_reader :sink, :dispatch, :poller, :workers, :checkpoints, :jobs, :formatter
 
-      def initialize(jobs:, formatter:, dispatch:, sink:, fail_fast: false, worker_count: 0)
-        @jobs, @formatter, @fail_fast = jobs, formatter, fail_fast
+      def initialize(jobs:, formatter:, dispatch:, sink:, worker_count: 0)
+        @formatter = formatter
+        @jobs = group_jobs(jobs, worker_count)
         @sink = Flatware.socket(ZMQ::PULL, bind: sink)
         @dispatch = Flatware.socket(ZMQ::REP, bind: dispatch)
         @poller = Poller.new(@sink, @dispatch)
         @workers = Set.new(worker_count.times.to_a)
+        @checkpoints = []
       end
 
       def start
         trap 'INT' do
           puts "Interrupted!"
-          checkpoint_handler.summarize
+          formatter.summarize checkpoints
           summarize_remaining
           puts "\n\nCleaning up. Please wait...\n"
           Flatware.close!
@@ -33,10 +35,6 @@ module Flatware
         listen.tap do
           Flatware.close
         end
-      end
-
-      def checkpoint_handler
-        @checkpoint_handler ||= CheckpointHandler.new(formatter, fail_fast?)
       end
 
       def listen
@@ -55,7 +53,7 @@ module Flatware
               dispatch.send 'seppuku'
             end
           when :checkpoint
-            checkpoint_handler.handle! content
+            checkpoints << content
           when :finished
             completed_jobs << content
             formatter.finished content
@@ -64,21 +62,15 @@ module Flatware
           end
           break if workers.empty? and done?
         end
-        checkpoint_handler.summarize
+        formatter.summarize(checkpoints)
         !failures?
       end
 
       private
 
       def failures?
-        checkpoint_handler.had_failures? || completed_jobs.any?(&:failed?)
+        checkpoints.any?(&:failures?) || completed_jobs.any?(&:failed?)
       end
-
-      def fail_fast?
-        @fail_fast
-      end
-
-      attr_reader :jobs, :formatter
 
       def summarize_remaining
         return if remaining_work.empty?
@@ -94,11 +86,20 @@ module Flatware
       end
 
       def done?
-        remaining_work.empty? || checkpoint_handler.done?
+        remaining_work.empty?
       end
 
       def remaining_work
         jobs - completed_jobs
+      end
+
+      def group_jobs(jobs, worker_count)
+        return jobs unless worker_count > 1
+        jobs.group_by.with_index do |_,i|
+          i % worker_count
+        end.values.map do |jobs|
+          Job.new(jobs.map(&:id), jobs.first.args)
+        end
       end
     end
   end

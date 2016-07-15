@@ -54,7 +54,7 @@ Feature: Output
     When I run flatware with "cucumber"
     Then the output contains the following:
     """
-    ---UUUU
+    UUUFUU
     """
     And the output contains the following:
     """
@@ -78,20 +78,7 @@ Feature: Output
     2 steps (2 undefined)
     """
 
-  Scenario: background without scenario
-    Given the following scenario:
-    """
-    Background:
-      Given some stuff
-    """
-    When I run flatware with "cucumber"
-    Then the output contains the following:
-    """
-    0 scenarios
-    1 step (1 undefined)
-    """
-
-    @non-zero
+    @non-zero @wip
   Scenario: Failures in hooks print a backtrace
     Given the following scenario:
     """

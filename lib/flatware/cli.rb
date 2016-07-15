@@ -14,7 +14,6 @@ module Flatware
     class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
 
     worker_option
-    method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
     method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
@@ -29,9 +28,8 @@ module Flatware
       end
 
       Flatware.verbose = options[:log]
-      worker_count = [workers, config.jobs.size].min
-      Worker.spawn worker_count, Cucumber, options['dispatch-endpoint'], options['sink-endpoint']
-      start_sink jobs: config.jobs, workers: worker_count
+      Worker.spawn count: workers, runner: Cucumber, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
+      start_sink jobs: config.jobs, workers: workers
     end
 
     worker_option
@@ -44,7 +42,7 @@ module Flatware
       require 'flatware/rspec'
       jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
       Flatware.verbose = options[:log]
-      Worker.spawn workers, RSpec, options['dispatch-endpoint'], options['sink-endpoint']
+      Worker.spawn count: workers, runner: RSpec, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
       start_sink jobs: jobs, workers: workers
     end
 
@@ -64,7 +62,6 @@ module Flatware
       Process.waitall
     end
 
-
     desc "clear", "kills all flatware processes"
     def clear
       (Flatware.pids - [$$]).each do |pid|
@@ -78,7 +75,7 @@ module Flatware
      $0 = 'flatware sink'
       Process.setpgrp
       formatter = Formatters.load_by_name(runner, options['formatters'])
-      passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], fail_fast: options['fail-fast'], worker_count: workers
+      passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], worker_count: workers
       exit passed ? 0 : 1
     end
 
