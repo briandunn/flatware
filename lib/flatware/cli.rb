@@ -33,7 +33,6 @@ module Flatware
     end
 
     worker_option
-    method_option 'fail-fast', type: :boolean, default: false, desc: "Abort the run on first failure"
     method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'

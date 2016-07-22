@@ -63,31 +63,16 @@ Given /^a cucumber suite with two features that each sleep for (#{A.number}) sec
   end
 end
 
-Given 'more slow failing features than workers' do
-  create_sleep_step_definition
-  create_flunk_step_definition
-  @scenario_count = ((max_workers * 2) + 1)
-  ((max_workers * 2) + 1).times do |feature_number|
-    write_file "features/feature_#{feature_number}.feature", <<-FEATURE
-      Feature: slowly die
-      Scenario: languish
-        Given sleep for 0.5 seconds
-        Then flunk
-    FEATURE
-  end
-end
-
 Given 'a sleepy cucumber suite' do
   step 'a cucumber suite with two features that each sleep for 1 second'
 end
 
-runners = Regexp.union %w[cucumber flatware fail-fast]
+runners = Regexp.union %w[cucumber flatware]
 
 When /^I time the cucumber suite with (#{runners})$/ do |runner|
   @durations ||= {}
   commands = {
     'cucumber'  => 'cucumber --format progress',
-    'fail-fast' => "flatware cucumber -l -w #{max_workers} --fail-fast",
     'flatware'  => "flatware cucumber -l -w #{max_workers}"
   }
   @durations[runner] = duration do
@@ -106,10 +91,6 @@ When /^I run flatware(?: with "([^"]+)")?$/ do |args|
   @duration = duration do
     run_simple command
   end
-end
-
-Then /^the suite finishes in less than (#{A.number}) seconds$/ do |seconds|
-  expect(@duration).to be < seconds
 end
 
 Then /^the output contains the following:$/ do |string|
@@ -152,17 +133,6 @@ Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count,
   expect(match[:count].to_i).to eq count
 end
 
-Then 'I see that not all scenarios were run' do
-  match = all_output.match(/^(?<count>\d+) scenarios?/)
-  expect(@scenario_count).to be > match[:count].to_i
-end
-
-Then /^I see that (#{A.number}) (scenario|step)s? failed$/ do |count, thing|
-  match = all_output.match /failed (?<count>\d+) #{thing}s?/
-  expect(match).to be
-  expect(match[:count].to_i).to eq count
-end
-
 Given /^a cucumber suite with two features that each fail$/ do
   create_flunk_step_definition
   2.times do |feature_number|
@@ -187,16 +157,4 @@ end
 
 Then 'I see log messages' do
   expect(flatware_process).to have_output Regexp.new 'flatware sink bind'
-end
-
-Then 'the failure list only includes one feature' do
-  all_output.match /Failing Scenarios:\n(.+?)(?=\n\n)/m
-  expect($1.split("\n").size).to eq 1
-  expect(all_commands.map(&:exit_status)).to eq [1]
-end
-
-Given /^an? (after|before) hook that will raise on (@.+)$/ do |side, tag|
-  write_file "features/support/#{rand}.rb", <<-RB
-    #{side.capitalize}('#{tag}') { expect(1).to eq 2 }
-  RB
 end

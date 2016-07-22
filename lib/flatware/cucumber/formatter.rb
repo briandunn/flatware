@@ -21,7 +21,6 @@ module Flatware
       end
 
       def initialize(config)
-        @fail_fast = config.to_hash[:fail_fast]
         config.on_event :after_test_case,  &method(:on_after_test_case)
         config.on_event :after_test_step,  &method(:on_after_test_step)
         config.on_event :finished_testing, &method(:on_finished_testing)
@@ -30,10 +29,6 @@ module Flatware
       end
 
       private
-
-      def fail_fast?
-        !!@fail_fast
-      end
 
       def reset
         @steps = []
@@ -45,7 +40,6 @@ module Flatware
 
       def on_after_test_case(event)
         scenarios << Scenario.new(event.test_case.name, event.test_case.location.to_s, event.result.to_sym)
-        ::Cucumber.wants_to_quit = true if fail_fast? and not event.result.ok?
       end
 
       def on_step_match(event)
