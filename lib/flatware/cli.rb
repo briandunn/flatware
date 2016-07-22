@@ -14,36 +14,6 @@ module Flatware
     class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
 
     worker_option
-    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
-    desc "cucumber [FLATWARE_OPTS] [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
-    def cucumber(*args)
-      require 'flatware/cucumber'
-      config = Cucumber.configure args
-
-      unless config.jobs.any?
-        puts "Please create some feature files in the #{config.feature_dir} directory."
-        exit 1
-      end
-
-      Flatware.verbose = options[:log]
-      Worker.spawn count: workers, runner: Cucumber, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
-      start_sink jobs: config.jobs, workers: workers, formatter: Flatware::Cucumber::Formatters::Console.new($stdout, $stderr)
-    end
-
-    worker_option
-    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
-    desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
-    def rspec(*rspec_args)
-      require 'flatware/rspec'
-      jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
-      Flatware.verbose = options[:log]
-      Worker.spawn count: workers, runner: RSpec, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
-      start_sink jobs: jobs, workers: workers, formatter: Flatware::RSpec::Formatters::Console.new($stdout, $stderr)
-    end
-
-    worker_option
     desc "fan [COMMAND]", "executes the given job on all of the workers"
     def fan(*command)
       Flatware.verbose = options[:log]
@@ -83,4 +53,12 @@ module Flatware
       options[:workers]
     end
   end
+end
+
+flatware_gems = Gem.loaded_specs.keys.grep(/^flatware-/)
+
+if flatware_gems.count > 0
+  flatware_gems.each(&method(:require))
+else
+  puts "The flatware gem is a dependency of flatware runners for rspec and cucumber.  Try adding flatware-rspec or flatware-cucumber to your Gemfile."
 end

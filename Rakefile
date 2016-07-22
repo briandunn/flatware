@@ -1,7 +1,10 @@
 require 'bundler'
 require 'cucumber/rake/task'
 require 'rspec/core/rake_task'
-Bundler::GemHelper.install_tasks
+
+for gem_name in %w[flatware flatware-rspec flatware-cucumber]
+  Bundler::GemHelper.install_tasks name: gem_name
+end
 
 RSpec::Core::RakeTask.new :spec do |task|
   task.pattern = FileList['spec/**/*_spec.rb']

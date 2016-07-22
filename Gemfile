@@ -1,3 +1,5 @@
 source 'https://rubygems.org'
-gemspec
+gemspec name: 'flatware'
+gemspec name: 'flatware-rspec'
+gemspec name: 'flatware-cucumber'
 gem 'pry'
