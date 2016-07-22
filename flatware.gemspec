@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.files = `git ls-files -- lib/*`.split "\n"
   s.homepage = "http://github.com/briandunn/flatware"
   s.licenses = ["MIT"]
+  s.required_ruby_version = '~> 2.1'
   s.require_paths = ["lib"]
   s.executables = ["flatware"]
   s.rubygems_version = "1.8.10"
