@@ -4,7 +4,7 @@ require 'flatware/cucumber/formatter'
 require 'flatware/cucumber/result'
 require 'flatware/cucumber/scenario_result'
 require 'flatware/cucumber/step_result'
-require 'flatware/formatters/cucumber/console'
+require 'flatware/cucumber/formatters/console'
 
 module Flatware
   module Cucumber

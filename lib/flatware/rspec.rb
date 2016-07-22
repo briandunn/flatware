@@ -1,10 +1,11 @@
 require 'rspec/core'
 require 'rspec/expectations'
-require 'flatware/formatters/rspec/console'
-require 'flatware/rspec/formatter'
 
 module Flatware
   module RSpec
+    require 'flatware/rspec/formatters/console'
+    require 'flatware/rspec/formatter'
+
     def self.extract_jobs_from_args(args, workers:)
 
       options = ::RSpec::Core::ConfigurationOptions.new(args)

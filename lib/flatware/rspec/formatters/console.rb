@@ -1,4 +1,4 @@
-module Flatware::Formatters::RSpec
+module Flatware::RSpec::Formatters
   class Console
     attr_reader :formatter
 

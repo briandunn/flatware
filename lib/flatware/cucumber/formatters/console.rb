@@ -1,7 +1,7 @@
-require 'flatware/formatters/cucumber/console/summary'
+require 'flatware/cucumber/formatters/console/summary'
 require 'cucumber/formatter/console'
 
-module Flatware::Formatters::Cucumber
+module Flatware::Cucumber::Formatters
   class Console
     #for format_string
     include ::Cucumber::Formatter::Console

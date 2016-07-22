@@ -14,7 +14,6 @@ module Flatware
     class_option :log, aliases: "-l", type: :boolean, desc: "Print debug messages to $stderr"
 
     worker_option
-    method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     desc "cucumber [FLATWARE_OPTS] [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
@@ -29,11 +28,10 @@ module Flatware
 
       Flatware.verbose = options[:log]
       Worker.spawn count: workers, runner: Cucumber, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
-      start_sink jobs: config.jobs, workers: workers
+      start_sink jobs: config.jobs, workers: workers, formatter: Flatware::Cucumber::Formatters::Console.new($stdout, $stderr)
     end
 
     worker_option
-    method_option 'formatters', aliases: "-f", type: :array, default: %w[console], desc: "The formatters to use for output"
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
     method_option 'sink-endpoint', type: :string, default: 'ipc://task'
     desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
@@ -42,7 +40,7 @@ module Flatware
       jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
       Flatware.verbose = options[:log]
       Worker.spawn count: workers, runner: RSpec, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
-      start_sink jobs: jobs, workers: workers
+      start_sink jobs: jobs, workers: workers, formatter: Flatware::RSpec::Formatters::Console.new($stdout, $stderr)
     end
 
     worker_option
@@ -70,11 +68,10 @@ module Flatware
 
     private
 
-    def start_sink(jobs:, workers:, runner: current_command_chain.first)
+    def start_sink(jobs:, workers:, formatter:)
      $0 = 'flatware sink'
       Process.setpgrp
-      formatter = Formatters.load_by_name(runner, options['formatters'])
-      passed = Sink.start_server jobs: jobs, formatter: formatter, sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], worker_count: workers
+      passed = Sink.start_server jobs: jobs, formatter: Flatware::Broadcaster.new([formatter]), sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], worker_count: workers
       exit passed ? 0 : 1
     end
 
