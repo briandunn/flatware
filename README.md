@@ -31,10 +31,11 @@ brew install zeromq
 
 ### Flatware
 
-Add this to your Gemfile:
+Add the runners you need to your Gemfile:
 
 ```ruby
-gem 'flatware'
+gem 'flatware-rspec'    # one
+gem 'flatware-cucumber' # or both
 ```
 
 then run
@@ -47,7 +48,7 @@ bundle install
 
 ### Cucumber
 
-To run your entire suite with the default cucumber options, just:
+To run your entire suite with the default cucumber options, add the `flatware-cucumber` gem and just:
 
 ```sh
 $ flatware cucumber
@@ -55,7 +56,7 @@ $ flatware cucumber
 
 ### RSpec
 
-To run your entire suite with the default rspec options, just:
+To run your entire suite with the default rspec options add the `flatware-rspec` gem and just:
 
 ```sh
 $ flatware rspec
