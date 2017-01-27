@@ -1,6 +1,6 @@
 # Flatware [![Build Status][travis-badge]][travis] [![Code Climate][code-climate-badge]][code-climate]
 
-[travis-badge]: https://travis-ci.org/briandunn/flatware.png
+[travis-badge]: https://travis-ci.org/briandunn/flatware.svg?branch=master
 [travis]: http://travis-ci.org/briandunn/flatware
 [code-climate-badge]: https://codeclimate.com/github/briandunn/flatware.png
 [code-climate]: https://codeclimate.com/github/briandunn/flatware
@@ -25,7 +25,11 @@ sudo apt-get install -qq libzmq3-dev
 
 #### Mac OSX
 
+Ruby FFI isn't getting along with the latest ZMQ formula. A tweaked verson is available in the Hashrocket tap.
+
 ```sh
+brew tap hashrocket/formulas
+brew install hashrocket/formulas/zeromq
 brew install zeromq
 ```
 
@@ -138,7 +142,7 @@ $ flatware rspec && flatware cucumber
 
 ## Tinkering
 
-Flatware is tested with [aruba][]. In order to get a demo cucumber project you
+Flatware integration tests use [aruba][a]. In order to get a demo cucumber project you
 can add the `@no-clobber` tag to `features/flatware.feature` and run the test
 with `cucumber features/flatware.feature`. Now you should have a `./tmp/aruba`
 directory. CD there and `flatware` will be in your path so you can tinker away.
@@ -159,18 +163,14 @@ To learn more about the messaging system that Flatware uses, take a look at the
 [excellent ZeroMQ guide][z].
 
 [z]: http://zguide.zeromq.org/page:all
+[a]: https://github.com/cucumber/aruba
 
 ## Contributing to Flatware
 
-* Check out the latest master to make sure the feature hasn't been implemented
-  or the bug hasn't been fixed yet
-* Check out the issue tracker to make sure someone already hasn't requested it
-  and/or contributed it
-* Fork the project
-* Start a feature/bugfix branch
-* Commit and push until you are happy with your contribution
-* Make sure to add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to
-  have your own version, or is otherwise necessary, that is fine, but please
-  isolate to its own commit so I can cherry-pick around it.
+Do whatever you want. I'd love to help make sure Flatware meets your needs.
+
+## About
+
+[![Hashrocket logo](https://hashrocket.com/hashrocket_logo.svg)](https://hashrocket.com)
+
+Flatware is supported by the team at [Hashrocket](https://hashrocket.com), a multidisciplinary design & development consultancy. If you'd like to [work with us](https://hashrocket.com/contact-us/hire-us) or [join our team](https://hashrocket.com/contact-us/jobs), don't hesitate to get in touch.
