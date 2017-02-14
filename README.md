@@ -30,7 +30,6 @@ Ruby FFI isn't getting along with the latest ZMQ formula. A tweaked verson is av
 ```sh
 brew tap hashrocket/formulas
 brew install hashrocket/formulas/zeromq
-brew install zeromq
 ```
 
 ### Flatware
