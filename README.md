@@ -25,7 +25,8 @@ sudo apt-get install -qq libzmq3-dev
 
 #### Mac OSX
 
-Ruby FFI isn't getting along with the latest ZMQ formula. A tweaked verson is available in the Hashrocket tap.
+Ruby FFI isn't getting along with the latest ZMQ formula. A tweaked version is
+available in the Hashrocket tap.
 
 ```sh
 brew tap hashrocket/formulas
