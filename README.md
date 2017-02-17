@@ -25,11 +25,18 @@ sudo apt-get install -qq libzmq3-dev
 
 #### Mac OSX
 
-Ruby FFI isn't getting along with the latest ZMQ formula. A tweaked version is available in the Hashrocket tap.
+
+If you're on macOS 10.12, use the custom hashrocket ZMQ homebrew formula.
 
 ```sh
 brew tap hashrocket/formulas
 brew install hashrocket/formulas/zeromq
+```
+
+The stock homebrew version will likely work on older versions of macOS.
+
+
+```sh
 brew install zeromq
 ```
 
