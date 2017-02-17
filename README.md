@@ -38,8 +38,8 @@ brew install zeromq
 Add the runners you need to your Gemfile:
 
 ```ruby
-gem 'flatware-rspec'    # one
-gem 'flatware-cucumber' # or both
+gem 'flatware-rspec', require: false    # one
+gem 'flatware-cucumber', require: false # or both
 ```
 
 then run
