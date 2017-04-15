@@ -1,6 +1,9 @@
 module Flatware
   class Poller
     attr_reader :sockets, :zmq_poller
+
+    TIMEOUT = 1000
+
     def initialize(*sockets)
       @sockets    = sockets
       @zmq_poller = ZMQ::Poller.new
@@ -8,7 +11,7 @@ module Flatware
     end
 
     def each(&block)
-      while (result = zmq_poller.poll) != 0
+      while (result = zmq_poller.poll(TIMEOUT)) != 0
         raise Error, ZMQ::Util.error_string, caller if result == -1
         for socket in zmq_poller.readables.map &find_wrapped_socket
           yield socket
