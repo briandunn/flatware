@@ -48,7 +48,7 @@ module Flatware
 
     private
 
-    attr_reader :fireable, :task, :sink, :runner
+    attr_reader :task, :sink, :runner
 
     def report_for_duty
       task.send [:ready, id]
