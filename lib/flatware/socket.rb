@@ -38,8 +38,8 @@ module Flatware
     close force: true
   end
 
-  def socket_error
-    raise(Error, ZMQ::Util.error_string, caller) unless @ignore_errors
+  def socket_error(name=nil)
+    raise(Error, [$0,name,ZMQ::Util.error_string].compact.join(' - '), caller) unless @ignore_errors
   end
 
   def log(*message)
@@ -110,7 +110,7 @@ module Flatware
 
     def send(message)
       result = socket.send_string(Marshal.dump(message))
-      Flatware::socket_error if result == -1
+      error if result == -1
       Flatware.log "#@type #@port send #{message}"
       message
     end
@@ -118,7 +118,7 @@ module Flatware
     def connect(port)
       @type = 'connected'
       @port = port
-      Flatware::socket_error unless socket.connect(port) == 0
+      error unless socket.connect(port) == 0
       Flatware.log "connect #@port"
     end
 
@@ -154,20 +154,24 @@ module Flatware
     def bind(port)
       @type = 'bound'
       @port = port
-      Flatware::socket_error unless socket.bind(port) == 0
+      error unless socket.bind(port) == 0
       Flatware.log "bind #@port"
     end
 
     def close
-      Flatware::socket_error unless socket.close == 0
+      error unless socket.close == 0
       Flatware.log "close #@type #@port"
+    end
+
+    def error
+      Flatware::socket_error name
     end
 
     def recv(block: true, marshal: true)
       message = ''
       if block
        result = socket.recv_string(message)
-       Flatware::socket_error if result == -1
+       error if result == -1
       else
         socket.recv_string(message, ZMQ::NOBLOCK)
       end
