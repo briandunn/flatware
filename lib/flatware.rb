@@ -1,5 +1,6 @@
 module Flatware
   require 'flatware/processor_info'
+  require 'flatware/job'
   require 'flatware/cli'
   require 'flatware/poller'
   require 'flatware/sink'

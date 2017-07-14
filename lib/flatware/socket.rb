@@ -5,15 +5,6 @@ require 'logger'
 module Flatware
   Error = Class.new StandardError
 
-  Job = Struct.new :id, :args do
-    attr_accessor :worker
-    attr_writer :failed
-
-    def failed?
-      !!@failed
-    end
-  end
-
   extend self
 
   def logger
