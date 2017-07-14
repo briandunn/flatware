@@ -88,7 +88,7 @@ module Flatware
         socket.setsockopt ZMQ::LINGER, 0
       end if force
       sockets.each(&:close)
-      Flatware::socket_error unless c.terminate == 0
+      Flatware::socket_error unless LibZMQ.zmq_term(c.context) == 0
       Flatware.log "terminated context"
     end
   end
