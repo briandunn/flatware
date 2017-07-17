@@ -12,6 +12,10 @@ module Flatware
         def failures?
           scenarios.any? &:failed?
         end
+
+        def to_stats
+          scenarios.map {|s| [s.file_colon_line, s.steps.map(&:seconds).reduce(:+) || 0] }.to_h
+        end
       end
 
       Scenario = Struct.new :name, :file_colon_line do
@@ -68,7 +72,9 @@ module Flatware
         if really_a_step?(event.test_step) or event.result.undefined?
           @current_scenario ||= Scenario.from_test_case event.test_case
           result = event.result
-          current_scenario.steps << StepResult.new(result.to_sym, result.failed? && result.exception)
+          nanoseconds = 0
+          result.duration.tap {|d| nanoseconds = d.nanoseconds }
+          current_scenario.steps << StepResult.new(result.to_sym, result.failed? && result.exception, nanoseconds)
           Sink::client.progress Result.new result.to_sym
         end
       end

@@ -9,6 +9,10 @@ module Flatware
         @summary, @failures_notification = summary, ExamplesNotification.new(failures_notification.failure_notifications)
       end
 
+      def to_stats
+        summary.examples.map {|e| [e.location_rerun_argument, e.run_time] }.to_h
+      end
+
       def +(other)
         self.class.new summary + other.summary, failures_notification + other.failures_notification
       end

@@ -2,10 +2,12 @@ require 'flatware/serialized_exception'
 module Flatware
   module Cucumber
     class StepResult
-      attr_reader :status, :exception
+      attr_reader :status, :exception, :seconds
 
-      def initialize(status, exception)
-        @status, @exception = status, (serialized(exception) if exception)
+      def initialize(status, exception, nanoseconds)
+        @status = status
+        @exception = (serialized(exception) if exception)
+        @seconds = nanoseconds / 1_000_000_000.0
       end
 
       def passed?
