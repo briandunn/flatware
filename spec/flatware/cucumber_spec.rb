@@ -1,10 +1,14 @@
-require 'spec_helper'
 require 'aruba/rspec'
 
 describe Flatware::Cucumber do
   describe '.configure' do
     it 'coppies the arguments into each job' do
       config = described_class.configure %w[-t@javascript]
+      expect(config.jobs.map(&:args).uniq).to eq [%w[-t@javascript]]
+    end
+
+    it 'does not duplicate a provided filename' do
+      config = described_class.configure %w[features/marvelous.feature -t@javascript]
       expect(config.jobs.map(&:args).uniq).to eq [%w[-t@javascript]]
     end
   end

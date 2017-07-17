@@ -19,7 +19,8 @@ module Flatware
       end
 
       def jobs
-        feature_files.map { |file| Job.new file, args }.to_a
+        job_args = args - feature_files
+        feature_files.map { |file| Job.new file, job_args }.to_a
       end
 
       private
