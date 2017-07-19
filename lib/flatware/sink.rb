@@ -63,6 +63,7 @@ module Flatware
           break if workers.empty? and done?
         end
         formatter.summarize(checkpoints)
+        Stats.write(checkpoints)
         !failures?
       end
 
@@ -95,11 +96,7 @@ module Flatware
 
       def group_jobs(jobs, worker_count)
         return jobs unless worker_count > 1
-        jobs.group_by.with_index do |_,i|
-          i % worker_count
-        end.values.map do |jobs|
-          Job.new(jobs.map(&:id), jobs.first.args)
-        end
+        Job.pack Stats.read.resolve(jobs), worker_count
       end
     end
   end
