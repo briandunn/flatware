@@ -1,5 +1,4 @@
 require 'cucumber'
-require 'flatware/cucumber/checkpoint'
 require 'flatware/cucumber/formatter'
 require 'flatware/cucumber/result'
 require 'flatware/cucumber/scenario_result'
