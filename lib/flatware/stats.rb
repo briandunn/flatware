@@ -1,10 +1,10 @@
 module Flatware
   class Stats
     FILE_NAME='.flatware_stats.yml'
-    attr_reader :stats
+    attr_reader :stats, :mtime
 
-    def initialize(stats)
-      @stats = stats
+    def initialize(stats, mtime=Time.now)
+      @stats, @mtime = stats, mtime
     end
 
     def merge(other)
@@ -17,7 +17,7 @@ module Flatware
         matching_stats = stats.map do |id, duration|
           Job.new(id, args, duration: duration)
         end.select do |stat|
-          stat.match?(job)
+          stat.match?(job) && mtime <= job.mtime
         end
         matching_stats.any? ? matching_stats : [Job.new(job.id, args, duration: 1)]
       end
@@ -28,8 +28,13 @@ module Flatware
     end
 
     def self.read
-      stats = YAML.load_file(FILE_NAME) rescue {}
-      new stats
+      file = Pathname(FILE_NAME)
+      stats, mtime = if file.exist? then
+                       [YAML.load(file.read), file.mtime]
+                     else
+                       [{}, nil]
+                     end
+      new stats, mtime
     end
   end
 end

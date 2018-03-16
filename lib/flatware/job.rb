@@ -13,6 +13,10 @@ module Flatware
       Pathname(id).expand_path.relative_path_from(Pathname(Dir.pwd)).to_path
     end
 
+    def mtime
+      whole_file? && Pathname(id).mtime
+    end
+
     def whole_file?
       not id.include? ':'
     end
