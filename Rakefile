@@ -13,7 +13,7 @@ RSpec::Core::RakeTask.new :spec do |task|
 end
 
 Cucumber::Rake::Task.new :cucumber do |task|
-  task.cucumber_opts = %w[--tags ~@wip]
+  task.cucumber_opts = ['--tags', 'not @wip']
   task.cucumber_opts += %w[-f progress] unless ENV['TRAVIS']
   task.fork = false
 end

@@ -1,9 +1,4 @@
 require 'ostruct'
-A = OpenStruct.new.tap do |a|
-  a.number = Transform /^(\d+(?:\.\d+)?)$/ do |num|
-    num.to_f
-  end
-end
 
 module Support
   def create_flunk_step_definition
@@ -14,7 +9,7 @@ module Support
 
   def create_sleep_step_definition
     write_file "features/step_definitions/sleepy_steps.rb", <<-RB
-      Then 'sleep for $seconds seconds' do |seconds|
+      Then 'sleep for {int} seconds' do |seconds|
         puts seconds
         sleep seconds.to_f
       end
@@ -52,7 +47,7 @@ Given 'I am using a multi core machine' do
   expect(Flatware::ProcessorInfo.count).to be > 1
 end
 
-Given /^a cucumber suite with two features that each sleep for (#{A.number}) seconds?$/ do |sleepyness|
+Given 'a cucumber suite with two features that each sleep for {int} second' do |sleepyness|
   create_sleep_step_definition
   2.times do |feature_number|
     write_file "features/feature_#{feature_number}.feature", <<-FEATURE
@@ -127,7 +122,7 @@ Then 'the output contains a backtrace' do
   expect(flatware_process).to have_output Regexp.new Regexp.escape trace
 end
 
-Then /^I see that (#{A.number}) (scenario|step)s? (?:was|where) run$/ do |count, thing|
+Then /^I see that (\d+) (scenario|step)s? (?:was|where) run$/ do |count, thing|
   match = all_output.match(/^(?<count>\d+) #{thing}s?/)
   expect(match).to(be, "No match found for output #{all_output}")
   expect(match[:count].to_i).to eq count

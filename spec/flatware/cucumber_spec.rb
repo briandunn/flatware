@@ -17,7 +17,7 @@ describe Flatware::Cucumber do
         allow(Flatware).to receive(:ran)
 
         write_file "features/step_definitions/flunky_steps.rb", <<~RB
-          Then 'ran $n', &Flatware.method(:ran)
+          Then('ran {int}', &Flatware.method(:ran))
         RB
 
         write_file "features/feature_1.feature", <<~FEATURE
@@ -40,9 +40,9 @@ describe Flatware::Cucumber do
         described_class.run('features/feature_1.feature', [])
         described_class.run('features/feature_2.feature', [])
 
-        expect(Flatware).to have_received(:ran).with('1')
-        expect(Flatware).to have_received(:ran).with('2')
-        expect(Flatware).to have_received(:ran).with('3')
+        expect(Flatware).to have_received(:ran).with(1)
+        expect(Flatware).to have_received(:ran).with(2)
+        expect(Flatware).to have_received(:ran).with(3)
         expect(Flatware).to have_received(:ran).exactly(3).times
         expect(sink).to have_received(:progress).exactly(3).times
         expect(sink).to have_received(:checkpoint).exactly(2).times

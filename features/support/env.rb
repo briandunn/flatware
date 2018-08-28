@@ -45,7 +45,7 @@ After do |scenario|
   end
 end
 
-After '~@non-zero' do |scenario|
+After 'not @non-zero' do |scenario|
   if flatware_process and scenario.status == :passed
     expect(flatware_process.exit_status).to eq 0
   end

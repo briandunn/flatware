@@ -85,7 +85,7 @@ You can also pass most cucumber/rspec options to Flatware. For example, to run o
 features that are not tagged 'javascript', you can:
 
 ```sh
-$ flatware cucumber -t ~@javascript
+$ flatware cucumber -t 'not @javascript'
 ```
 
 Additionally, for either cucumber or rspec you can specify a directory:

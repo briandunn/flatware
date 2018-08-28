@@ -21,10 +21,10 @@ module Flatware
       end
 
       def initialize(config)
-        config.on_event :after_test_case,  &method(:on_after_test_case)
-        config.on_event :after_test_step,  &method(:on_after_test_step)
-        config.on_event :finished_testing, &method(:on_finished_testing)
-        config.on_event :step_match,       &method(:on_step_match)
+        config.on_event :test_case_finished, &method(:on_test_case_finished)
+        config.on_event :test_step_finished, &method(:on_test_step_finished)
+        config.on_event :test_run_finished,  &method(:on_test_run_finished)
+        config.on_event :step_activated,     &method(:on_step_activated)
         reset
       end
 
@@ -38,22 +38,22 @@ module Flatware
 
       attr_reader :steps, :scenarios, :matched_steps
 
-      def on_after_test_case(event)
+      def on_test_case_finished(event)
         scenarios << Scenario.new(event.test_case.name, event.test_case.location.to_s, event.result.to_sym)
       end
 
-      def on_step_match(event)
+      def on_step_activated(event)
         @matched_steps << event.step_match.location.to_s
       end
 
-      def on_after_test_step(event)
+      def on_test_step_finished(event)
         if really_a_step?(event.test_step) or event.result.undefined?
           steps << StepResult.new(event.result.to_sym, event.result.failed? && event.result.exception)
           Sink::client.progress Result.new event.result.to_sym
         end
       end
 
-      def on_finished_testing(*)
+      def on_test_run_finished(*)
         Sink::client.checkpoint Checkpoint.new steps, scenarios
         reset
       end

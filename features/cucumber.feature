@@ -10,7 +10,7 @@ Feature: cucumber task
     """
 
   Scenario: provide only cucumber options
-    When I run flatware with "cucumber -t~@wip"
+    When I run flatware with "cucumber -t 'not @wip'"
     Then the output contains the following:
     """
     0 scenarios
@@ -18,7 +18,7 @@ Feature: cucumber task
     """
 
   Scenario: provide flatware options and cucumber options
-    When I run flatware with "cucumber -l -t~@wip"
+    When I run flatware with "cucumber -l -t 'not @wip'"
     Then the output contains the following:
     """
     0 scenarios
