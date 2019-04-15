@@ -14,7 +14,7 @@ module Flatware
       end
 
       def failures?
-        summary.failure_count > 0
+        summary.failure_count > 0 || summary.errors_outside_of_examples_count > 0
       end
 
       def failure_notifications
