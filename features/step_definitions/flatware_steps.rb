@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 require 'ostruct'
 
 module Support
   def create_flunk_step_definition
-    write_file "features/step_definitions/flunky_steps.rb", <<-RB
+    write_file 'features/step_definitions/flunky_steps.rb', <<-RB
       Then('flunk') { raise StandardError.new('hell') }
     RB
   end
 
   def create_sleep_step_definition
-    write_file "features/step_definitions/sleepy_steps.rb", <<-RB
+    write_file 'features/step_definitions/sleepy_steps.rb', <<-RB
       Then 'sleep for {int} seconds' do |seconds|
         puts seconds
         sleep seconds.to_f
@@ -21,20 +23,18 @@ module Support
   end
 
   def flatware_process
-    all_commands.find {|command| command.commandline.include? 'flatware' }
+    all_commands.find { |command| command.commandline.include? 'flatware' }
   end
 
   def run_simple(*args)
-    begin
-      super
-    rescue ChildProcess::TimeoutError => e
-      terminate_processes!
-      puts all_output
-      raise
-    end
+    run_command_and_stop(*args)
+  rescue ChildProcess::TimeoutError => e
+    terminate_processes!
+    puts all_output
+    raise
   end
 
-  def duration(&block)
+  def duration
     started_at = Time.now
     yield
   ensure
@@ -71,7 +71,7 @@ When /^I time the cucumber suite with (#{runners})$/ do |runner|
     'flatware'  => "flatware cucumber -l -w #{max_workers}"
   }
   @durations[runner] = duration do
-    run_simple commands[runner], false
+    run_simple commands[runner], fail_on_error: false
   end
 end
 
@@ -81,7 +81,7 @@ Then /^(#{runners}) is the fastest$/ do |runner|
 end
 
 When /^I run flatware(?: with "([^"]+)")?$/ do |args|
-  command = ['flatware', args, '-w', max_workers].flatten.compact.join(" ")
+  command = ['flatware', args, '-w', max_workers].flatten.compact.join(' ')
 
   @duration = duration do
     run_simple command
@@ -102,7 +102,7 @@ end
 Given 'the following scenario:' do |scenario|
   create_flunk_step_definition
 
-  write_file "features/flunk.feature", <<-FEATURE
+  write_file 'features/flunk.feature', <<-FEATURE
   Feature: flunk
 
   #{scenario}
@@ -114,7 +114,6 @@ Given 'the following spec:' do |spec|
 end
 
 Then 'the output contains a backtrace' do
-
   trace = <<-TXT.gsub(/^ +/, '')
     features/flunk.feature:4:in `Given flunk'
   TXT
