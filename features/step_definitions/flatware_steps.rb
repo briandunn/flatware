@@ -26,7 +26,7 @@ module Support
 
   def run_simple(*args)
     begin
-      super
+      run_command_and_stop(*args)
     rescue ChildProcess::TimeoutError => e
       terminate_processes!
       puts all_output
@@ -71,7 +71,7 @@ When /^I time the cucumber suite with (#{runners})$/ do |runner|
     'flatware'  => "flatware cucumber -l -w #{max_workers}"
   }
   @durations[runner] = duration do
-    run_simple commands[runner], false
+    run_simple commands[runner], fail_on_error: false
   end
 end
 
