@@ -35,17 +35,18 @@ describe Flatware::Cucumber do
 
         FEATURE
 
-        Dir.chdir Pathname(Dir.pwd).join('tmp/aruba')
+        Dir.chdir Pathname(Dir.pwd).join('tmp/aruba') do
 
-        described_class.run('features/feature_1.feature', [])
-        described_class.run('features/feature_2.feature', [])
+          described_class.run('features/feature_1.feature', [])
+          described_class.run('features/feature_2.feature', [])
 
-        expect(Flatware).to have_received(:ran).with(1)
-        expect(Flatware).to have_received(:ran).with(2)
-        expect(Flatware).to have_received(:ran).with(3)
-        expect(Flatware).to have_received(:ran).exactly(3).times
-        expect(sink).to have_received(:progress).exactly(3).times
-        expect(sink).to have_received(:checkpoint).exactly(2).times
+          expect(Flatware).to have_received(:ran).with(1)
+          expect(Flatware).to have_received(:ran).with(2)
+          expect(Flatware).to have_received(:ran).with(3)
+          expect(Flatware).to have_received(:ran).exactly(3).times
+          expect(sink).to have_received(:progress).exactly(3).times
+          expect(sink).to have_received(:checkpoint).exactly(2).times
+        end
       end
     end
   end
