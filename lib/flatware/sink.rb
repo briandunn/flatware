@@ -98,7 +98,7 @@ module Flatware
         jobs.group_by.with_index do |_,i|
           i % worker_count
         end.values.map do |jobs|
-          Job.new(jobs.map(&:id), jobs.first.args)
+          Job.new(jobs.map(&:id).flatten, jobs.first.args)
         end
       end
     end
