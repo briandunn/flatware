@@ -57,7 +57,7 @@ module Flatware
 
       def persisted_example_statuses
         ::RSpec::Core::ExampleStatusPersister.load_from(
-          configuration.example_status_persistence_file_path
+          configuration.example_status_persistence_file_path || ''
         )
       end
 
@@ -77,6 +77,6 @@ module Flatware
           bucket.map(&:first)
         end
       end
-     end
+    end
   end
 end
