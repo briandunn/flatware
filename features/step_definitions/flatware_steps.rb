@@ -1,14 +1,15 @@
-require 'ostruct'
+# frozen_string_literal: true
 
+# helper methods available in all steps
 module Support
   def create_flunk_step_definition
-    write_file "features/step_definitions/flunky_steps.rb", <<-RB
+    write_file 'features/step_definitions/flunky_steps.rb', <<-RB
       Then('flunk') { raise StandardError.new('hell') }
     RB
   end
 
   def create_sleep_step_definition
-    write_file "features/step_definitions/sleepy_steps.rb", <<-RB
+    write_file 'features/step_definitions/sleepy_steps.rb', <<-RB
       Then 'sleep for {int} seconds' do |seconds|
         puts seconds
         sleep seconds.to_f
@@ -21,24 +22,14 @@ module Support
   end
 
   def flatware_process
-    all_commands.find {|command| command.commandline.include? 'flatware' }
+    all_commands.find { |command| command.commandline.include? 'flatware' }
   end
 
-  def run_simple(*args)
-    begin
-      run_command_and_stop(*args)
-    rescue ChildProcess::TimeoutError => e
-      terminate_processes!
-      puts all_output
-      raise
-    end
-  end
-
-  def duration(&block)
+  def duration(&_block)
     started_at = Time.now
     yield
   ensure
-    return Time.now - started_at
+    Time.now - started_at
   end
 end
 World(Support)
@@ -47,7 +38,9 @@ Given 'I am using a multi core machine' do
   expect(Flatware::ProcessorInfo.count).to be > 1
 end
 
-Given 'a cucumber suite with two features that each sleep for {int} second' do |sleepyness|
+Given(
+  'a cucumber suite with two features that each sleep for {int} second'
+) do |sleepyness|
   create_sleep_step_definition
   2.times do |feature_number|
     write_file "features/feature_#{feature_number}.feature", <<-FEATURE
@@ -64,36 +57,36 @@ end
 
 runners = Regexp.union %w[cucumber flatware]
 
-When /^I time the cucumber suite with (#{runners})$/ do |runner|
+When(/^I time the cucumber suite with (#{runners})$/) do |runner|
   @durations ||= {}
   commands = {
-    'cucumber'  => 'cucumber --format progress',
-    'flatware'  => "flatware cucumber -l -w #{max_workers}"
+    'cucumber' => 'cucumber --format progress',
+    'flatware' => "flatware cucumber -l -w #{max_workers}"
   }
   @durations[runner] = duration do
-    run_simple commands[runner], fail_on_error: false
+    run_command_and_stop(commands.fetch(runner))
   end
 end
 
-Then /^(#{runners}) is the fastest$/ do |runner|
+Then(/^(#{runners}) is the fastest$/) do |runner|
   expect(@durations.size).to be >= 2
   expect(@durations[runner]).to eq @durations.values.min
 end
 
-When /^I run flatware(?: with "([^"]+)")?$/ do |args|
-  command = ['flatware', args, '-w', max_workers].flatten.compact.join(" ")
+When(/^I run flatware(?: with "([^"]+)")?$/) do |args|
+  command = ['flatware', args, '-w', max_workers].flatten.compact.join(' ')
 
   @duration = duration do
-    run_simple command
+    run_command_and_stop(command, fail_on_exit: false)
   end
 end
 
-Then /^the output contains the following:$/ do |string|
+Then 'the output contains the following:' do |string|
   expect(flatware_process).to have_output Regexp.new Regexp.escape string
 end
 
-Then /^the output contains the following lines:$/ do |string|
-  normalize_space = ->(string) { string.split("\n").map(&:strip).join("\n") }
+Then 'the output contains the following lines:' do |string|
+  normalize_space = ->(s) { s.split("\n").map(&:strip).join("\n") }
   expected_lines = normalize_space[string]
   actual_lines = normalize_space[sanitize_text(flatware_process.output)]
   expect(actual_lines).to include expected_lines
@@ -102,7 +95,7 @@ end
 Given 'the following scenario:' do |scenario|
   create_flunk_step_definition
 
-  write_file "features/flunk.feature", <<-FEATURE
+  write_file 'features/flunk.feature', <<-FEATURE
   Feature: flunk
 
   #{scenario}
@@ -114,7 +107,6 @@ Given 'the following spec:' do |spec|
 end
 
 Then 'the output contains a backtrace' do
-
   trace = <<-TXT.gsub(/^ +/, '')
     features/flunk.feature:4:in `Given flunk'
   TXT
@@ -122,13 +114,13 @@ Then 'the output contains a backtrace' do
   expect(flatware_process).to have_output Regexp.new Regexp.escape trace
 end
 
-Then /^I see that (\d+) (scenario|step)s? (?:was|where) run$/ do |count, thing|
+Then(/^I see that (\d+) (scenario|step)s? (?:was|where) run$/) do |count, thing|
   match = all_output.match(/^(?<count>\d+) #{thing}s?/)
   expect(match).to(be, "No match found for output #{all_output}")
   expect(match[:count].to_i).to eq count
 end
 
-Given /^a cucumber suite with two features that each fail$/ do
+Given 'a cucumber suite with two features that each fail' do
   create_flunk_step_definition
   2.times do |feature_number|
     write_file "features/failing_feature_#{feature_number}.feature", <<-FEATURE
@@ -141,7 +133,7 @@ Given /^a cucumber suite with two features that each fail$/ do
 end
 
 Then 'the output contains a summary of failing features' do
-  trace = <<-TXT.gsub /^ +/, ''
+  trace = <<-TXT.gsub(/^ +/, '')
     Failing Scenarios:
     features/failing_feature_0.feature:3 # Scenario: flunk
     features/failing_feature_1.feature:3 # Scenario: flunk
