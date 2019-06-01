@@ -73,6 +73,17 @@ To run your entire suite with the default rspec options add the `flatware-rspec`
 $ flatware rspec
 ```
 
+The rspec runner can balance worker loads, making your suite even faster.
+
+It forms balaced groups of spec files according to their last run times, if you've set `example_status_persistence_file_path` [in your RSpec config](https://relishapp.com/rspec/rspec-core/v/3-8/docs/command-line/only-failures).
+
+For this to work the configuration option must be loaded before any specs are run. The `.rspec` file is one way to achive this:
+
+    --require spec_helper
+
+But beware, if you're using ActiveRecord in your suite you'll need to avoid doing things that cause it to establish a database connection in `spec_helper.rb`. If ActiveRecord connects before flatware forks off workers, each will die messily. All of this will just work if you're following [the recomended pattern of splitting your helpers into `spec_helper` and `rails_helper`](https://github.com/rspec/rspec-rails/blob/v3.8.2/lib/generators/rspec/install/templates/spec/rails_helper.rb).
+
+
 ### Options
 
 If you'd like to limit the number of forked workers, you can pass the 'w' flag:
