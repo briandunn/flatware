@@ -8,6 +8,7 @@ module Flatware
     class JobBuilder
       extend Forwardable
       attr_reader :args, :workers, :configuration
+
       def_delegators(
         :configuration,
         :files_to_run,
