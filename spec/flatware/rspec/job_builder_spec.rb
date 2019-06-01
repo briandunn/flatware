@@ -17,11 +17,16 @@ describe Flatware::RSpec::JobBuilder do
   let(:persisted_examples) { [] }
   let(:files_to_run) { [] }
 
-  context 'when persisted examples include files in this run' do
+  subject do
+    described_class.new([], workers: 2).jobs
+  end
+
+  context 'when this run includes persisted examples' do
     let(:persisted_examples) do
       [
         { example_id: './fast_1_spec.rb[1]', run_time: '1 second', status: 'passed' },
         { example_id: './fast_2_spec.rb[1]', run_time: '1 second', status: 'passed' },
+        { example_id: './fast_3_spec.rb[1]', run_time: '1 second', status: 'passed' },
         { example_id: './slow_spec.rb[1]', run_time: '2 seconds', status: 'passed' }
       ]
     end
@@ -29,20 +34,34 @@ describe Flatware::RSpec::JobBuilder do
     let(:files_to_run) { %w[fast_1_spec.rb fast_2_spec.rb slow_spec.rb] }
 
     it 'groups them into equal time blocks' do
-      expect(described_class.new([], workers: 2).jobs).to match_array(
+      expect(subject).to match_array(
         [
           have_attributes(id: match_array(%w[./fast_1_spec.rb ./fast_2_spec.rb])),
           have_attributes(id: match_array(%w[./slow_spec.rb]))
         ]
       )
     end
-  end
 
-  describe '#jobs' do
-    it 'balances jobs by expected time' do
-    end
+    context 'and this run includes examples that are not persisted' do
+      let(:files_to_run) do
+        %w[
+          fast_1_spec.rb
+          fast_2_spec.rb
+          slow_spec.rb
+          new_1_spec.rb
+          new_2_spec.rb
+          new_3_spec.rb
+        ]
+      end
 
-    it 'assigns untimed specs round robin' do
+      it 'assigns the remaining files round-robin' do
+        expect(subject).to match_array(
+          [
+            have_attributes(id: include('./new_1_spec.rb', './new_3_spec.rb')),
+            have_attributes(id: include('./new_2_spec.rb'))
+          ]
+        )
+      end
     end
   end
 end
