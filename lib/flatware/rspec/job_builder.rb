@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'forwardable'
+
 module Flatware
   module RSpec
     # groups spec files into one job per worker.
