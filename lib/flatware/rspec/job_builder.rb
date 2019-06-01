@@ -2,79 +2,103 @@
 
 module Flatware
   module RSpec
+    # groups spec files into one job per worker.
+    # reads from persisted example statuses, if available,
+    # and attempts to ballence the jobs accordingly.
     class JobBuilder
+      extend Forwardable
       attr_reader :args, :workers, :configuration
+      def_delegator :configuration, :files_to_run
 
       def initialize(args, workers:)
         @args = args
         @workers = workers
 
         @configuration = ::RSpec.configuration
-        def configuration.command
-          'rspec'
-        end
+        configuration.define_singleton_method(:command) { 'rspec' }
 
         ::RSpec::Core::ConfigurationOptions.new(args).configure(@configuration)
       end
 
       def jobs
-        to_run = configuration
-                 .files_to_run
-                 .uniq.map do |file|
-          ::RSpec::Core::Metadata.relative_path(File.expand_path(file))
+        bucket_count = [files_to_run.size, workers].min
+
+        seconds_per_file = load_persisted_example_statuses
+                           .select(&passing)
+                           .map(&parse_example)
+                           .reduce({}, &sum_by_example_file)
+
+        timed_files, untimed_files = files_to_run
+                                     .map(&method(:normalize_path))
+                                     .reduce(
+                                       [[], []]
+                                     ) do |(timed, untimed), file|
+          if (time = seconds_per_file[file])
+            [timed.append([file, time]), untimed]
+          else
+            [timed, untimed.append(file)]
+          end
         end
 
-        bucket_count = [to_run.size, workers].min
-
-        acc = equal_time_buckets(bucket_count)
-              .each_with_object(buckets: [], unbucketed: to_run) do |bucket, acc|
-          common = (bucket & acc[:unbucketed])
-          acc[:buckets] << common
-          acc[:unbucketed] = acc[:unbucketed] - common
-        end
-
-        # round robin the rest
-        acc[:unbucketed]
-          .each_with_index
-          .each_with_object(acc[:buckets]) do |(entry, i), buckets|
-          buckets[i % buckets.size] << entry
-        end.map do |files|
+        balance_by(bucket_count, timed_files, &:last)
+          .map { |bucket| bucket.map(&:first) }
+          .zip(
+            round_robin(bucket_count, untimed_files)
+          ).map(&:flatten)
+          .map do |files|
           Job.new(files, args)
         end
       end
 
       private
 
-      def seconds_per_file
-        persisted_example_statuses.select { |status:, **| status =~ /passed/i }.map do |example_id:, run_time:, **|
-          seconds = run_time.match(/\d+(\.\d+)?/).to_s.to_f
-          file_name = ::RSpec::Core::Example.parse_id(example_id).first
-          { seconds: seconds, file_name: file_name }
-        end.reduce(Hash.new(0)) do |times, file_name:, seconds:|
-          times.merge(file_name => seconds) { |_, old, new| old + new }
-        end
+      def normalize_path(path)
+        ::RSpec::Core::Metadata.relative_path(File.expand_path(path))
       end
 
-      def persisted_example_statuses
+      def load_persisted_example_statuses
         ::RSpec::Core::ExampleStatusPersister.load_from(
           configuration.example_status_persistence_file_path || ''
         )
       end
 
-      def equal_time_buckets(bucket_count)
-        # find the bucket with the smallest sum and add it there
-        buckets = seconds_per_file
-                  .to_a
-                  .sort_by(&:last)
-                  .reverse
-                  .each_with_object(Array.new(bucket_count) { [] }) do |entry, groups|
-          groups.min_by do |group|
-            group.map(&:last).reduce(:+) || 0
-          end.push(entry)
+      def sum_by_example_file
+        lambda do |times, file_name:, seconds:|
+          times.merge(file_name => seconds) { |_, old = 0, new| old + new }
         end
+      end
 
-        buckets.map do |bucket|
-          bucket.map(&:first)
+      def passing
+        ->(status:, **) { status =~ /pass/i }
+      end
+
+      def parse_example
+        lambda do |example_id:, run_time:, **|
+          seconds = run_time.match(/\d+(\.\d+)?/).to_s.to_f
+          file_name = ::RSpec::Core::Example.parse_id(example_id).first
+          { seconds: seconds, file_name: file_name }
+        end
+      end
+
+      def round_robin(count, items)
+        Array.new(count) { [] }.tap do |groups|
+          items.each_with_index do |entry, i|
+            groups[i % count] << entry
+          end
+        end
+      end
+
+      def balance_by(count, items, &block)
+        # find the group with the smallest sum and add it there
+        Array.new(count) { [] }.tap do |groups|
+          items
+            .sort_by(&block)
+            .reverse
+            .each do |entry|
+            groups.min_by do |group|
+              group.map(&block).reduce(:+) || 0
+            end.push(entry)
+          end
         end
       end
     end
