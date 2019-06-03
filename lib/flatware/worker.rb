@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'flatware/sink/client'
 module Flatware
   class Worker
@@ -11,10 +13,12 @@ module Flatware
     end
 
     def self.spawn(count:, runner:, dispatch:, sink:)
+      Flatware.configuration.before_fork.call
       count.times do |i|
         fork do
           $0 = "flatware worker #{i}"
           ENV['TEST_ENV_NUMBER'] = i.to_s
+          Flatware.configuration.after_fork.call(i)
           new(i, runner, dispatch, sink).listen
         end
       end
@@ -31,12 +35,13 @@ module Flatware
       report_for_duty
       loop do
         job = task.recv
-        break if job == 'seppuku' or @want_to_quit
+        break if (job == 'seppuku') || @want_to_quit
+
         job.worker = id
         sink.started job
         begin
           runner.run job.id, job.args
-        rescue => e
+        rescue StandardError => e
           Flatware.log e
           job.failed = true
         end

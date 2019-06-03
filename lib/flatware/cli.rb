@@ -4,12 +4,34 @@ require 'thor'
 require 'flatware/pids'
 module Flatware
   class CLI < Thor
-    def self.processors
-      @processors ||= ProcessorInfo.count
-    end
+    class << self
+      def processors
+        @processors ||= ProcessorInfo.count
+      end
 
-    def self.worker_option
-      method_option :workers, aliases: '-w', type: :numeric, default: processors, desc: 'Number of concurent processes to run'
+      def worker_option
+        method_option(
+          :workers,
+          aliases: '-w',
+          type: :numeric,
+          default: processors,
+          desc: 'Number of concurent processes to run'
+        )
+      end
+
+      def dispatch_option
+        method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
+      end
+
+      def sink_option
+        method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+      end
+
+      def runner_options
+        worker_option
+        dispatch_option
+        sink_option
+      end
     end
 
     class_option :log, aliases: '-l', type: :boolean, desc: 'Print debug messages to $stderr'
@@ -44,6 +66,15 @@ module Flatware
       Process.setpgrp
       passed = Sink.start_server jobs: jobs, formatter: Flatware::Broadcaster.new([formatter]), sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], worker_count: workers
       exit passed ? 0 : 1
+    end
+
+    def spawn_workers(runner:)
+      Worker.spawn(
+        count: workers,
+        runner: runner,
+        dispatch: options['dispatch-endpoint'],
+        sink: options['sink-endpoint']
+      )
     end
 
     def log(*args)

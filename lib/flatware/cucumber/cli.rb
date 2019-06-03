@@ -1,11 +1,11 @@
+# frozen_string_literal: true
+
 require 'flatware/cli'
 
 module Flatware
   class CLI
-    worker_option
-    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
-    desc "cucumber [FLATWARE_OPTS] [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
+    runner_options
+    desc 'cucumber [FLATWARE_OPTS] [CUCUMBER_ARGS]', 'parallelizes cucumber with custom arguments'
     def cucumber(*args)
       config = Cucumber.configure args
 
@@ -15,7 +15,8 @@ module Flatware
       end
 
       Flatware.verbose = options[:log]
-      Worker.spawn count: workers, runner: Cucumber, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
+
+      spawn_workers(runner: Cucumber)
       start_sink jobs: config.jobs, workers: workers, formatter: Flatware::Cucumber::Formatters::Console.new($stdout, $stderr)
     end
   end
