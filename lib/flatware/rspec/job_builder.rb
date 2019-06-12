@@ -41,9 +41,9 @@ module Flatware
                                        [[], []]
                                      ) do |(timed, untimed), file|
           if (time = seconds_per_file[file])
-            [timed.append([file, time]), untimed]
+            [timed.push([file, time]), untimed]
           else
-            [timed, untimed.append(file)]
+            [timed, untimed.push(file)]
           end
         end
 
