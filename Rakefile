@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bundler'
 require 'cucumber/rake/task'
 require 'rspec/core/rake_task'
@@ -18,9 +20,9 @@ Cucumber::Rake::Task.new :cucumber do |task|
   task.fork = false
 end
 
-desc "generate connection diagram"
+desc 'generate connection diagram'
 task :diagram do
-  system "dot connections.dot -Tpng > connections.png"
+  system 'dot connections.dot -Tpng > connections.png'
 end
 
-task default: [:spec, :cucumber]
+task default: %i[spec cucumber]

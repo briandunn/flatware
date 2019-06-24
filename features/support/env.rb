@@ -7,9 +7,6 @@ $LOAD_PATH.unshift Pathname.new(__FILE__).dirname.join('../../lib').to_s
 ENV['PATH'] = [Pathname('.').expand_path.join('bin'), ENV['PATH']].join(':')
 
 require 'flatware/pids'
-
-Before { @dirs = ['tmp', "aruba#{ENV['TEST_ENV_NUMBER']}"] }
-
 require 'aruba/cucumber'
 require 'aruba/api'
 require 'rspec/expectations'
@@ -23,7 +20,7 @@ World(Module.new do
   end
 
   def travis?
-    ENV['TRAVIS'] == 'true'
+    ENV.key? 'TRAVIS'
   end
 end)
 
@@ -40,15 +37,19 @@ Before do
 end
 
 After do |_scenario|
-  if all_commands.any?
-    zombie_pids = Flatware.pids_of_group(all_commands[0].pid)
+  all_commands.reject(&:stopped?).each do |command|
+    zombie_pids = Flatware.pids_of_group(command.pid)
 
-    (Flatware.pids - [$PROCESS_ID]).each do |pid|
+    zombie_pids.each do |pid|
+      $stderr.puts "kill #{`ps -oCOMMAND ${pid}`}"
       Process.kill 6, pid
+      Process.wait pid, Process::WUNTRACED
+    rescue Errno::ECHILD
+      next
     end
-    Process.waitall
-    expect(zombie_pids.size).to(
-      eq(0),
+
+    expect(zombie_pids).not_to(
+      be_any,
       "Zombie pids: #{zombie_pids.size}, should be 0"
     )
   end

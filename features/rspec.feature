@@ -8,7 +8,7 @@ Feature: rspec task
       it { expect(true).to eq false }
       end
       """
-    When I run `flatware rspec`
+    When I run flatware with "rspec -l"
     Then the output contains the following:
       """
       F
