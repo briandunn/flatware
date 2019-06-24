@@ -12,7 +12,7 @@ describe Flatware::Cucumber do
   describe 'run', type: :aruba do
     context 'with multiple scenarios in the same file' do
       it 'calls the steps the correct number of times' do
-        sink = instance_double Flatware::Sink::Client, progress: nil, checkpoint: nil
+        sink = double Flatware::Sink::Server, progress: nil, checkpoint: nil
         allow(Flatware::Sink).to receive(:client) { sink }
         allow(Flatware).to receive(:ran)
 

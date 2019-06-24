@@ -52,9 +52,10 @@ describe Flatware::Sink do
 
   context 'there is no work' do
     it 'sumarizes' do
-      worker = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
-      worker.send 'ready'
-      described_class.start_server defaults.merge(jobs: [])
+      allow(DRb).to receive(:start_service).and_return nil
+      allow(DRb).to receive(:thread).and_return []
+      server = described_class::Server.new defaults.merge(jobs: [])
+      server.ready(1)
       expect(formatter).to have_received :summarize
     end
   end

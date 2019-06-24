@@ -1,36 +1,35 @@
-require 'flatware/sink/client'
 module Flatware
   class Worker
-    attr_reader :id
+    attr_reader :sink, :runner, :tries, :id
 
-    def initialize(id, runner, dispatch_endpoint, sink_endpoint)
+    def initialize(id, runner, sink_endpoint)
       @id       = id
       @runner   = runner
-      @sink     = Sink::Client.new sink_endpoint
-      @task     = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
-    end
+      @sink     = DRbObject.new_with_uri sink_endpoint
+      Flatware::Sink.client = @sink
 
-    def self.spawn(count:, runner:, dispatch:, sink:)
-      count.times do |i|
-        fork do
-          $0 = "flatware worker #{i}"
-          ENV['TEST_ENV_NUMBER'] = i.to_s
-          new(i, runner, dispatch, sink).listen
-        end
-      end
-    end
+      @tries = 0
 
-    def listen
       trap 'INT' do
         Flatware.close!
         @want_to_quit = true
         exit(1)
       end
+    end
 
-      Sink.client = sink
-      report_for_duty
+    def self.spawn(count:, runner:, sink:, **)
+      count.times do |i|
+        fork do
+          $0 = "flatware worker #{i}"
+          ENV['TEST_ENV_NUMBER'] = i.to_s
+          new(i, runner, sink).listen
+        end
+      end
+    end
+
+    def listen
       loop do
-        job = task.recv
+        job = sink.ready id
         break if job == 'seppuku' or @want_to_quit
         job.worker = id
         sink.started job
@@ -41,17 +40,14 @@ module Flatware
           job.failed = true
         end
         sink.finished job
-        report_for_duty
       end
       Flatware.close unless @want_to_quit
-    end
-
-    private
-
-    attr_reader :task, :sink, :runner
-
-    def report_for_duty
-      task.send [:ready, id]
+    rescue DRb::DRbConnError
+      @tries += 1
+      if @tries < 10
+        sleep 0.1
+        retry
+      end
     end
   end
 end

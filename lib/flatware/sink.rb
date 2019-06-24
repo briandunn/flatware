@@ -1,4 +1,5 @@
-require 'flatware'
+require 'drb/drb'
+
 module Flatware
   module Sink
     extend self
@@ -7,15 +8,18 @@ module Flatware
       Server.new(*args).start
     end
 
-    class Server
-      attr_reader :sink, :dispatch, :poller, :workers, :checkpoints, :jobs, :formatter
+    attr_accessor :client
 
-      def initialize(jobs:, formatter:, dispatch:, sink:, worker_count: 0)
+    class Server
+      attr_reader :workers, :checkpoints, :jobs, :queue, :formatter, :sink
+
+      def initialize(jobs:, formatter:, sink:, worker_count: 0, **)
+        @sink = sink
         @formatter = formatter
         @jobs = group_jobs(jobs, worker_count)
-        @sink = Flatware.socket(ZMQ::PULL, bind: sink)
-        @dispatch = Flatware.socket(ZMQ::REP, bind: dispatch)
-        @poller = Poller.new(@sink, @dispatch)
+        @queue = @jobs.dup
+        @jobs.freeze
+
         @workers = Set.new(worker_count.times.to_a)
         @checkpoints = []
       end
@@ -32,41 +36,47 @@ module Flatware
           exit 1
         end
         formatter.jobs jobs
-        listen.tap do
-          Flatware.close
-        end
-      end
-
-      def listen
-        que = jobs.dup
-        poller.each do |socket|
-          message, content = socket.recv
-
-          case message
-          when :ready
-            workers << content
-            job = que.shift
-            if job and not done?
-              dispatch.send job
-            else
-              workers.delete content
-              dispatch.send 'seppuku'
-            end
-          when :checkpoint
-            checkpoints << content
-          when :finished
-            completed_jobs << content
-            formatter.finished content
-          else
-            formatter.send message, content
-          end
-          break if workers.empty? and done?
-        end
-        formatter.summarize(checkpoints)
+        DRb.start_service(sink, self)
+        DRb.thread.join
+        Flatware.close
         !failures?
       end
 
+      def ready(worker)
+        job = queue.shift
+        if job and not done?
+          workers << worker
+          job
+        else
+          workers.delete worker
+          check_finished!
+          'seppuku'
+        end
+      end
+
+      def checkpoint(checkpoint)
+        checkpoints << checkpoint
+      end
+
+      def finished(job)
+        completed_jobs << job
+        formatter.finished(job)
+        check_finished!
+      end
+
+      def method_missing(name, *args)
+        Flatware.log(:method_missing, name, *args)
+        formatter.send(name, *args)
+      end
+
       private
+
+      def check_finished!
+        if workers.empty? and done?
+          DRb.stop_service
+          formatter.summarize(checkpoints)
+        end
+      end
 
       def failures?
         checkpoints.any?(&:failures?) || completed_jobs.any?(&:failed?)
@@ -75,10 +85,6 @@ module Flatware
       def summarize_remaining
         return if remaining_work.empty?
         formatter.summarize_remaining remaining_work
-      end
-
-      def log(*args)
-        Flatware.log *args
       end
 
       def completed_jobs

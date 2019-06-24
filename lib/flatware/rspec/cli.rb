@@ -4,7 +4,7 @@ module Flatware
   class CLI
     worker_option
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+    method_option 'sink-endpoint', type: :string, default: 'druby://localhost:8787'
     desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
     def rspec(*rspec_args)
       jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers

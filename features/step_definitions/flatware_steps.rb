@@ -143,5 +143,5 @@ Then 'the output contains a summary of failing features' do
 end
 
 Then 'I see log messages' do
-  expect(flatware_process).to have_output Regexp.new 'flatware sink bind'
+  expect(flatware_process).to have_output Regexp.new 'flatware sink'
 end

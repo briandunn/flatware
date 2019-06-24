@@ -4,7 +4,7 @@ module Flatware
   class CLI
     worker_option
     method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'ipc://task'
+    method_option 'sink-endpoint', type: :string, default: 'druby://localhost:8787'
     desc "cucumber [FLATWARE_OPTS] [CUCUMBER_ARGS]", "parallelizes cucumber with custom arguments"
     def cucumber(*args)
       config = Cucumber.configure args
