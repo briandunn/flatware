@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe Flatware::Sink do
   before { Flatware.close }
-  let(:sink_endpoint) { 'ipc://sink-test' }
-  let(:dispatch_endpoint) { 'ipc://dispatch-test' }
+  let(:sink_endpoint) { 'druby://localhost:8787' }
+
   let! :formatter do
     double 'Formatter', ready: nil,
       summarize: nil, jobs: nil, progress: nil, finished: nil, summarize_remaining: nil
@@ -13,7 +13,6 @@ describe Flatware::Sink do
     {
       formatter: formatter,
       sink: sink_endpoint,
-      dispatch: dispatch_endpoint
     }
   end
 
@@ -52,8 +51,6 @@ describe Flatware::Sink do
 
   context 'there is no work' do
     it 'sumarizes' do
-      allow(DRb).to receive(:start_service).and_return nil
-      allow(DRb).to receive(:thread).and_return []
       server = described_class::Server.new defaults.merge(jobs: [])
       server.ready(1)
       expect(formatter).to have_received :summarize
@@ -63,41 +60,26 @@ describe Flatware::Sink do
   context 'there is outstanding work' do
     context 'and a Result object is received' do
       it 'prints the result' do
-        job       = OpenStruct.new failed?: false
-        socket    = Flatware.socket(ZMQ::PUSH, connect: sink_endpoint)
-        socket.send [:progress, 'progress']
-        socket.send [:finished, job]
+        server = described_class::Server.new jobs: [], **defaults
+        server.progress 'progress'
 
-        described_class.start_server defaults.merge(jobs: [job])
         expect(formatter).to have_received(:progress).with 'progress'
-        expect(formatter).to have_received(:finished).with job
       end
     end
   end
 
   describe '#start_server' do
-    let(:job) { OpenStruct.new failed?: false }
-
-    before do
-      socket = Flatware.socket(ZMQ::PUSH, connect: sink_endpoint)
-      socket.send [:checkpoint, checkpoint]
-      socket.send [:finished, job]
-    end
-
     subject do
-      described_class.start_server defaults.merge(jobs: [job])
+      described_class.start_server defaults
     end
 
-    context 'when there are failures' do
-      let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: true }
 
-      it { should_not be }
-    end
+    context 'returns the server result' do
+      before do
+        allow(described_class::Server).to receive(:new).and_return instance_double(described_class::Server, start: :result)
+      end
 
-    context 'when everything passes' do
-      let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: false }
-
-      it { should be }
+      it { should eq(:result) }
     end
   end
 

@@ -1,7 +1,7 @@
 require 'timeout'
 module WaitingSupport
-  def wait(pid)
-    Timeout.timeout Aruba.config.exit_timeout do
+  def wait(pid, timeout=3)
+    Timeout.timeout 3 do
       Process.wait pid
     end
   end
