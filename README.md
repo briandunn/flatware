@@ -7,39 +7,6 @@
 
 Flatware parallelizes your test suite to significantly reduce test time.
 
-## Requirements
-
-* ZeroMQ > 4.0
-
-## Installation
-
-### ZeroMQ
-
-#### Linux Ubuntu
-
-```sh
-sudo apt-get install -qq libzmq3-dev
-```
-
-(Never you mind the 3. This package contains ZMQ version 4.)
-
-#### Mac OSX
-
-
-If you're on macOS 10.12, use the custom hashrocket ZMQ homebrew formula.
-
-```sh
-brew tap hashrocket/formulas
-brew install hashrocket/formulas/zeromq
-```
-
-The stock homebrew version will likely work on older versions of macOS.
-
-
-```sh
-brew install zeromq
-```
-
 ### Flatware
 
 Add the runners you need to your Gemfile:
@@ -177,10 +144,6 @@ collected progress messages.
 
 ## Resources
 
-To learn more about the messaging system that Flatware uses, take a look at the
-[excellent ZeroMQ guide][z].
-
-[z]: http://zguide.zeromq.org/page:all
 [a]: https://github.com/cucumber/aruba
 
 ## Contributing to Flatware
