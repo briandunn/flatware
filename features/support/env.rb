@@ -41,11 +41,12 @@ After do |_scenario|
     zombie_pids = Flatware.pids_of_group(command.pid)
 
     zombie_pids.each do |pid|
-      $stderr.puts "kill #{`ps -oCOMMAND ${pid}`}"
-      Process.kill 6, pid
-      Process.wait pid, Process::WUNTRACED
-    rescue Errno::ECHILD
-      next
+      begin
+        Process.kill 6, pid
+        Process.wait pid, Process::WUNTRACED
+      rescue Errno::ECHILD
+        next
+      end
     end
 
     expect(zombie_pids).not_to(
