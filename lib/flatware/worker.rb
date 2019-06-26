@@ -1,14 +1,17 @@
+# frozen_string_literal: true
+
+require 'drb/drb'
+
 module Flatware
+  # executes tests and sends results to the sink
   class Worker
-    attr_reader :sink, :runner, :tries, :id
+    attr_reader :sink, :runner, :id
 
     def initialize(id, runner, sink_endpoint)
       @id       = id
       @runner   = runner
       @sink     = DRbObject.new_with_uri sink_endpoint
       Flatware::Sink.client = @sink
-
-      @tries = 0
 
       trap 'INT' do
         @want_to_quit = true
@@ -27,24 +30,40 @@ module Flatware
     end
 
     def listen
-      loop do
-        job = sink.ready id
-        break if job == 'seppuku' or @want_to_quit
-        job.worker = id
-        sink.started job
-        begin
-          runner.run job.id, job.args
-        rescue => e
-          Flatware.log e
-          job.failed = true
+      retrying(times: 10, wait: 0.1) do
+        loop do
+          job = sink.ready id
+          break if (job == 'seppuku') || @want_to_quit
+
+          job.worker = id
+          run job
         end
-        sink.finished job
       end
-    rescue DRb::DRbConnError
-      @tries += 1
-      if @tries < 10
-        sleep 0.1
-        retry
+    end
+
+    private
+
+    def run(job)
+      sink.started job
+      begin
+        runner.run job.id, job.args
+      rescue StandardError => e
+        Flatware.log e
+        job.failed = true
+      end
+      sink.finished job
+    end
+
+    def retrying(times:, wait:)
+      tries = 0
+      begin
+        yield
+      rescue DRb::DRbConnError
+        tries += 1
+        if tries < times
+          sleep wait
+          retry
+        end
       end
     end
   end
