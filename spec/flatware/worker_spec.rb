@@ -27,7 +27,9 @@ describe Flatware::Worker do
 
       it 'retries' do
         worker = subject
-        worker.listen
+        expect do
+          worker.listen
+        end.to raise_error(DRb::DRbConnError)
         expect(sink).to have_received(:ready).exactly(10).times
       end
     end

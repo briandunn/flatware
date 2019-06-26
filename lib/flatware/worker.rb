@@ -55,15 +55,16 @@ module Flatware
     end
 
     def retrying(times:, wait:)
-      tries = 0
+      tries = 1
       begin
         yield
       rescue DRb::DRbConnError
+        raise if tries >= times
+
         tries += 1
-        if tries < times
-          sleep wait
-          retry
-        end
+
+        sleep wait
+        retry
       end
     end
   end
