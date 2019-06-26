@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'flatware/rspec/examples_notification'
 
 module Flatware
@@ -6,7 +8,8 @@ module Flatware
       attr_reader :summary, :failures_notification
 
       def initialize(summary, failures_notification)
-        @summary, @failures_notification = summary, ExamplesNotification.new(failures_notification.failure_notifications)
+        @summary = summary
+        @failures_notification = ExamplesNotification.new(failures_notification.failure_notifications)
       end
 
       def +(other)

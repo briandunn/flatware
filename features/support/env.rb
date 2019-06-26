@@ -22,6 +22,16 @@ World(Module.new do
   def travis?
     ENV.key? 'TRAVIS'
   end
+
+  def default_args(args)
+    free_port = TCPServer.new('localhost', 0).addr[1]
+    [
+      'flatware',
+      args,
+      '-w', max_workers,
+      '--sink-endpoint', "druby://localhost:#{free_port}"
+    ].flatten.compact.join(' ')
+  end
 end)
 
 Before do

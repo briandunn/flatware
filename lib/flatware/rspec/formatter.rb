@@ -1,27 +1,31 @@
+# frozen_string_literal: true
+
 require 'flatware/rspec/checkpoint'
 require 'flatware/rspec/summary'
 require 'rspec/core/formatters/console_codes'
 
 module Flatware
+  # namespace for rspec related stuffs
   module RSpec
     ProgressMessage = Struct.new(:progress)
 
+    # the formatter we pass to rspec
     class Formatter
-      attr_reader :summary, :output
+      attr_reader :summary, :sink, :output
 
-      def initialize(stdout)
-        @output = stdout
+      def initialize(sink)
+        @sink = sink
       end
 
-      def example_passed(example)
+      def example_passed(_example)
         send_progress :passed
       end
 
-      def example_failed(example)
+      def example_failed(_example)
         send_progress :failed
       end
 
-      def example_pending(example)
+      def example_pending(_example)
         send_progress :pending
       end
 
@@ -34,17 +38,26 @@ module Flatware
       end
 
       def close(*)
-        Sink::client.checkpoint Checkpoint.new(summary, @failure_notification)
+        checkpoint = Checkpoint.new(summary, @failure_notification)
+        sink.checkpoint checkpoint
         @failure_notification = nil
       end
 
       private
 
       def send_progress(status)
-        Sink::client.progress ProgressMessage.new status
+        sink.progress ProgressMessage.new status
       end
     end
 
-    ::RSpec::Core::Formatters.register Formatter, :example_passed, :example_failed, :example_pending, :dump_summary, :dump_failures, :close
+    ::RSpec::Core::Formatters.register(
+      Formatter,
+      :example_passed,
+      :example_failed,
+      :example_pending,
+      :dump_summary,
+      :dump_failures,
+      :close
+    )
   end
 end

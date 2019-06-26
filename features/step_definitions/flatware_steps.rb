@@ -63,7 +63,7 @@ When(/^I time the cucumber suite with (#{runners})$/) do |runner|
   @durations ||= {}
   commands = {
     'cucumber' => 'cucumber --format progress',
-    'flatware' => "flatware cucumber -l -w #{max_workers}"
+    'flatware' => default_args('cucumber -l')
   }
   @durations[runner] = duration do
     run_command_and_stop(commands.fetch(runner))
@@ -76,11 +76,13 @@ Then(/^(#{runners}) is the fastest$/) do |runner|
 end
 
 When(/^I run flatware(?: with "([^"]+)")?$/) do |args|
-  command = ['flatware', args, '-w', max_workers].flatten.compact.join(' ')
-
   @duration = duration do
-    run_command_and_stop(command, fail_on_exit: false)
+    run_command_and_stop(default_args(args), fail_on_exit: false)
   end
+end
+
+When('I run flatware with {string} in background') do |args|
+  step("I run `#{default_args(args)}` in background")
 end
 
 Then 'the output contains the following:' do |string|

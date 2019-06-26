@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Aruba.configure do |config|
   config.working_directory = "tmp/aruba#{ENV['TEST_ENV_NUMBER']}"
   config.exit_timeout = 3
