@@ -37,7 +37,7 @@ module Flatware
 
       abort(
         format(
-          'Please create some feature files in the %<dir> directory.',
+          'Please create some feature files in the %<dir>s directory.',
           dir: config.feature_dir
         )
       )

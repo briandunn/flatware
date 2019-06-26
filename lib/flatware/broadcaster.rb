@@ -3,6 +3,7 @@
 module Flatware
   # sends messages to all formatters
   class Broadcaster
+    FORMATTER_MESSAGES = %i[jobs started progress finished summarize].freeze
     attr_reader :formatters
 
     def initialize(formatters)
@@ -10,21 +11,14 @@ module Flatware
     end
 
     def method_missing(name, *args)
-      responding_formatters = formatters.select do |formatter|
-        formatter.respond_to? name
-      end
+      return super unless FORMATTER_MESSAGES.include? name
 
-      return super unless responding_formatters.any?
-
-      responding_formatters.each do |formatter|
-        formatter.send name, *args
-      end
+      formatters.select { |formatter| formatter.respond_to? name }
+                .each { |formatter| formatter.send name, *args }
     end
 
     def respond_to_missing?(name, _include_all)
-      formatters.any? do |formatter|
-        formatter.respond_to? name
-      end
+      FORMATTER_MESSAGES.include? name
     end
   end
 end
