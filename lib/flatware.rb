@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'logger'
 
 module Flatware
@@ -7,10 +9,10 @@ module Flatware
   require 'flatware/worker'
   require 'flatware/broadcaster'
 
-  extend self
+  module_function
 
   def logger
-    @logger ||= Logger.new($stderr)
+    @logger ||= Logger.new($stderr, level: :fatal)
   end
 
   def logger=(logger)
@@ -18,16 +20,16 @@ module Flatware
   end
 
   def log(*message)
-    if Exception === message.first
+    case message.first
+    when Exception
       logger.error message.first
-    elsif verbose?
-      logger.info ([$0] + message).join(' ')
+    else
+      logger.info(([$PROGRAM_NAME] + message).join(' '))
     end
     message
   end
 
-  attr_writer :verbose
-  def verbose?
-    !!@verbose
+  def verbose=(bool)
+    logger.level = bool ? :debug : :fatal
   end
 end

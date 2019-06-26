@@ -1,16 +1,25 @@
+# frozen_string_literal: true
+
 require 'flatware/cli'
 
 module Flatware
+  # rspec thor command
   class CLI
     worker_option
-    method_option 'dispatch-endpoint', type: :string, default: 'ipc://dispatch'
-    method_option 'sink-endpoint', type: :string, default: 'druby://localhost:8787'
-    desc "rspec [FLATWARE_OPTS]", "parallelizes rspec"
+    method_option(
+      'sink-endpoint',
+      type: :string,
+      default: 'druby://localhost:8787'
+    )
+    desc 'rspec [FLATWARE_OPTS]', 'parallelizes rspec'
     def rspec(*rspec_args)
       jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
+      formatter = Flatware::RSpec::Formatters::Console.new($stdout, $stderr)
       Flatware.verbose = options[:log]
-      Worker.spawn count: workers, runner: RSpec, dispatch: options['dispatch-endpoint'], sink: options['sink-endpoint']
-      start_sink jobs: jobs, workers: workers, formatter: Flatware::RSpec::Formatters::Console.new($stdout, $stderr)
+      Worker.spawn count: workers, runner: RSpec, sink: options['sink-endpoint']
+      start_sink(jobs: jobs,
+                 workers: workers,
+                 formatter: formatter)
     end
   end
 end

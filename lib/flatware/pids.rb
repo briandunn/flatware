@@ -3,11 +3,12 @@
 require 'etc'
 
 module Flatware
-  extend self
+  module_function
+
   # All the pids of all the processes called flatware on this machine
   def pids
     pids_command.map do |row|
-      row =~ /(\d+).*flatware/ and $1.to_i
+      row =~ /(\d+).*flatware/ && Regexp.last_match(1).to_i
     end.compact
   end
 
