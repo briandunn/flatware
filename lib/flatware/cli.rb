@@ -2,10 +2,12 @@
 
 require 'thor'
 require 'flatware/pids'
+require 'etc'
+
 module Flatware
   class CLI < Thor
     def self.processors
-      @processors ||= ProcessorInfo.count
+      @processors ||= Etc.nprocessors
     end
 
     def self.worker_option

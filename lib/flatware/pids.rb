@@ -1,4 +1,7 @@
-require 'flatware/processor_info'
+# frozen_string_literal: true
+
+require 'etc'
+
 module Flatware
   extend self
   # All the pids of all the processes called flatware on this machine
@@ -9,7 +12,7 @@ module Flatware
   end
 
   def pids_command
-    case ProcessorInfo.operating_system
+    case Etc.uname.fetch(:sysname)
     when 'Darwin'
       `ps -c -opid,pgid,command`
     when 'Linux'

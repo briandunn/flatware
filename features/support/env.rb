@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'pathname'
+require 'etc'
 
 $LOAD_PATH.unshift Pathname.new(__FILE__).dirname.join('../../lib').to_s
 
@@ -10,13 +11,12 @@ require 'flatware/pids'
 require 'aruba/cucumber'
 require 'aruba/api'
 require 'rspec/expectations'
-require 'flatware/processor_info'
 
 World(Module.new do
   def max_workers
     return 3 if travis?
 
-    Flatware::ProcessorInfo.count
+    Etc.nprocessors
   end
 
   def travis?
