@@ -30,7 +30,6 @@ module Flatware
           formatter.summarize checkpoints
           summarize_remaining
           puts "\n\nCleaning up. Please wait...\n"
-          Flatware.close!
           Process.waitall
           puts "thanks."
           exit 1
@@ -38,7 +37,6 @@ module Flatware
         formatter.jobs jobs
         DRb.start_service(sink, self)
         DRb.thread.join
-        Flatware.close
         !failures?
       end
 

@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Flatware::Sink do
-  before { Flatware.close }
   let(:sink_endpoint) { 'druby://localhost:8787' }
 
   let! :formatter do

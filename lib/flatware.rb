@@ -31,10 +31,4 @@ module Flatware
   def verbose?
     !!@verbose
   end
-
-  def close!
-  end
-
-  def close
-  end
 end

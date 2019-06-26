@@ -11,7 +11,6 @@ module Flatware
       @tries = 0
 
       trap 'INT' do
-        Flatware.close!
         @want_to_quit = true
         exit(1)
       end
@@ -41,7 +40,6 @@ module Flatware
         end
         sink.finished job
       end
-      Flatware.close unless @want_to_quit
     rescue DRb::DRbConnError
       @tries += 1
       if @tries < 10
