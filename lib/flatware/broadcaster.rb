@@ -3,7 +3,15 @@
 module Flatware
   # sends messages to all formatters
   class Broadcaster
-    FORMATTER_MESSAGES = %i[jobs started progress finished summarize].freeze
+    FORMATTER_MESSAGES = %i[
+      jobs
+      started
+      progress
+      finished
+      summarize
+      summarize_remaining
+    ].freeze
+
     attr_reader :formatters
 
     def initialize(formatters)
