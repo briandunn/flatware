@@ -8,11 +8,12 @@ module Flatware
         @formatted = notification.fully_formatted '!', default_colorizer
       end
 
-      def fully_formatted(i, _=nil)
-        formatted.sub '!', i.to_s
+      def fully_formatted(index, _ = nil)
+        formatted.sub '!', index.to_s
       end
 
       private
+
       def default_colorizer
         ::RSpec::Core::Formatters::ConsoleCodes
       end

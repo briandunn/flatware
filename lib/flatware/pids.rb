@@ -7,23 +7,26 @@ module Flatware
 
   # All the pids of all the processes called flatware on this machine
   def pids
-    pids_command.map do |row|
-      row =~ /(\d+).*flatware/ && Regexp.last_match(1).to_i
-    end.compact
+    ps.select { |command:, **| command =~ /flatware/ }
+      .map { |pid:, **| pid }
   end
 
-  def pids_command
-    case Etc.uname.fetch(:sysname)
-    when 'Darwin'
-      `ps -c -opid,pgid,command`
-    when 'Linux'
-      `ps -opid,pgid,command`
-    end.split("\n")[1..-1]
+  def ps
+    args = case Etc.uname.fetch(:sysname)
+           when 'Darwin'
+             ' -c '
+           else
+             ''
+           end
+    `ps -opid=,pgid=,command= #{args}`.split("\n").map do |row|
+      pid, pgid, command = row.split(' ', 3)
+      Hash[%i[pid pgid command].zip([pid, pgid].map(&:to_i) + [command])]
+    end
   end
 
   def pids_of_group(group_pid)
-    pids_command.map(&:split).map do |pid, pgid, _|
-      pid.to_i if pgid.to_i == group_pid
-    end.compact
+    ps
+      .select { |pgid:, **| pgid == group_pid }
+      .map { |pid:, **| pid }
   end
 end

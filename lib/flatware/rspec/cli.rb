@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'flatware/cli'
+require 'flatware/rspec'
+require 'flatware/rspec/formatters/console'
 
 module Flatware
   # rspec thor command

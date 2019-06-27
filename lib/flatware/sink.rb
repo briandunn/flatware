@@ -2,13 +2,19 @@ require 'drb/drb'
 
 module Flatware
   module Sink
-    extend self
+    module_function
 
     def start_server(*args)
       Server.new(*args).start
     end
 
-    attr_accessor :client
+    def client
+      @client
+    end
+
+    def client=(client)
+      @client = client
+    end
 
     class Server
       attr_reader :workers, :checkpoints, :jobs, :queue, :formatter, :sink
@@ -25,15 +31,7 @@ module Flatware
       end
 
       def start
-        trap 'INT' do
-          puts "Interrupted!"
-          formatter.summarize checkpoints
-          summarize_remaining
-          puts "\n\nCleaning up. Please wait...\n"
-          Process.waitall
-          puts "thanks."
-          exit 1
-        end
+        trap_interrupt
         formatter.jobs jobs
         DRb.start_service(sink, self)
         DRb.thread.join
@@ -42,7 +40,7 @@ module Flatware
 
       def ready(worker)
         job = queue.shift
-        if job and not done?
+        if job && !done?
           workers << worker
           job
         else
@@ -63,17 +61,34 @@ module Flatware
       end
 
       def method_missing(name, *args)
-        Flatware.log(:method_missing, name, *args)
+        super unless formatter.respond_to?(name)
+        Flatware.log(name, *args)
         formatter.send(name, *args)
+      end
+
+      def respond_to_missing?(name, include_all)
+        formatter.respond_to?(name, include_all)
       end
 
       private
 
-      def check_finished!
-        if workers.empty? and done?
-          DRb.stop_service
-          formatter.summarize(checkpoints)
+      def trap_interrupt
+        trap 'INT' do
+          puts 'Interrupted!'
+          formatter.summarize checkpoints
+          summarize_remaining
+          puts "\n\nCleaning up. Please wait...\n"
+          Process.waitall
+          puts 'thanks.'
+          exit 1
         end
+      end
+
+      def check_finished!
+        return unless workers.empty? && done?
+
+        DRb.stop_service
+        formatter.summarize(checkpoints)
       end
 
       def failures?
@@ -82,6 +97,7 @@ module Flatware
 
       def summarize_remaining
         return if remaining_work.empty?
+
         formatter.summarize_remaining remaining_work
       end
 
@@ -99,10 +115,13 @@ module Flatware
 
       def group_jobs(jobs, worker_count)
         return jobs unless worker_count > 1
-        jobs.group_by.with_index do |_,i|
-          i % worker_count
-        end.values.map do |jobs|
-          Job.new(jobs.map(&:id).flatten, jobs.first.args)
+
+        jobs
+          .group_by
+          .with_index { |_, i| i % worker_count }
+          .values
+          .map do |job_group|
+          Job.new(job_group.map(&:id).flatten, jobs.first.args)
         end
       end
     end

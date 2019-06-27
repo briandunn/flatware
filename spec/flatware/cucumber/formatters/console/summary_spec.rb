@@ -4,19 +4,51 @@ require 'flatware/cucumber/formatters/console/summary'
 describe Flatware::Cucumber::Formatters::Console::Summary do
   let(:summary) { described_class.new steps, scenarios, io }
   let(:io) { StringIO.new }
-  let(:passed) { double 'passed step', status: :passed, failed?: false, failed_outside_step?: false }
-  let(:failed) { double 'failed step', status: :failed, failed?: true, exception: exception, file_colon_line: "features/failed.feature:3", name: "failed", failed_outside_step?: false  }
-  let(:failed2) { double 'failed step 2', status: :failed, failed?: true, exception: exception, file_colon_line: "features/failed_2.feature:8", name: "failed_2", failed_outside_step?: false }
+  let(:passed) do
+    double(
+      'passed step',
+      status: :passed,
+      failed?: false,
+      failed_outside_step?: false
+    )
+  end
+  let(:failed) do
+    double(
+      'failed step',
+      status: :failed,
+      failed?: true,
+      exception: exception,
+      file_colon_line: 'features/failed.feature:3',
+      name: 'failed',
+      failed_outside_step?: false
+    )
+  end
+  let(:failed2) do
+    double(
+      'failed step 2',
+      status: :failed,
+      failed?: true,
+      exception: exception,
+      file_colon_line: 'features/failed_2.feature:8',
+      name: 'failed_2',
+      failed_outside_step?: false
+    )
+  end
 
   let(:exception) do
-    double 'Exception',  backtrace: %w'backtrace', message: 'message', class: 'class'
+    double(
+      'Exception',
+      backtrace: %w[backtrace],
+      message: 'message',
+      class: 'class'
+    )
   end
 
   let(:steps) { [] }
   let(:scenarios) { [] }
 
   before { summary.summarize }
-  subject { io.tap(&:rewind).read.gsub /\e[^m]+m/, '' }
+  subject { io.tap(&:rewind).read.gsub(/\e[^m]+m/, '') }
 
   context 'with a passed scenario' do
     let(:scenarios) { [passed] }
@@ -52,7 +84,4 @@ describe Flatware::Cucumber::Formatters::Console::Summary do
       should include 'backtrace'
     end
   end
-
 end
-
-

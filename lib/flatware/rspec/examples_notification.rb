@@ -5,7 +5,8 @@ module Flatware
       attr_reader :failure_notifications
 
       def initialize(failure_notifications)
-        @failure_notifications = failure_notifications.map(&ExampleNotification.method(:new))
+        @failure_notifications = failure_notifications
+                                 .map(&ExampleNotification.method(:new))
       end
 
       def +(other)

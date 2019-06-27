@@ -2,7 +2,8 @@ require 'drb/drb'
 
 module Flatware
   module Sink
-    extend self
+    module_function
+
     attr_accessor :client
 
     class Client

@@ -27,11 +27,12 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/briandunn/flatware'
 
   s.licenses = ['MIT']
-  s.required_ruby_version = '~> 2.1'
+  s.required_ruby_version = '~> 2.3'
   s.require_paths = ['lib']
   s.executables = ['flatware']
   s.rubygems_version = '1.8.10'
   s.add_dependency %(thor), '~> 0.13'
   s.add_development_dependency %(aruba), '~> 0.14'
   s.add_development_dependency %(rake), '~> 10.1.0'
+  s.add_development_dependency %(rubocop), '~> 0.72.0'
 end

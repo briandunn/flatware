@@ -11,11 +11,15 @@ module Flatware
 
     class Summary < ::RSpec::Core::Notifications::SummaryNotification
       def +(other)
-        self.class.new(*zip(other).map {|a,b| a + b})
+        self.class.new(*zip(other).map { |a, b| a + b })
       end
 
       def self.from_notification(summary)
-        serialized_examples = [summary.examples, summary.failed_examples, summary.pending_examples].map do |examples|
+        serialized_examples = [
+          summary.examples,
+          summary.failed_examples,
+          summary.pending_examples
+        ].map do |examples|
           examples.map(&Example.method(:new))
         end
 
