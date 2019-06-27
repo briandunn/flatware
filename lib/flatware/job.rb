@@ -4,7 +4,7 @@ module Flatware
     attr_writer :failed
 
     def failed?
-      !!@failed
+      @failed == true
     end
   end
 end

@@ -3,8 +3,9 @@
 require 'bundler'
 require 'cucumber/rake/task'
 require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
 
-for gem_name in %w[flatware flatware-rspec flatware-cucumber]
+%w[flatware flatware-rspec flatware-cucumber].each do |gem_name|
   Bundler::GemHelper.install_tasks name: gem_name
 end
 
@@ -13,6 +14,8 @@ RSpec::Core::RakeTask.new :spec do |task|
   task.rspec_opts = %w[-f doc] if ENV['TRAVIS']
   task.verbose = false
 end
+
+RuboCop::RakeTask.new :lint
 
 Cucumber::Rake::Task.new :cucumber do |task|
   task.cucumber_opts = ['--tags', 'not @wip']
@@ -25,4 +28,4 @@ task :diagram do
   system 'dot connections.dot -Tpng > connections.png'
 end
 
-task default: %i[spec cucumber]
+task default: %i[lint spec cucumber]

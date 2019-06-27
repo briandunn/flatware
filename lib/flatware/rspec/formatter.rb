@@ -13,15 +13,15 @@ module Flatware
         @output = stdout
       end
 
-      def example_passed(example)
+      def example_passed(_example)
         send_progress :passed
       end
 
-      def example_failed(example)
+      def example_failed(_example)
         send_progress :failed
       end
 
-      def example_pending(example)
+      def example_pending(_example)
         send_progress :pending
       end
 
@@ -34,17 +34,25 @@ module Flatware
       end
 
       def close(*)
-        Sink::client.checkpoint Checkpoint.new(summary, @failure_notification)
+        Sink.client.checkpoint Checkpoint.new(summary, @failure_notification)
         @failure_notification = nil
       end
 
       private
 
       def send_progress(status)
-        Sink::client.progress ProgressMessage.new status
+        Sink.client.progress ProgressMessage.new status
       end
     end
 
-    ::RSpec::Core::Formatters.register Formatter, :example_passed, :example_failed, :example_pending, :dump_summary, :dump_failures, :close
+    ::RSpec::Core::Formatters.register(
+      Formatter,
+      :example_passed,
+      :example_failed,
+      :example_pending,
+      :dump_summary,
+      :dump_failures,
+      :close
+    )
   end
 end

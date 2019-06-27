@@ -1,7 +1,6 @@
 require 'cucumber'
 require 'flatware/cucumber/formatter'
 require 'flatware/cucumber/result'
-require 'flatware/cucumber/scenario_result'
 require 'flatware/cucumber/step_result'
 require 'flatware/cucumber/formatters/console'
 require 'flatware/cucumber/cli'
@@ -11,7 +10,8 @@ module Flatware
     class Config
       attr_reader :config, :args
       def initialize(cucumber_config, args)
-        @config, @args = cucumber_config, args
+        @config = cucumber_config
+        @args = args
       end
 
       def feature_dir
@@ -29,9 +29,9 @@ module Flatware
       end
     end
 
-    extend self
+    module_function
 
-    def configure(args, out_stream=$stdout, error_stream=$stderr)
+    def configure(args, out_stream = $stdout, error_stream = $stderr)
       raw_args = args.dup
       cli_config = ::Cucumber::Cli::Configuration.new(out_stream, error_stream)
       cli_config.parse! args + %w[--format Flatware::Cucumber::Formatter]

@@ -1,33 +1,39 @@
-module Flatware::RSpec::Formatters
-  class Console
-    attr_reader :formatter
+require 'rspec/core'
 
-    def initialize(out, err)
-      ::RSpec::configuration.tty = true
-      ::RSpec::configuration.color = true
-      @formatter = ::RSpec::Core::Formatters::ProgressFormatter.new(out)
-    end
+module Flatware
+  module RSpec
+    module Formatters
+      class Console
+        attr_reader :formatter
 
-    def progress(result)
-      formatter.send(message_for(result),nil)
-    end
+        def initialize(out, _err)
+          ::RSpec.configuration.tty = true
+          ::RSpec.configuration.color = true
+          @formatter = ::RSpec::Core::Formatters::ProgressFormatter.new(out)
+        end
 
-    def summarize(checkpoints)
-      result = checkpoints.reduce :+
-      if result
-        formatter.dump_failures result
-        formatter.dump_summary result.summary
+        def progress(result)
+          formatter.send(message_for(result), nil)
+        end
+
+        def summarize(checkpoints)
+          return if checkpoints.empty?
+
+          result = checkpoints.reduce :+
+          formatter.dump_failures result
+          formatter.dump_summary result.summary
+        end
+
+        private
+
+        def message_for(result)
+          {
+            passed: :example_passed,
+            failed: :example_failed,
+            pending: :example_pending
+          }.fetch result.progress
+        end
       end
-    end
-
-    private
-
-    def message_for(result)
-      {
-        passed:  :example_passed,
-        failed:  :example_failed,
-        pending: :example_pending
-      }.fetch result.progress
     end
   end
 end

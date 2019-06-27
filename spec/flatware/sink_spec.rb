@@ -4,14 +4,21 @@ describe Flatware::Sink do
   let(:sink_endpoint) { 'druby://localhost:8787' }
 
   let! :formatter do
-    double 'Formatter', ready: nil,
-      summarize: nil, jobs: nil, progress: nil, finished: nil, summarize_remaining: nil
+    double(
+      'Formatter',
+      ready: nil,
+      summarize: nil,
+      jobs: nil,
+      progress: nil,
+      finished: nil,
+      summarize_remaining: nil
+    )
   end
 
   let :defaults do
     {
       formatter: formatter,
-      sink: sink_endpoint,
+      sink: sink_endpoint
     }
   end
 
@@ -22,8 +29,10 @@ describe Flatware::Sink do
       # disable rspec trap
       orig = trap 'INT', 'DEFAULT'
 
-      unless child_io = IO.popen("-")
-        allow(formatter).to receive(:summarize_remaining) { puts 'signal was captured' }
+      unless (child_io = IO.popen('-'))
+        allow(formatter).to receive(:summarize_remaining) do
+          puts 'signal was captured'
+        end
         described_class.start_server defaults.merge(jobs: [job])
       end
 
@@ -44,6 +53,7 @@ describe Flatware::Sink do
         end
       end
       expect(child_io.read).to match(/signal was captured/)
+      child_pids = Flatware.pids { |ppid:, **| ppid == Process.pid }
       expect(child_pids).to_not include pid
     end
   end
@@ -72,10 +82,11 @@ describe Flatware::Sink do
       described_class.start_server defaults
     end
 
-
     context 'returns the server result' do
       before do
-        allow(described_class::Server).to receive(:new).and_return instance_double(described_class::Server, start: :result)
+        allow(described_class::Server).to receive(:new).and_return(
+          instance_double(described_class::Server, start: :result)
+        )
       end
 
       it { should eq(:result) }
@@ -83,10 +94,12 @@ describe Flatware::Sink do
   end
 
   it 'groups jobs' do
-    files = (?a..?z).to_a.map(&Flatware::Job.method(:new))
+    files = ('a'..'z').to_a.map(&Flatware::Job.method(:new))
 
-    sink = described_class::Server.new defaults.merge(jobs: files, worker_count: 4)
+    sink = described_class::Server.new(
+      defaults.merge(jobs: files, worker_count: 4)
+    )
 
-    expect(sink.jobs.map {|j| j.id.size}).to eq [7,7,6,6]
+    expect(sink.jobs.map { |j| j.id.size }).to eq [7, 7, 6, 6]
   end
 end

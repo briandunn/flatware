@@ -16,10 +16,13 @@ Gem::Specification.new do |s|
     'LICENSE.txt',
     'README.md'
   ]
-  s.files = `git ls-files -- lib/flatware/rspec`.split("\n") + %w[lib/flatware-rspec.rb lib/flatware/rspec.rb]
+  s.files = (
+            `git ls-files -- lib/flatware/rspec`.split("\n") +
+            %w[lib/flatware-rspec.rb lib/flatware/rspec.rb]
+          )
   s.homepage = 'http://github.com/briandunn/flatware'
   s.licenses = ['MIT']
-  s.required_ruby_version = '~> 2.1'
+  s.required_ruby_version = '~> 2.3'
   s.require_paths = ['lib']
   s.rubygems_version = '1.8.10'
   s.add_dependency %(flatware), Flatware::VERSION
