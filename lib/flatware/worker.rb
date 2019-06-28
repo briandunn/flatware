@@ -3,6 +3,7 @@
 require 'drb/drb'
 
 module Flatware
+  require 'flatware/configuration'
   # executes tests and sends results to the sink
   class Worker
     attr_reader :sink, :runner, :id
@@ -20,10 +21,12 @@ module Flatware
     end
 
     def self.spawn(count:, runner:, sink:, **)
+      Flatware.configuration.before_fork.call
       count.times do |i|
         fork do
           $0 = "flatware worker #{i}"
           ENV['TEST_ENV_NUMBER'] = i.to_s
+          Flatware.configuration.after_fork.call(i)
           new(i, runner, sink).listen
         end
       end

@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 describe Flatware::Worker do
-  context 'when a worker is started' do
-    let(:sink) { double Flatware::Sink::Server }
-    let(:runner) { double 'Runner', run: nil }
+  let(:sink) { double Flatware::Sink::Server }
+  let(:runner) { double 'Runner', run: nil }
 
+  context 'when a worker is started' do
     subject do
       described_class.new(1, runner, 'druby://test:12345')
     end
@@ -45,6 +45,45 @@ describe Flatware::Worker do
           having_attributes(failed?: true)
         )
       end
+    end
+  end
+
+  describe '::spawn' do
+    it 'calls fork hooks' do
+      endpoint = 'drbunix:test'
+      allow(sink).to receive_messages(
+        before_fork: nil,
+        after_fork: nil,
+        ready: 'seppuku'
+      )
+
+      def sink.after_fork(*args)
+        return @after_fork if args.empty?
+
+        @after_fork = args
+      end
+
+      DRb.start_service(endpoint, sink)
+
+      parent_pid = Process.pid
+
+      Flatware.configuration.before_fork do
+        sink.before_fork(parent_pid)
+
+        expect(Process.pid).to eq parent_pid
+      end
+
+      Flatware.configuration.after_fork do |n|
+        expect(n).to eq 0
+        expect(Process.pid).not_to eq parent_pid
+      end
+
+      described_class.spawn(
+        count: 1,
+        runner: runner,
+        sink: endpoint
+      )
+      Process.waitall
     end
   end
 end

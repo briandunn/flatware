@@ -9,7 +9,7 @@ module Flatware
     method_option(
       'sink-endpoint',
       type: :string,
-      default: 'druby://localhost:8787'
+      default: 'drbunix:sink'
     )
     desc(
       'cucumber [FLATWARE_OPTS] [CUCUMBER_ARGS]',

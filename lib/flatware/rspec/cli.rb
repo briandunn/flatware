@@ -11,7 +11,7 @@ module Flatware
     method_option(
       'sink-endpoint',
       type: :string,
-      default: 'druby://localhost:8787'
+      default: 'drbunix:sink'
     )
     desc 'rspec [FLATWARE_OPTS]', 'parallelizes rspec'
     def rspec(*rspec_args)
