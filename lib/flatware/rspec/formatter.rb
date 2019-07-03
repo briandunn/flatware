@@ -7,10 +7,10 @@ module Flatware
     ProgressMessage = Struct.new(:progress)
 
     class Formatter
-      attr_reader :summary, :output
+      attr_reader :summary, :sink
 
-      def initialize(stdout)
-        @output = stdout
+      def initialize(sink)
+        @sink = sink
       end
 
       def example_passed(_example)
@@ -34,14 +34,14 @@ module Flatware
       end
 
       def close(*)
-        Sink.client.checkpoint Checkpoint.new(summary, @failure_notification)
+        sink.checkpoint Checkpoint.new(summary, @failure_notification)
         @failure_notification = nil
       end
 
       private
 
       def send_progress(status)
-        Sink.client.progress ProgressMessage.new status
+        sink.progress ProgressMessage.new status
       end
     end
 

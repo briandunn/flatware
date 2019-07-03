@@ -39,8 +39,8 @@ module Flatware
       Config.new cucumber_config, raw_args
     end
 
-    def run(feature_files, options)
-      runtime(Array(feature_files) + options).run!
+    def run(feature_files, args:, **)
+      runtime(Array(feature_files) + args).run!
     end
 
     def runtime(args)

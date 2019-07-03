@@ -4,13 +4,12 @@ require 'flatware/rspec'
 describe Flatware::RSpec::Formatter do
   context 'when example_passed' do
     it "sends a 'passed' progress message to the sink client" do
-      formatter = described_class.new StringIO.new
+      sink = double Flatware::Sink, progress: nil
+      formatter = described_class.new sink
       example = double 'Example'
-      client = double 'Client', progress: true
-      Flatware::Sink.client = client
       formatter.example_passed example
 
-      expect(client).to have_received(:progress).with anything do |message|
+      expect(sink).to have_received(:progress).with anything do |message|
         expect(message.progress).to eq :passed
         true
       end

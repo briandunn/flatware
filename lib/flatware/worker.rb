@@ -49,7 +49,7 @@ module Flatware
     def run(job)
       sink.started job
       begin
-        runner.run job.id, job.args
+        runner.run job.id, sink: sink, args: job.args
       rescue StandardError => e
         Flatware.log e
         job.failed = true

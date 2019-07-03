@@ -15,15 +15,11 @@ module Flatware
       JobBuilder.new(args, workers: workers).jobs
     end
 
-    def run(job, _options = {})
-      runner = ::RSpec::Core::Runner
-      def runner.trap_interrupt() end
-
-      args = %w[
-        --format Flatware::RSpec::Formatter
-      ] + Array(job)
-
-      runner.run(args, $stderr, $stdout)
+    def run(job, sink:, **)
+      options = ::RSpec::Core::ConfigurationOptions.new(Array(job))
+      runner = ::RSpec::Core::Runner.new(options)
+      runner.configuration.add_formatter(Formatter.new(sink))
+      runner.run($stderr, $stdout)
     end
   end
 end
