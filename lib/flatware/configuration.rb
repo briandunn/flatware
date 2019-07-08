@@ -3,8 +3,7 @@
 module Flatware
   class Configuration
     def initialize
-      @before_fork = -> {}
-      @after_fork = ->(_) {}
+      reset!
     end
 
     def before_fork(&block)
@@ -21,6 +20,11 @@ module Flatware
       else
         @after_fork
       end
+    end
+
+    def reset!
+      @before_fork = -> {}
+      @after_fork = ->(_) {}
     end
   end
 
