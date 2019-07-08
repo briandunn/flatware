@@ -1,6 +1,4 @@
 require 'cucumber'
-require 'flatware/sink'
-require 'ostruct'
 module Flatware
   module Cucumber
     class Formatter
@@ -20,8 +18,10 @@ module Flatware
         end
       end
 
+      attr_accessor :sink
+
       def initialize(config)
-        # FIXME: can we sneak the sink in through the config?
+        @sink = config.sink
         config.on_event :test_case_finished, &method(:on_test_case_finished)
         config.on_event :test_step_finished, &method(:on_test_step_finished)
         config.on_event :test_run_finished,  &method(:on_test_run_finished)
@@ -59,11 +59,11 @@ module Flatware
           result.to_sym,
           result.failed? && result.exception
         )
-        Sink.client.progress Result.new result.to_sym
+        sink.progress Result.new result.to_sym
       end
 
       def on_test_run_finished(*)
-        Sink.client.checkpoint Checkpoint.new steps, scenarios
+        sink.checkpoint Checkpoint.new steps, scenarios
         reset
       end
 

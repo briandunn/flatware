@@ -10,6 +10,9 @@ describe Flatware::Cucumber do
   end
 
   describe 'run', type: :aruba do
+    let(:sink) do
+      instance_double(Flatware::Sink::Server)
+    end
     context 'with multiple scenarios in the same file' do
       it 'calls the steps the correct number of times' do
         sink = double Flatware::Sink::Server, progress: nil, checkpoint: nil
@@ -36,8 +39,13 @@ describe Flatware::Cucumber do
         FEATURE
 
         Dir.chdir Pathname(Dir.pwd).join('tmp/aruba') do
-          described_class.run('features/feature_1.feature', [])
-          described_class.run('features/feature_2.feature', [])
+          1.upto(2) do |i|
+            described_class.run(
+              "features/feature_#{i}.feature",
+              args: [],
+              sink: sink
+            )
+          end
 
           expect(Flatware).to have_received(:ran).with(1)
           expect(Flatware).to have_received(:ran).with(2)

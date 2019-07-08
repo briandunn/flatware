@@ -34,17 +34,32 @@ module Flatware
     def configure(args, out_stream = $stdout, error_stream = $stderr)
       raw_args = args.dup
       cli_config = ::Cucumber::Cli::Configuration.new(out_stream, error_stream)
-      cli_config.parse! args + %w[--format Flatware::Cucumber::Formatter]
+      cli_config.parse! args
       cucumber_config = ::Cucumber::Configuration.new cli_config
       Config.new cucumber_config, raw_args
     end
 
-    def run(feature_files, args:, **)
-      runtime(Array(feature_files) + args).run!
+    def run(feature_files, args:, sink:)
+      cucumber_config = ::Cucumber::Configuration.new(
+        build_cli_config(feature_files, args: args)
+      )
+      unless cucumber_config.respond_to?(:sink) ||
+             cucumber_config.class.prepend(Module.new do
+               define_method(:sink) { sink }
+             end)
+      end
+
+      ::Cucumber::Runtime.new(cucumber_config).run!
     end
 
-    def runtime(args)
-      ::Cucumber::Runtime.new(configure(args).config)
+    def build_cli_config(feature_files, args:)
+      cli_config = ::Cucumber::Cli::Configuration.new($stdout, $stderr)
+      cli_config.parse!(
+        Array(feature_files) +
+        %w[--format Flatware::Cucumber::Formatter] +
+        args
+      )
+      cli_config
     end
   end
 end
