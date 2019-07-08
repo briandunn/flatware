@@ -8,14 +8,6 @@ module Flatware
       Server.new(*args).start
     end
 
-    def client
-      @client
-    end
-
-    def client=(client)
-      @client = client
-    end
-
     class Server
       attr_reader :workers, :checkpoints, :jobs, :queue, :formatter, :sink
 

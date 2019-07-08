@@ -12,7 +12,6 @@ module Flatware
       @id       = id
       @runner   = runner
       @sink     = DRbObject.new_with_uri sink_endpoint
-      Flatware::Sink.client = @sink
 
       trap 'INT' do
         @want_to_quit = true

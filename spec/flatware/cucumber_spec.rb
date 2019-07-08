@@ -16,7 +16,6 @@ describe Flatware::Cucumber do
     context 'with multiple scenarios in the same file' do
       it 'calls the steps the correct number of times' do
         sink = double Flatware::Sink::Server, progress: nil, checkpoint: nil
-        allow(Flatware::Sink).to receive(:client) { sink }
         allow(Flatware).to receive(:ran)
 
         write_file 'features/step_definitions/flunky_steps.rb', <<~RB
