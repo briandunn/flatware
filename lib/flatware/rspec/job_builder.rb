@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+require 'flatware/rspec/patch_configuration'
 
 module Flatware
   module RSpec
@@ -21,8 +22,7 @@ module Flatware
         @args = args
         @workers = workers
 
-        @configuration = ::RSpec.configuration
-        configuration.define_singleton_method(:command) { 'rspec' }
+        @configuration = ::RSpec::Core::Configuration.new
 
         ::RSpec::Core::ConfigurationOptions.new(args).configure(@configuration)
       end

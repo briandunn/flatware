@@ -4,24 +4,34 @@ require 'spec_helper'
 require 'flatware/rspec/job_builder'
 
 describe Flatware::RSpec::JobBuilder do
-  before do
-    allow(::RSpec::Core::ExampleStatusPersister).to(
-      receive(:load_from).and_return(persisted_examples)
-    )
+  let(:job_builder) { described_class.new([], workers: 2) }
 
-    allow(::RSpec.configuration).to(
-      receive(:files_to_run).and_return(files_to_run)
-    )
-  end
-
-  let(:persisted_examples) { [] }
-  let(:files_to_run) { [] }
-
-  subject do
-    described_class.new([], workers: 2).jobs
+  context '.rspec' do
+    it 'reads .rspec' do
+      allow(File).to receive(:exist?) { false }
+      job_builder
+      expect(File).to have_received(:exist?)
+        .with(match(/\.rspec/))
+        .at_least(:once)
+    end
   end
 
   context 'when this run includes persisted examples' do
+    before do
+      allow(::RSpec::Core::ExampleStatusPersister).to(
+        receive(:load_from).and_return(persisted_examples)
+      )
+
+      allow(job_builder.configuration).to(
+        receive(:files_to_run).and_return(files_to_run)
+      )
+    end
+
+    let(:persisted_examples) { [] }
+    let(:files_to_run) { [] }
+
+    subject { job_builder.jobs }
+
     let(:persisted_examples) do
       [
         { example_id: './fast_1_spec.rb[1]', run_time: '1 second' },

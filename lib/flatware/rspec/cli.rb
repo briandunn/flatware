@@ -18,7 +18,7 @@ module Flatware
       jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
       formatter = Flatware::RSpec::Formatters::Console.new($stdout, $stderr)
       Flatware.verbose = options[:log]
-      Worker.spawn count: workers, runner: RSpec, sink: options['sink-endpoint']
+      Worker.spawn count: [workers, jobs.size].min, runner: RSpec, sink: options['sink-endpoint']
       start_sink(jobs: jobs,
                  workers: workers,
                  formatter: formatter)

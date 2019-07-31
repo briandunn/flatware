@@ -14,6 +14,12 @@ RSpec.configure do |config|
   config.after(:each) do
     Flatware.configuration.reset!
   end
+  config.before :each do
+    allow(::RSpec).to receive_messages(
+      world: instance_double(::RSpec::Core::World),
+      configuration: instance_double(::RSpec::Core::Configuration)
+    )
+  end
   config.around :each, :verbose do |example|
     Flatware.verbose = true
     example.run

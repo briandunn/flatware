@@ -13,6 +13,10 @@ module Flatware
         @sink = sink
       end
 
+      def output
+        $stdout
+      end
+
       def example_passed(_example)
         send_progress :passed
       end

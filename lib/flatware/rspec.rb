@@ -2,6 +2,7 @@
 
 require 'rspec/core'
 require 'rspec/expectations'
+require 'flatware/rspec/patch_configuration'
 require 'flatware/rspec/cli'
 
 module Flatware
@@ -15,10 +16,14 @@ module Flatware
       JobBuilder.new(args, workers: workers).jobs
     end
 
-    def run(job, sink:, **)
-      options = ::RSpec::Core::ConfigurationOptions.new(Array(job))
+    def run(files, sink:, args:)
+      options = ::RSpec::Core::ConfigurationOptions.new(Array(files) + args)
+      configuration = ::RSpec.configuration
+      configuration.filter_gems_from_backtrace 'flatware'
+      options.configure(configuration)
+      configuration.add_formatter(Formatter.new(sink))
+
       runner = ::RSpec::Core::Runner.new(options)
-      runner.configuration.add_formatter(Formatter.new(sink))
       runner.run($stderr, $stdout)
     end
   end
