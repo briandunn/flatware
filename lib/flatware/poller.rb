@@ -9,7 +9,10 @@ module Flatware
 
     def each(&block)
       while (result = zmq_poller.poll) != 0
-        raise Error, ZMQ::Util.error_string, caller if result == -1
+        if result == -1
+          next if ZMQ::Util.errno == 4 # continue if poll returns EINTR
+          raise Error, ZMQ::Util.error_string, caller
+        end
         for socket in zmq_poller.readables.map &find_wrapped_socket
           yield socket
         end
