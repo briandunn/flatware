@@ -49,41 +49,47 @@ describe Flatware::Worker do
   end
 
   describe '::spawn' do
-    it 'calls fork hooks' do
-      endpoint = 'drbunix:test'
-      allow(sink).to receive_messages(
-        before_fork: nil,
-        after_fork: nil,
-        ready: 'seppuku'
-      )
-
-      def sink.after_fork(*args)
-        return @after_fork if args.empty?
-
-        @after_fork = args
+    describe 'hooks' do
+      after do
+        Flatware.configuration.reset!
       end
 
-      DRb.start_service(endpoint, sink)
+      it 'calls fork hooks' do
+        endpoint = 'drbunix:test'
+        allow(sink).to receive_messages(
+          before_fork: nil,
+          after_fork: nil,
+          ready: 'seppuku'
+        )
 
-      parent_pid = Process.pid
+        def sink.after_fork(*args)
+          return @after_fork if args.empty?
 
-      Flatware.configuration.before_fork do
-        sink.before_fork(parent_pid)
+          @after_fork = args
+        end
 
-        expect(Process.pid).to eq parent_pid
+        DRb.start_service(endpoint, sink)
+
+        parent_pid = Process.pid
+
+        Flatware.configuration.before_fork do
+          sink.before_fork(parent_pid)
+
+          expect(Process.pid).to eq parent_pid
+        end
+
+        Flatware.configuration.after_fork do |n|
+          expect(n).to eq 0
+          expect(Process.pid).not_to eq parent_pid
+        end
+
+        described_class.spawn(
+          count: 1,
+          runner: runner,
+          sink: endpoint
+        )
+        Process.waitall
       end
-
-      Flatware.configuration.after_fork do |n|
-        expect(n).to eq 0
-        expect(Process.pid).not_to eq parent_pid
-      end
-
-      described_class.spawn(
-        count: 1,
-        runner: runner,
-        sink: endpoint
-      )
-      Process.waitall
     end
   end
 end
