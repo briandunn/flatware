@@ -12,6 +12,7 @@
 AllCops:
   Exclude:
     - tmp/**/*
+    - vendor/**/*
 
 Style/FrozenStringLiteralComment:
   Enabled: false
