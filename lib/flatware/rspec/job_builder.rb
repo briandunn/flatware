@@ -74,22 +74,24 @@ module Flatware
 
       def sum_seconds(statuses)
         statuses.select(&passing)
-                .map(&parse_example)
-                .reduce({}) do |times, file_name:, seconds:|
-          times.merge(file_name => seconds) { |_, old = 0, new| old + new }
+                .map { |example| parse_example(**example) }
+                .reduce({}) do |times, example|
+          times.merge(
+            example.fetch(:file_name) => example.fetch(:seconds)
+          ) do |_, old = 0, new|
+            old + new
+          end
         end
       end
 
       def passing
-        ->(status:, **) { status =~ /pass/i }
+        ->(example) { example.fetch(:status) =~ /pass/i }
       end
 
-      def parse_example
-        lambda do |example_id:, run_time:, **|
-          seconds = run_time.match(/\d+(\.\d+)?/).to_s.to_f
-          file_name = ::RSpec::Core::Example.parse_id(example_id).first
-          { seconds: seconds, file_name: file_name }
-        end
+      def parse_example(example_id:, run_time:, **)
+        seconds = run_time.match(/\d+(\.\d+)?/).to_s.to_f
+        file_name = ::RSpec::Core::Example.parse_id(example_id).first
+        { seconds: seconds, file_name: file_name }
       end
 
       def round_robin(count, items)

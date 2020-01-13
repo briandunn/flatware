@@ -34,5 +34,5 @@ Gem::Specification.new do |s|
   s.add_dependency %(thor), '~> 0.13'
   s.add_development_dependency %(aruba), '~> 0.14'
   s.add_development_dependency %(rake), '~> 10.1.0'
-  s.add_development_dependency %(rubocop), '~> 0.72.0'
+  s.add_development_dependency %(rubocop), '~> 0.79'
 end

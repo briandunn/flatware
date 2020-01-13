@@ -7,7 +7,7 @@ $LOAD_PATH.unshift Pathname.new(__FILE__).dirname.join('../../lib').to_s
 
 ENV['PATH'] = [Pathname('.').expand_path.join('bin'), ENV['PATH']].join(':')
 
-require 'flatware/pids'
+require 'flatware/pid'
 require 'aruba/cucumber'
 require 'aruba/api'
 require 'rspec/expectations'

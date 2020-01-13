@@ -33,7 +33,7 @@ describe Flatware::Sink do
         allow(formatter).to receive(:summarize_remaining) do
           puts 'signal was captured'
         end
-        described_class.start_server defaults.merge(jobs: [job])
+        described_class.start_server(**defaults.merge(jobs: [job]))
       end
 
       trap 'INT', orig
@@ -53,14 +53,14 @@ describe Flatware::Sink do
         end
       end
       expect(child_io.read).to match(/signal was captured/)
-      child_pids = Flatware.pids { |ppid:, **| ppid == Process.pid }
+      child_pids = Flatware.pids { |cpid| cpid.ppid == Process.pid }
       expect(child_pids).to_not include pid
     end
   end
 
   context 'there is no work' do
     it 'sumarizes' do
-      server = described_class::Server.new defaults.merge(jobs: [])
+      server = described_class::Server.new jobs: [], **defaults
       server.ready(1)
       expect(formatter).to have_received :summarize
     end
@@ -79,7 +79,7 @@ describe Flatware::Sink do
 
   describe '#start_server' do
     subject do
-      described_class.start_server defaults
+      described_class.start_server(**defaults)
     end
 
     context 'returns the server result' do
@@ -96,9 +96,7 @@ describe Flatware::Sink do
   it 'groups jobs' do
     files = ('a'..'z').to_a.map(&Flatware::Job.method(:new))
 
-    sink = described_class::Server.new(
-      defaults.merge(jobs: files, worker_count: 4)
-    )
+    sink = described_class::Server.new(jobs: files, worker_count: 4, **defaults)
 
     expect(sink.jobs.map { |j| j.id.size }).to eq [7, 7, 6, 6]
   end

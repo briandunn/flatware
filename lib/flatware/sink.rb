@@ -4,8 +4,8 @@ module Flatware
   module Sink
     module_function
 
-    def start_server(*args)
-      Server.new(*args).start
+    def start_server(**args)
+      Server.new(**args).start
     end
 
     def client

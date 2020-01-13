@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'thor'
-require 'flatware/pids'
+require 'flatware/pid'
 require 'etc'
 
 module Flatware
@@ -46,7 +46,7 @@ module Flatware
 
     desc 'clear', 'kills all flatware processes'
     def clear
-      (Flatware.pids - [$PROCESS_ID]).each do |pid|
+      (Flatware.pids - [Process.pid]).each do |pid|
         Process.kill 6, pid
       end
     end
