@@ -1,4 +1,4 @@
-require 'flatware/pids'
+require 'flatware/pid'
 
 describe 'pids' do
   context 'group pids' do
