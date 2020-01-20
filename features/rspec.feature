@@ -21,7 +21,7 @@ Feature: rspec task
       """
       Failures:
 
-      1) fail should eq false
+      1) fail is expected to eq false
       Failure/Error: it { expect(true).to eq false }
 
       expected: false
