@@ -1,7 +1,13 @@
 require 'spec_helper'
+require 'drb'
 
 describe Flatware::Sink do
-  let(:sink_endpoint) { 'druby://localhost:8787' }
+  let(:sink_endpoint) do
+    server = TCPServer.new('127.0.0.1', 0)
+    port = server.addr[1]
+    server.close
+    "druby://localhost:#{port}"
+  end
 
   let! :formatter do
     double(
@@ -26,35 +32,19 @@ describe Flatware::Sink do
     it 'exits' do
       job = double 'job', id: 'int.feature'
 
-      # disable rspec trap
-      orig = trap 'INT', 'DEFAULT'
+      IO.popen('-') do |f|
+        if f
+          sleep 1
+          Process.kill 'INT', f.pid
 
-      unless (child_io = IO.popen('-'))
-        allow(formatter).to receive(:summarize_remaining) do
-          puts 'signal was captured'
-        end
-        described_class.start_server(**defaults.merge(jobs: [job]))
-      end
+          expect(f.read).to match(/Interrupted/)
 
-      trap 'INT', orig
-      pid = child_io.pid
-      sleep 0.1
-      retries = 0
-
-      begin
-        Process.kill 'INT', pid
-        wait pid
-      rescue Timeout::Error
-        retries += 1
-        if retries < 3
-          retry
+          child_pids = Flatware.pids { |cpid| cpid.ppid == Process.pid }
+          expect(child_pids).to_not include f.pid
         else
-          exit(1)
+          described_class.start_server(**defaults, jobs: [job])
         end
       end
-      expect(child_io.read).to match(/signal was captured/)
-      child_pids = Flatware.pids { |cpid| cpid.ppid == Process.pid }
-      expect(child_pids).to_not include pid
     end
   end
 

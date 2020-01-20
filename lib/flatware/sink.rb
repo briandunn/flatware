@@ -40,7 +40,7 @@ module Flatware
 
       def ready(worker)
         job = queue.shift
-        if job && !done?
+        if job && !(remaining_work.empty? || interruped?)
           workers << worker
           job
         else
@@ -73,19 +73,32 @@ module Flatware
       private
 
       def trap_interrupt
+        Thread.main[:signals] = Queue.new
+
+        Thread.new(&method(:handle_interrupt))
+
         trap 'INT' do
-          puts 'Interrupted!'
-          formatter.summarize checkpoints
-          summarize_remaining
-          puts "\n\nCleaning up. Please wait...\n"
-          Process.waitall
-          puts 'thanks.'
-          exit 1
+          Thread.main[:signals] << :int
         end
       end
 
+      def handle_interrupt
+        Thread.main[:signals].pop
+        puts 'Interrupted!'
+        summarize_remaining
+        puts "\n\nCleaning up. Please wait...\n"
+        Thread.main.kill
+        Process.waitall
+        abort 'thanks.'
+      end
+
+      def interruped?
+        signals = Thread.main[:signals]
+        signals && !signals.empty?
+      end
+
       def check_finished!
-        return unless workers.empty? && done?
+        return unless [workers, remaining_work].all?(&:empty?)
 
         DRb.stop_service
         formatter.summarize(checkpoints)
@@ -96,6 +109,7 @@ module Flatware
       end
 
       def summarize_remaining
+        formatter.summarize(checkpoints)
         return if remaining_work.empty?
 
         formatter.summarize_remaining remaining_work
@@ -103,10 +117,6 @@ module Flatware
 
       def completed_jobs
         @completed_jobs ||= []
-      end
-
-      def done?
-        remaining_work.empty?
       end
 
       def remaining_work
