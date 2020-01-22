@@ -17,7 +17,7 @@ module Flatware
     end
 
     class Server
-      attr_reader :workers, :checkpoints, :jobs, :queue, :formatter, :sink
+      attr_reader :workers, :checkpoints, :jobs, :queue, :formatter, :sink, :completed_jobs
 
       def initialize(jobs:, formatter:, sink:, worker_count: 0, **)
         @sink = sink
@@ -25,6 +25,7 @@ module Flatware
         @jobs = group_jobs(jobs, worker_count)
         @queue = @jobs.dup
         @jobs.freeze
+        @completed_jobs = []
 
         @workers = Set.new(worker_count.times.to_a)
         @checkpoints = []
@@ -87,7 +88,6 @@ module Flatware
         puts 'Interrupted!'
         summarize_remaining
         puts "\n\nCleaning up. Please wait...\n"
-        Thread.main.kill
         Process.waitall
         abort 'thanks.'
       end
@@ -113,10 +113,6 @@ module Flatware
         return if remaining_work.empty?
 
         formatter.summarize_remaining remaining_work
-      end
-
-      def completed_jobs
-        @completed_jobs ||= []
       end
 
       def remaining_work
