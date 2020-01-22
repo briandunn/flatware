@@ -17,7 +17,15 @@ module Flatware
     end
 
     class Server
-      attr_reader :workers, :checkpoints, :jobs, :queue, :formatter, :sink, :completed_jobs
+      attr_reader(
+        :checkpoints,
+        :completed_jobs,
+        :formatter,
+        :jobs,
+        :queue,
+        :sink,
+        :workers
+      )
 
       def initialize(jobs:, formatter:, sink:, worker_count: 0, **)
         @sink = sink
@@ -47,7 +55,7 @@ module Flatware
         else
           workers.delete worker
           check_finished!
-          'seppuku'
+          Job.sentinel
         end
       end
 
@@ -89,7 +97,8 @@ module Flatware
         summarize_remaining
         puts "\n\nCleaning up. Please wait...\n"
         Process.waitall
-        abort 'thanks.'
+        puts 'done.'
+        abort
       end
 
       def interruped?

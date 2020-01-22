@@ -25,20 +25,28 @@ module Flatware
         end
 
         def summarize_remaining(remaining)
-          list = remaining.flat_map(&:id).sort.each_with_index.map do |example, index|
-            "%4d) %s" % [index.next, example]
-          end.join("\n")
-
           formatter.output.puts(colorizer.wrap(<<~MESSAGE, :detail))
 
-          The following specs weren't run:
+            The following specs weren't run:
 
-          #{list}
+            #{spec_list(remaining)}
 
           MESSAGE
         end
 
         private
+
+        def spec_list(remaining)
+          remaining
+            .flat_map(&:id).sort.each_with_index
+            .map do |example, index|
+            format(
+              '%<index>4d) %<example>s',
+              index: index.next,
+              example: example
+            )
+          end.join("\n")
+        end
 
         def colorizer
           ::RSpec::Core::Formatters::ConsoleCodes

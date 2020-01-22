@@ -13,7 +13,6 @@ module Flatware
       @runner   = runner
       @sink     = DRbObject.new_with_uri sink_endpoint
       Flatware::Sink.client = @sink
-
     end
 
     def self.spawn(count:, runner:, sink:, **)
@@ -30,16 +29,12 @@ module Flatware
 
     def listen
       retrying(times: 10, wait: 0.1) do
-        loop do
-          break if @want_to_quit
-          job = sink.ready self
-          break if (job == 'seppuku')
-
+        job = sink.ready id
+        until want_to_quit? || job.sentinel?
           job.worker = id
+          sink.started job
           run job
-
-        rescue Interrupt
-          @want_to_quit = true
+          job = sink.ready id
         end
       end
     end
@@ -47,20 +42,28 @@ module Flatware
     private
 
     def run(job)
-      sink.started job
-      begin
-        runner.run job.id, job.args
-      rescue StandardError => e
-        Flatware.log e
-        job.failed = true
-      end
+      runner.run job.id, job.args
       sink.finished job
+    rescue Interrupt
+      want_to_quit!
+    rescue StandardError => e
+      Flatware.log e
+      job.failed!
+      sink.finished job
+    end
+
+    def want_to_quit!
+      @want_to_quit = true
+    end
+
+    def want_to_quit?
+      @want_to_quit == true
     end
 
     def retrying(times:, wait:)
       tries = 1
       begin
-        yield unless @want_to_quit
+        yield unless want_to_quit?
       rescue DRb::DRbConnError
         raise if tries >= times
 

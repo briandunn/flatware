@@ -5,6 +5,7 @@ require 'spec_helper'
 describe Flatware::Worker do
   let(:sink) { double Flatware::Sink::Server }
   let(:runner) { double 'Runner', run: nil }
+  let(:sentinel) { instance_double(Flatware::Job, sentinel?: true) }
 
   context 'when a worker is started' do
     subject do
@@ -16,7 +17,7 @@ describe Flatware::Worker do
     end
 
     it 'exits when dispatch is done' do
-      allow(sink).to receive(:ready).and_return('seppuku')
+      allow(sink).to receive(:ready).and_return(sentinel)
       subject.listen
     end
 
@@ -38,7 +39,7 @@ describe Flatware::Worker do
       it 'marks the job as failed' do
         job = Flatware::Job.new
         allow(sink).to receive_messages(started: nil, finished: nil)
-        allow(sink).to receive(:ready).and_return(job, 'seppuku')
+        allow(sink).to receive(:ready).and_return(job, sentinel)
         allow(runner).to receive(:run).and_raise(StandardError)
         subject.listen
         expect(sink).to have_received(:finished).with(
@@ -59,7 +60,7 @@ describe Flatware::Worker do
         allow(sink).to receive_messages(
           before_fork: nil,
           after_fork: nil,
-          ready: 'seppuku'
+          ready: sentinel
         )
 
         def sink.after_fork(*args)
