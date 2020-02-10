@@ -48,8 +48,9 @@ For this to work the configuration option must be loaded before any specs are ru
 
     --require spec_helper
 
-But beware, if you're using ActiveRecord in your suite you'll need to avoid doing things that cause it to establish a database connection in `spec_helper.rb`. If ActiveRecord connects before flatware forks off workers, each will die messily. All of this will just work if you're following [the recomended pattern of splitting your helpers into `spec_helper` and `rails_helper`](https://github.com/rspec/rspec-rails/blob/v3.8.2/lib/generators/rspec/install/templates/spec/rails_helper.rb).
-
+But beware, if you're using ActiveRecord in your suite you'll need to avoid doing things that cause it to establish a database connection in `spec_helper.rb`. If ActiveRecord connects before flatware forks off workers, each will die messily. All of this will just work if you're following [the recomended pattern of splitting your helpers into `spec_helper` and `rails_helper`](https://github.com/rspec/rspec-rails/blob/v3.8.2/lib/generators/rspec/install/templates/spec/rails_helper.rb). Another option is to use [the configurable hooks](
+#faster-startup-with-activerecord
+).
 
 ### Options
 
@@ -101,9 +102,31 @@ Now you are ready to rock:
 $ flatware rspec && flatware cucumber
 ```
 
-## Planned Features
+### Faster Startup With ActiveRecord
 
-* Use heuristics to run your slowest tests first
+Flatware has a couple lifecycle callbacks that you can use to avoid booting your app
+over again on every core. One way to take advantage of this via a `spec/flatware_helper.rb` file like so:
+
+```ruby
+Flatware.configure do |conf|
+  conf.before_fork do
+    require 'rails_helper'
+
+    ActiveRecord::Base.connection.disconnect!
+  end
+
+  conf.after_fork do |test_env_number|
+    config = ActiveRecord::Base.connection_config
+
+    ActiveRecord::Base.establish_connection(
+      config.merge(
+        database: config.fetch(:database) + test_env_number.to_s
+      )
+    )
+  end
+end
+```
+Now when I run `bundle exec flatware rspec -r ./spec/flatware_helper` My app only boots once, rather than once per core.
 
 ## Design Goals
 
@@ -134,13 +157,7 @@ directory. CD there and `flatware` will be in your path so you can tinker away.
 
 ## How it works
 
-Flatware relies on a message passing system to enable concurrency.
-The main process declares a worker for each cpu in the computer. Each
-worker forks from the main process and is then assigned a portion of the
-test suite.  As the worker runs the test suite it sends progress
-messages to the main process.  These messages are collected and when
-the last worker is finished the main process provides a report on the
-collected progress messages.
+Flatware relies on a message passing system to enable concurrency. The main process forks a worker for each cpu in the computer. These workers are each given a chunk of the tests to run. The workers report back to the main process about their progress. The main process prints those progress messages. When the last worker is finished the main process prints the results.
 
 ## Resources
 
