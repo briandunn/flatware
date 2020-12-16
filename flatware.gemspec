@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.executables = ['flatware']
   s.rubygems_version = '1.8.10'
   s.add_dependency %(ffi-rzmq), '~> 2.0'
-  s.add_dependency %(thor), '~> 1.0.1'
+  s.add_dependency %(thor), '< 2.0'
   s.add_development_dependency %(aruba), '~> 0.14'
   s.add_development_dependency %(rake), '~> 10.1.0'
 end
