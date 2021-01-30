@@ -42,7 +42,7 @@ module Flatware
     def start_sink(jobs:, workers:, formatter:)
       $0 = 'flatware sink'
       Process.setpgrp
-      passed = Sink.start_server jobs: jobs, formatter: Flatware::Broadcaster.new([formatter]), sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], worker_count: workers
+      passed = Sink.start_server(jobs: jobs, formatter: Flatware::Broadcaster.new([formatter]), sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], worker_count: workers)
       exit passed ? 0 : 1
     end
 

@@ -31,15 +31,15 @@ module Flatware
         bucket_count = [files_to_run.size, workers].min
 
         seconds_per_file = load_persisted_example_statuses
-                           .select(&passing)
-                           .map(&parse_example)
-                           .reduce({}, &sum_by_example_file)
+                             .select(&passing)
+                             .map(&parse_example)
+                             .reduce({}, &sum_by_example_file)
 
         timed_files, untimed_files = files_to_run
-                                     .map(&method(:normalize_path))
-                                     .reduce(
-                                       [[], []]
-                                     ) do |(timed, untimed), file|
+                                       .map(&method(:normalize_path))
+                                       .reduce(
+                                         [[], []]
+                                       ) do |(timed, untimed), file|
           if (time = seconds_per_file[file])
             [timed.push([file, time]), untimed]
           else
@@ -70,19 +70,21 @@ module Flatware
       end
 
       def sum_by_example_file
-        lambda do |times, file_name:, seconds:|
-          times.merge(file_name => seconds) { |_, old = 0, new| old + new }
+        lambda do |times, parsed_example|
+          times.merge(parsed_example[:file_name] => parsed_example[:seconds]) { |_, old = 0, new| old + new }
         end
       end
 
       def passing
-        ->(status:, **) { status =~ /pass/i }
+        lambda do |example_status|
+          example_status[:status] =~ /pass/i
+        end
       end
 
       def parse_example
-        lambda do |example_id:, run_time:, **|
-          seconds = run_time.match(/\d+(\.\d+)?/).to_s.to_f
-          file_name = ::RSpec::Core::Example.parse_id(example_id).first
+        lambda do |example_status|
+          seconds = example_status[:run_time].match(/\d+(\.\d+)?/).to_s.to_f
+          file_name = ::RSpec::Core::Example.parse_id(example_status[:example_id]).first
           { seconds: seconds, file_name: file_name }
         end
       end

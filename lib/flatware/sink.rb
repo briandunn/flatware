@@ -3,8 +3,8 @@ module Flatware
   module Sink
     extend self
 
-    def start_server(*args)
-      Server.new(*args).start
+    def start_server(**args)
+      Server.new(**args).start
     end
 
     class Server
@@ -23,8 +23,6 @@ module Flatware
       def start
         trap 'INT' do
           puts "Interrupted!"
-          formatter.summarize checkpoints
-          summarize_remaining
           puts "\n\nCleaning up. Please wait...\n"
           Flatware.close!
           Process.waitall

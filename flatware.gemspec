@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.executables = ['flatware']
   s.add_dependency %(ffi-rzmq), '~> 2.0'
-  s.add_dependency %(thor), '< 2.0'
+  s.add_dependency %(thor), '~> 1.0'
   s.add_development_dependency %(aruba), '~> 1.0'
   s.add_development_dependency %(rake), '~> 10.1.0'
 end

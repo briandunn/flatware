@@ -17,7 +17,7 @@ describe Flatware::Sink do
     }
   end
 
-  context 'when I have work to do, but am interupted' do
+  context 'when I have work to do, but am interrupted' do
     it 'exits' do
       job = double 'job', id: 'int.feature'
 
@@ -25,8 +25,7 @@ describe Flatware::Sink do
       orig = trap 'INT', 'DEFAULT'
 
       unless child_io = IO.popen("-")
-        allow(formatter).to receive(:summarize_remaining) { puts 'signal was captured' }
-        described_class.start_server defaults.merge(jobs: [job])
+        described_class.start_server(**defaults.merge(jobs: [job]))
       end
 
       trap 'INT', orig
@@ -45,16 +44,16 @@ describe Flatware::Sink do
           exit(1)
         end
       end
-      expect(child_io.read).to match(/signal was captured/)
+      expect(child_io.read).to match(/Interrupted!\n\n\nCleaning up. Please wait...\nthanks.\n\n\nFinished/)
       expect(child_pids).to_not include pid
     end
   end
 
   context 'there is no work' do
-    it 'sumarizes' do
+    it 'summarizes' do
       worker = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
       worker.send 'ready'
-      described_class.start_server defaults.merge(jobs: [])
+      described_class.start_server(**defaults.merge(jobs: []))
       expect(formatter).to have_received :summarize
     end
   end
@@ -67,7 +66,7 @@ describe Flatware::Sink do
         socket.send [:progress, 'progress']
         socket.send [:finished, job]
 
-        described_class.start_server defaults.merge(jobs: [job])
+        described_class.start_server(**defaults.merge(jobs: [job]))
         expect(formatter).to have_received(:progress).with 'progress'
         expect(formatter).to have_received(:finished).with job
       end
@@ -84,7 +83,7 @@ describe Flatware::Sink do
     end
 
     subject do
-      described_class.start_server defaults.merge(jobs: [job])
+      described_class.start_server(**defaults.merge(jobs: [job]))
     end
 
     context 'when there are failures' do
@@ -103,7 +102,7 @@ describe Flatware::Sink do
   it 'groups jobs' do
     files = (?a..?z).to_a.map(&Flatware::Job.method(:new))
 
-    sink = described_class::Server.new defaults.merge(jobs: files, worker_count: 4)
+    sink = described_class::Server.new(**defaults.merge(jobs: files, worker_count: 4))
 
     expect(sink.jobs.map {|j| j.id.size}).to eq [7,7,6,6]
   end
