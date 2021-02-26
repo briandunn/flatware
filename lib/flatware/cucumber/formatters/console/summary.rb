@@ -41,7 +41,7 @@ module Flatware
           def to_failed_scenario_line(scenario)
             [
               [scenario.file_colon_line, :failed],
-              ['# Scenario: ' + scenario.name, :comment]
+              ["# Scenario: #{scenario.name}", :comment]
             ].map do |string, format|
               format_string string, format
             end.join(' ')
@@ -59,7 +59,7 @@ module Flatware
           end
 
           def pluralize(word, number)
-            "#{number} #{number == 1 ? word : word + 's'}"
+            "#{number} #{number == 1 ? word : "#{word}s"}"
           end
 
           def with_status(status)

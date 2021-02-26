@@ -9,6 +9,7 @@ module Flatware
   module Cucumber
     class Config
       attr_reader :config, :args
+
       def initialize(cucumber_config, args)
         @config = cucumber_config
         @args = args

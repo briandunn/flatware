@@ -4,8 +4,7 @@ module Flatware
   module Cucumber
     class Runtime < ::Cucumber::Runtime
       attr_accessor :configuration, :loader
-      attr_reader :out, :err
-      attr_reader :visitor
+      attr_reader :out, :err, :visitor
 
       def initialize(out = StringIO.new, err = out)
         @out = out

@@ -2,6 +2,7 @@ module Flatware
   class SerializedException
     attr_reader :class, :message, :cause
     attr_accessor :backtrace
+
     def initialize(klass, message, backtrace, cause = '')
       @class = serialized(klass)
       @message = message

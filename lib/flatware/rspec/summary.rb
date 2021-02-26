@@ -23,7 +23,7 @@ module Flatware
           examples.map(&Example.method(:new))
         end
 
-        new summary.duration, *serialized_examples, *summary.to_a[4..-1]
+        new summary.duration, *serialized_examples, *summary.to_a[4..]
       end
     end
   end

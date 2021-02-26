@@ -8,7 +8,6 @@ Gem::Specification.new do |s|
   s.name = 'flatware-rspec'
   s.version = Flatware::VERSION
   s.authors = ['Brian Dunn']
-  s.date = Date.today.to_s
   s.summary = 'A distributed rspec runner'
   s.description = 'A distributed rspec runner'
   s.email = 'brian@hashrocket.com'
@@ -22,7 +21,7 @@ Gem::Specification.new do |s|
           )
   s.homepage = 'http://github.com/briandunn/flatware'
   s.licenses = ['MIT']
-  s.required_ruby_version = '~> 2.3'
+  s.required_ruby_version = ['>= 2.6', '< 3.1']
   s.require_paths = ['lib']
   s.rubygems_version = '1.8.10'
   s.add_dependency %(flatware), Flatware::VERSION

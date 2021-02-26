@@ -74,11 +74,9 @@ end
 flatware_gems = %w[flatware-rspec flatware-cucumber]
 
 loaded_flatware_gem_count = flatware_gems.map do |flatware_gem|
-  begin
-    require flatware_gem
-  rescue LoadError
-    nil
-  end
+  require flatware_gem
+rescue LoadError
+  nil
 end.compact.size
 
 if loaded_flatware_gem_count.zero?

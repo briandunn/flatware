@@ -4,6 +4,7 @@ module Flatware
   module RSpec
     class ExampleNotification
       attr_reader :formatted
+
       def initialize(notification)
         @formatted = notification.fully_formatted '!', default_colorizer
       end

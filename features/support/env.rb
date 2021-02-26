@@ -41,12 +41,10 @@ After do |_scenario|
     zombie_pids = Flatware.pids_of_group(command.pid)
 
     zombie_pids.each do |pid|
-      begin
-        Process.kill 6, pid
-        Process.wait pid, Process::WUNTRACED
-      rescue Errno::ECHILD
-        next
-      end
+      Process.kill 6, pid
+      Process.wait pid, Process::WUNTRACED
+    rescue Errno::ECHILD
+      next
     end
 
     expect(zombie_pids).not_to(
@@ -57,13 +55,9 @@ After do |_scenario|
 end
 
 After 'not @non-zero' do |scenario|
-  if flatware_process && (scenario.status == :passed)
-    expect(flatware_process.exit_status).to eq 0
-  end
+  expect(flatware_process.exit_status).to eq 0 if flatware_process && (scenario.status == :passed)
 end
 
 After '@non-zero' do |scenario|
-  if flatware_process && (scenario.status == :passed)
-    expect(flatware_process.exit_status).to eq 1
-  end
+  expect(flatware_process.exit_status).to eq 1 if flatware_process && (scenario.status == :passed)
 end
