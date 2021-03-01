@@ -14,7 +14,7 @@ module Flatware
         end
 
         def progress(result)
-          progress_formatter.send(message_for(result), nil)
+          progress_formatter.public_send(message_for(result), nil)
         end
 
         def summarize(checkpoints)
@@ -22,9 +22,10 @@ module Flatware
 
           result = checkpoints.reduce :+
 
-          profile_formatter.dump_profile result.profile if result.profile
-          progress_formatter.dump_failures result
-          progress_formatter.dump_summary result.summary
+          progress_formatter.dump_failures(result)
+          progress_formatter.dump_summary(result.summary)
+          profile_formatter.dump_profile(result.profile) if result.profile
+          progress_formatter.dump_pending(result) if result.pending_examples.any?
         end
 
         def summarize_remaining(remaining)

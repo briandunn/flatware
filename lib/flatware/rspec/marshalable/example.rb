@@ -15,7 +15,11 @@ module Flatware
           super(*members.map do |attribute|
             rspec_example.public_send(attribute)
           end)
+
+          @metadata = rspec_example.metadata.slice(:extra_failure_lines, :shared_group_inclusion_backtrace)
         end
+
+        attr_reader :metadata
       end
     end
   end

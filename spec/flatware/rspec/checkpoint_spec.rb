@@ -10,7 +10,8 @@ describe Flatware::RSpec::Checkpoint do
         full_description: 'bad news',
         execution_result: nil,
         location: nil,
-        location_rerun_argument: nil
+        location_rerun_argument: nil,
+        metadata: {}
       )
 
       bad_news = described_class.new(

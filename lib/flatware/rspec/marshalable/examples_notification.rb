@@ -1,30 +1,29 @@
+require 'rspec/core'
+require 'flatware/rspec/marshalable/example'
 require 'flatware/rspec/marshalable/example_notification'
 
 module Flatware
   module RSpec
     module Marshalable
-      class ExamplesNotification
-        attr_reader :failure_notifications
+      class ExamplesNotification < ::RSpec::Core::Notifications::ExamplesNotification
+        Reporter = Struct.new(:examples, :failed_examples, :pending_examples) do
+          def self.from_rspec(reporter)
+            new(*members.map { |member| reporter.public_send(member).map(&Example.method(:new)) })
+          end
 
-        def initialize(failure_notifications)
-          @failure_notifications = failure_notifications
-                                   .map(&ExampleNotification.method(:new))
+          def +(other)
+            self.class.new(*zip(other).map { |a, b| a + b })
+          end
         end
 
+        attr_reader :reporter
+
         def self.from_notification(rspec_notification)
-          new rspec_notification.failure_notifications
+          new Reporter.from_rspec(rspec_notification.instance_variable_get(:@reporter))
         end
 
         def +(other)
-          self.class.new failure_notifications + other.failure_notifications
-        end
-
-        def fully_formatted_failed_examples(*)
-          formatted = "\n\nFailures:\n"
-          failure_notifications.each_with_index do |failure, index|
-            formatted << failure.fully_formatted(index.next)
-          end
-          formatted
+          self.class.new reporter + other.reporter
         end
       end
     end

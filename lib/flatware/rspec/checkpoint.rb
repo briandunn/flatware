@@ -13,6 +13,7 @@ module Flatware
 
       def_delegator :summary, :failures?
       def_delegators :failures_notification, :fully_formatted_failed_examples, :failure_notifications
+      def_delegators :pending_notification, :fully_formatted_pending_examples, :pending_examples
 
       EVENTS = %i[dump_profile dump_summary dump_pending dump_failures].freeze
 
@@ -50,6 +51,10 @@ module Flatware
 
       def failures_notification
         events.fetch(:dump_failures)
+      end
+
+      def pending_notification
+        events.fetch(:dump_pending)
       end
     end
   end
