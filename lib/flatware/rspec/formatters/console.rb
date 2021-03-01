@@ -4,28 +4,31 @@ module Flatware
   module RSpec
     module Formatters
       class Console
-        attr_reader :formatter
+        attr_reader :progress_formatter, :profile_formatter
 
         def initialize(out, _err)
           ::RSpec.configuration.tty = true
           ::RSpec.configuration.color = true
-          @formatter = ::RSpec::Core::Formatters::ProgressFormatter.new(out)
+          @progress_formatter = ::RSpec::Core::Formatters::ProgressFormatter.new(out)
+          @profile_formatter = ::RSpec::Core::Formatters::ProfileFormatter.new(out)
         end
 
         def progress(result)
-          formatter.send(message_for(result), nil)
+          progress_formatter.send(message_for(result), nil)
         end
 
         def summarize(checkpoints)
           return if checkpoints.empty?
 
           result = checkpoints.reduce :+
-          formatter.dump_failures result
-          formatter.dump_summary result.summary
+
+          profile_formatter.dump_profile result.profile if result.profile
+          progress_formatter.dump_failures result
+          progress_formatter.dump_summary result.summary
         end
 
         def summarize_remaining(remaining)
-          formatter.output.puts(colorizer.wrap(<<~MESSAGE, :detail))
+          progress_formatter.output.puts(colorizer.wrap(<<~MESSAGE, :detail))
 
             The following specs weren't run:
 

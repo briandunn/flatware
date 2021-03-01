@@ -17,26 +17,16 @@ module Flatware
     end
 
     class Server
-      attr_reader(
-        :checkpoints,
-        :completed_jobs,
-        :formatter,
-        :jobs,
-        :queue,
-        :sink,
-        :workers
-      )
+      attr_reader :checkpoints, :completed_jobs, :formatter, :jobs, :queue, :sink, :workers
 
       def initialize(jobs:, formatter:, sink:, worker_count: 0, **)
-        @sink = sink
-        @formatter = formatter
-        @jobs = group_jobs(jobs, worker_count)
-        @queue = @jobs.dup
-        @jobs.freeze
-        @completed_jobs = []
-
-        @workers = Set.new(worker_count.times.to_a)
         @checkpoints = []
+        @completed_jobs = []
+        @formatter = formatter
+        @jobs = group_jobs(jobs, worker_count).freeze
+        @queue = @jobs.dup
+        @sink = sink
+        @workers = Set.new(worker_count.times.to_a)
       end
 
       def start
@@ -110,7 +100,7 @@ module Flatware
         return unless [workers, remaining_work].all?(&:empty?)
 
         DRb.stop_service
-        formatter.summarize(checkpoints)
+        summarize
       end
 
       def failures?
@@ -118,7 +108,7 @@ module Flatware
       end
 
       def summarize_remaining
-        formatter.summarize(checkpoints)
+        summarize
         return if remaining_work.empty?
 
         formatter.summarize_remaining remaining_work
@@ -126,6 +116,10 @@ module Flatware
 
       def remaining_work
         jobs - completed_jobs
+      end
+
+      def summarize
+        formatter.summarize(checkpoints)
       end
 
       def group_jobs(jobs, worker_count)

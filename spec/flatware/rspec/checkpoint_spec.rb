@@ -6,21 +6,27 @@ describe Flatware::RSpec::Checkpoint do
   context 'when summed and some have errors' do
     it 'has errors' do
       failure_notification = instance_double(
-        ::RSpec::Core::Notifications::FailedExampleNotification,
-        fully_formatted: 'bad news'
+        ::RSpec::Core::Example,
+        full_description: 'bad news',
+        execution_result: nil,
+        location: nil,
+        location_rerun_argument: nil
       )
-      bad_news = described_class.new 1, instance_double(
-        ::RSpec::Core::Notifications::ExamplesNotification,
-        failure_notifications: [failure_notification, failure_notification]
+
+      bad_news = described_class.new(
+        dump_summary: Flatware::RSpec::Marshalable::SummaryNotification.from_notification(
+          ::RSpec::Core::Notifications::SummaryNotification.new(0, [], [failure_notification], [], 0, 0)
+        )
       )
-      good_news = described_class.new 1, instance_double(
-        ::RSpec::Core::Notifications::ExamplesNotification,
-        failure_notifications: []
+
+      good_news = described_class.new(
+        dump_summary: Flatware::RSpec::Marshalable::SummaryNotification.from_notification(
+          ::RSpec::Core::Notifications::SummaryNotification.new(0, [], [], [], 0, 0)
+        )
       )
 
       sum = bad_news + good_news
-      expect(sum.failures_notification.failure_notifications.size).to eq 2
-      expect(sum.fully_formatted_failed_examples).to include 'bad news'
+      expect(sum).to be_failures
     end
   end
 end

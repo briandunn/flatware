@@ -1,6 +1,7 @@
 require 'spec_helper'
-require 'flatware/rspec/summary'
-describe Flatware::RSpec::Summary do
+require 'flatware/rspec/marshalable/summary_notification'
+
+describe Flatware::RSpec::Marshalable::SummaryNotification do
   def args
     [1, [], [], []] + (5..described_class.members.size).to_a
   end

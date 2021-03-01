@@ -20,7 +20,7 @@ module Flatware
       private
 
       def push(message)
-        @sink.send message
+        @sink.public_send message
       end
     end
   end
