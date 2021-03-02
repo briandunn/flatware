@@ -23,9 +23,4 @@ Cucumber::Rake::Task.new :cucumber do |task|
   task.fork = false
 end
 
-desc 'generate connection diagram'
-task :diagram do
-  system 'dot connections.dot -Tpng > connections.png'
-end
-
 task default: %i[lint spec cucumber]
