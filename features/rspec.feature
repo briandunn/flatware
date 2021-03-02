@@ -33,3 +33,29 @@ Feature: rspec task
       """
       # ./spec/spec_spec.rb:2:in `block (2 levels) in <top (required)>'
       """
+
+  Scenario: it behaves like
+    Given the following spec:
+      """
+      class Rick
+        def drunk?
+          true
+        end
+      end
+
+      class PickleRick < Rick
+      end
+
+      shared_examples_for Rick do
+        it('drinks') { expect(subject).to be_drunk }
+      end
+
+      describe PickleRick do
+        it_behaves_like Rick
+      end
+      """
+    When I run flatware with "rspec"
+    Then the output contains the following:
+      """
+      1 example, 0 failures
+      """

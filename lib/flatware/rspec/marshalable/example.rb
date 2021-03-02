@@ -1,6 +1,8 @@
 module Flatware
   module RSpec
     module Marshalable
+      require 'flatware/rspec/marshalable/shared_group_inclusion_backtrace'
+
       ##
       # a subset of the rspec example interface that can traverse drb
       Example = Struct.new(
@@ -16,10 +18,21 @@ module Flatware
             rspec_example.public_send(attribute)
           end)
 
-          @metadata = rspec_example.metadata.slice(:extra_failure_lines, :shared_group_inclusion_backtrace)
+          @metadata = marshalable_metadata(rspec_example.metadata)
         end
 
         attr_reader :metadata
+
+        private
+
+        def marshalable_metadata(rspec_metadata)
+          rspec_metadata.slice(:extra_failure_lines).tap do |metadata|
+            if (backtraces = rspec_metadata[:shared_group_inclusion_backtrace])
+              metadata[:shared_group_inclusion_backtrace] =
+                backtraces.map(&SharedGroupInclusionBacktrace.method(:from_rspec))
+            end
+          end
+        end
       end
     end
   end
