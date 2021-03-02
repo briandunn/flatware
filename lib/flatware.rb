@@ -32,4 +32,8 @@ module Flatware
   def verbose=(bool)
     logger.level = bool ? :debug : :fatal
   end
+
+  def verbose?
+    logger.level < Logger::SEV_LABEL.index('FATAL')
+  end
 end

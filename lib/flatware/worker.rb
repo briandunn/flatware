@@ -64,12 +64,15 @@ module Flatware
       tries = 1
       begin
         yield unless want_to_quit?
-      rescue DRb::DRbConnError
+      rescue DRb::DRbConnError => e
         raise if tries >= times
 
         tries += 1
 
         sleep wait
+
+        Flatware.logger.info(e.message)
+        Flatware.logger.info('retrying')
         retry
       end
     end

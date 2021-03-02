@@ -32,7 +32,7 @@ module Flatware
       def start
         trap_interrupt
         formatter.jobs jobs
-        DRb.start_service(sink, self)
+        DRb.start_service(sink, self, verbose: Flatware.verbose?)
         DRb.thread.join
         !failures?
       end
