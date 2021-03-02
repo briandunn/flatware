@@ -1,19 +1,30 @@
 require 'spec_helper'
+require 'drb'
 
 describe Flatware::Sink do
-  before { Flatware.close }
-  let(:sink_endpoint) { 'ipc://sink-test' }
-  let(:dispatch_endpoint) { 'ipc://dispatch-test' }
+  let(:sink_endpoint) do
+    server = TCPServer.new('127.0.0.1', 0)
+    port = server.addr[1]
+    server.close
+    "druby://localhost:#{port}"
+  end
+
   let! :formatter do
-    double 'Formatter', ready: nil,
-      summarize: nil, jobs: nil, progress: nil, finished: nil, summarize_remaining: nil
+    double(
+      'Formatter',
+      ready: nil,
+      summarize: nil,
+      jobs: nil,
+      progress: nil,
+      finished: nil,
+      summarize_remaining: nil
+    )
   end
 
   let :defaults do
     {
       formatter: formatter,
-      sink: sink_endpoint,
-      dispatch: dispatch_endpoint
+      sink: sink_endpoint
     }
   end
 
@@ -21,40 +32,26 @@ describe Flatware::Sink do
     it 'exits' do
       job = double 'job', id: 'int.feature'
 
-      # disable rspec trap
-      orig = trap 'INT', 'DEFAULT'
+      IO.popen('-') do |f|
+        if f
+          sleep 1
+          Process.kill 'INT', f.pid
 
-      unless child_io = IO.popen("-")
-        allow(formatter).to receive(:summarize_remaining) { puts 'signal was captured' }
-        described_class.start_server defaults.merge(jobs: [job])
-      end
+          expect(f.read).to match(/Interrupted/)
 
-      trap 'INT', orig
-      pid = child_io.pid
-      sleep 0.1
-      retries = 0
-
-      begin
-        Process.kill 'INT', pid
-        wait pid
-      rescue Timeout::Error
-        retries += 1
-        if retries < 3
-          retry
+          child_pids = Flatware.pids { |cpid| cpid.ppid == Process.pid }
+          expect(child_pids).to_not include f.pid
         else
-          exit(1)
+          described_class.start_server(**defaults, jobs: [job])
         end
       end
-      expect(child_io.read).to match(/signal was captured/)
-      expect(child_pids).to_not include pid
     end
   end
 
   context 'there is no work' do
     it 'sumarizes' do
-      worker = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
-      worker.send 'ready'
-      described_class.start_server defaults.merge(jobs: [])
+      server = described_class::Server.new jobs: [], **defaults
+      server.ready(1)
       expect(formatter).to have_received :summarize
     end
   end
@@ -62,49 +59,35 @@ describe Flatware::Sink do
   context 'there is outstanding work' do
     context 'and a Result object is received' do
       it 'prints the result' do
-        job       = OpenStruct.new failed?: false
-        socket    = Flatware.socket(ZMQ::PUSH, connect: sink_endpoint)
-        socket.send [:progress, 'progress']
-        socket.send [:finished, job]
+        server = described_class::Server.new jobs: [], **defaults
+        server.progress 'progress'
 
-        described_class.start_server defaults.merge(jobs: [job])
         expect(formatter).to have_received(:progress).with 'progress'
-        expect(formatter).to have_received(:finished).with job
       end
     end
   end
 
   describe '#start_server' do
-    let(:job) { OpenStruct.new failed?: false }
-
-    before do
-      socket = Flatware.socket(ZMQ::PUSH, connect: sink_endpoint)
-      socket.send [:checkpoint, checkpoint]
-      socket.send [:finished, job]
-    end
-
     subject do
-      described_class.start_server defaults.merge(jobs: [job])
+      described_class.start_server(**defaults)
     end
 
-    context 'when there are failures' do
-      let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: true }
+    context 'returns the server result' do
+      before do
+        allow(described_class::Server).to receive(:new).and_return(
+          instance_double(described_class::Server, start: :result)
+        )
+      end
 
-      it { should_not be }
-    end
-
-    context 'when everything passes' do
-      let(:checkpoint) { OpenStruct.new steps: [], scenarios: [], failures?: false }
-
-      it { should be }
+      it { should eq(:result) }
     end
   end
 
   it 'groups jobs' do
-    files = (?a..?z).to_a.map(&Flatware::Job.method(:new))
+    files = ('a'..'z').to_a.map(&Flatware::Job.method(:new))
 
-    sink = described_class::Server.new defaults.merge(jobs: files, worker_count: 4)
+    sink = described_class::Server.new(jobs: files, worker_count: 4, **defaults)
 
-    expect(sink.jobs.map {|j| j.id.size}).to eq [7,7,6,6]
+    expect(sink.jobs.map { |j| j.id.size }).to eq [7, 7, 6, 6]
   end
 end

@@ -1,10 +1,39 @@
+# frozen_string_literal: true
+
+require 'logger'
+
 module Flatware
-  require 'flatware/processor_info'
   require 'flatware/job'
   require 'flatware/cli'
-  require 'flatware/poller'
   require 'flatware/sink'
-  require 'flatware/socket'
   require 'flatware/worker'
   require 'flatware/broadcaster'
+
+  module_function
+
+  def logger
+    @logger ||= Logger.new($stderr, level: :fatal)
+  end
+
+  def logger=(logger)
+    @logger = logger
+  end
+
+  def log(*message)
+    case message.first
+    when Exception
+      logger.error message.first
+    else
+      logger.info(([$PROGRAM_NAME] + message).join(' '))
+    end
+    message
+  end
+
+  def verbose=(bool)
+    logger.level = bool ? :debug : :fatal
+  end
+
+  def verbose?
+    logger.level < Logger::SEV_LABEL.index('FATAL')
+  end
 end

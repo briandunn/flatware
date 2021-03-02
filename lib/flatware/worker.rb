@@ -1,57 +1,80 @@
-require 'flatware/sink/client'
-module Flatware
-  class Worker
-    attr_reader :id
+# frozen_string_literal: true
 
-    def initialize(id, runner, dispatch_endpoint, sink_endpoint)
+require 'drb/drb'
+
+module Flatware
+  require 'flatware/configuration'
+  # executes tests and sends results to the sink
+  class Worker
+    attr_reader :sink, :runner, :id
+
+    def initialize(id, runner, sink_endpoint)
       @id       = id
       @runner   = runner
-      @sink     = Sink::Client.new sink_endpoint
-      @task     = Flatware.socket ZMQ::REQ, connect: dispatch_endpoint
+      @sink     = DRbObject.new_with_uri sink_endpoint
+      Flatware::Sink.client = @sink
     end
 
-    def self.spawn(count:, runner:, dispatch:, sink:)
+    def self.spawn(count:, runner:, sink:, **)
+      Flatware.configuration.before_fork.call
       count.times do |i|
         fork do
           $0 = "flatware worker #{i}"
           ENV['TEST_ENV_NUMBER'] = i.to_s
-          new(i, runner, dispatch, sink).listen
+          Flatware.configuration.after_fork.call(i)
+          new(i, runner, sink).listen
         end
       end
     end
 
     def listen
-      trap 'INT' do
-        Flatware.close!
-        @want_to_quit = true
-        exit(1)
-      end
-
-      Sink.client = sink
-      report_for_duty
-      loop do
-        job = task.recv
-        break if job == 'seppuku' or @want_to_quit
-        job.worker = id
-        sink.started job
-        begin
-          runner.run job.id, job.args
-        rescue => e
-          Flatware.log e
-          job.failed = true
+      retrying(times: 10, wait: 0.1) do
+        job = sink.ready id
+        until want_to_quit? || job.sentinel?
+          job.worker = id
+          sink.started job
+          run job
+          job = sink.ready id
         end
-        sink.finished job
-        report_for_duty
       end
-      Flatware.close unless @want_to_quit
     end
 
     private
 
-    attr_reader :task, :sink, :runner
+    def run(job)
+      runner.run job.id, job.args
+      sink.finished job
+    rescue Interrupt
+      want_to_quit!
+    rescue StandardError => e
+      Flatware.log e
+      job.failed!
+      sink.finished job
+    end
 
-    def report_for_duty
-      task.send [:ready, id]
+    def want_to_quit!
+      @want_to_quit = true
+    end
+
+    def want_to_quit?
+      @want_to_quit == true
+    end
+
+    def retrying(times:, wait:)
+      tries = 1
+      begin
+        yield unless want_to_quit?
+      rescue DRb::DRbConnError => e
+        raise if tries >= times
+
+        tries += 1
+
+        sleep wait
+
+        Flatware.logger.info(e.message)
+        Flatware.logger.info('retrying')
+        retry
+      end
     end
   end
 end

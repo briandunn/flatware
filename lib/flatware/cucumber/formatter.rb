@@ -6,7 +6,7 @@ module Flatware
     class Formatter
       Checkpoint = Struct.new :steps, :scenarios do
         def failures?
-          scenarios.any? &:failed?
+          scenarios.any?(&:failed?)
         end
       end
 
@@ -21,6 +21,7 @@ module Flatware
       end
 
       def initialize(config)
+        # FIXME: can we sneak the sink in through the config?
         config.on_event :test_case_finished, &method(:on_test_case_finished)
         config.on_event :test_step_finished, &method(:on_test_step_finished)
         config.on_event :test_run_finished,  &method(:on_test_run_finished)
@@ -39,7 +40,11 @@ module Flatware
       attr_reader :steps, :scenarios, :matched_steps
 
       def on_test_case_finished(event)
-        scenarios << Scenario.new(event.test_case.name, event.test_case.location.to_s, event.result.to_sym)
+        scenarios << Scenario.new(
+          event.test_case.name,
+          event.test_case.location.to_s,
+          event.result.to_sym
+        )
       end
 
       def on_step_activated(event)
@@ -47,14 +52,18 @@ module Flatware
       end
 
       def on_test_step_finished(event)
-        if really_a_step?(event.test_step) or event.result.undefined?
-          steps << StepResult.new(event.result.to_sym, event.result.failed? && event.result.exception)
-          Sink::client.progress Result.new event.result.to_sym
-        end
+        result = event.result
+        return unless really_a_step?(event.test_step) || result.undefined?
+
+        steps << StepResult.new(
+          result.to_sym,
+          result.failed? && result.exception
+        )
+        Sink.client.progress Result.new result.to_sym
       end
 
       def on_test_run_finished(*)
-        Sink::client.checkpoint Checkpoint.new steps, scenarios
+        Sink.client.checkpoint Checkpoint.new steps, scenarios
         reset
       end
 

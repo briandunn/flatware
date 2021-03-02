@@ -12,15 +12,15 @@ describe Flatware::Cucumber do
   describe 'run', type: :aruba do
     context 'with multiple scenarios in the same file' do
       it 'calls the steps the correct number of times' do
-        sink = instance_double Flatware::Sink::Client, progress: nil, checkpoint: nil
+        sink = double Flatware::Sink::Server, progress: nil, checkpoint: nil
         allow(Flatware::Sink).to receive(:client) { sink }
         allow(Flatware).to receive(:ran)
 
-        write_file "features/step_definitions/flunky_steps.rb", <<~RB
+        write_file 'features/step_definitions/flunky_steps.rb', <<~RB
           Then('ran {int}', &Flatware.method(:ran))
         RB
 
-        write_file "features/feature_1.feature", <<~FEATURE
+        write_file 'features/feature_1.feature', <<~FEATURE
           Feature: 1
           Scenario: 1
             Then ran 1
@@ -28,7 +28,7 @@ describe Flatware::Cucumber do
             Then ran 2
         FEATURE
 
-        write_file "features/feature_2.feature", <<~FEATURE
+        write_file 'features/feature_2.feature', <<~FEATURE
           Feature: 2
           Scenario: 3
             Then ran 3
@@ -36,7 +36,6 @@ describe Flatware::Cucumber do
         FEATURE
 
         Dir.chdir Pathname(Dir.pwd).join('tmp/aruba') do
-
           described_class.run('features/feature_1.feature', [])
           described_class.run('features/feature_2.feature', [])
 

@@ -1,18 +1,32 @@
 # frozen_string_literal: true
 
 require 'thor'
-require 'flatware/pids'
+require 'flatware/pid'
+require 'etc'
+
 module Flatware
+  # shared flatware cli
   class CLI < Thor
     def self.processors
-      @processors ||= ProcessorInfo.count
+      @processors ||= Etc.nprocessors
     end
 
     def self.worker_option
-      method_option :workers, aliases: '-w', type: :numeric, default: processors, desc: 'Number of concurent processes to run'
+      method_option(
+        :workers,
+        aliases: '-w',
+        type: :numeric,
+        default: processors,
+        desc: 'Number of concurent processes to run'
+      )
     end
 
-    class_option :log, aliases: '-l', type: :boolean, desc: 'Print debug messages to $stderr'
+    class_option(
+      :log,
+      aliases: '-l',
+      type: :boolean,
+      desc: 'Print debug messages to $stderr'
+    )
 
     worker_option
     desc 'fan [COMMAND]', 'executes the given job on all of the workers'
@@ -32,7 +46,7 @@ module Flatware
 
     desc 'clear', 'kills all flatware processes'
     def clear
-      (Flatware.pids - [$PROCESS_ID]).each do |pid|
+      (Flatware.pids - [Process.pid]).each do |pid|
         Process.kill 6, pid
       end
     end
@@ -42,12 +56,13 @@ module Flatware
     def start_sink(jobs:, workers:, formatter:)
       $0 = 'flatware sink'
       Process.setpgrp
-      passed = Sink.start_server jobs: jobs, formatter: Flatware::Broadcaster.new([formatter]), sink: options['sink-endpoint'], dispatch: options['dispatch-endpoint'], worker_count: workers
+      passed = Sink.start_server(
+        jobs: jobs,
+        formatter: Flatware::Broadcaster.new([formatter]),
+        sink: options['sink-endpoint'],
+        worker_count: workers
+      )
       exit passed ? 0 : 1
-    end
-
-    def log(*args)
-      Flatware.log(*args)
     end
 
     def workers
@@ -59,11 +74,9 @@ end
 flatware_gems = %w[flatware-rspec flatware-cucumber]
 
 loaded_flatware_gem_count = flatware_gems.map do |flatware_gem|
-  begin
-    require flatware_gem
-  rescue LoadError
-    nil
-  end
+  require flatware_gem
+rescue LoadError
+  nil
 end.compact.size
 
 if loaded_flatware_gem_count.zero?
@@ -72,5 +85,4 @@ if loaded_flatware_gem_count.zero?
       The flatware gem is a dependency of flatware runners for rspec and cucumber.
       Install %<gem_list>s for more usefull commands.
     MESSAGE
-
 end

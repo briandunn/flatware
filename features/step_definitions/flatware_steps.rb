@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'etc'
+
 # helper methods available in all steps
 module Support
   def create_flunk_step_definition
@@ -35,7 +37,7 @@ end
 World(Support)
 
 Given 'I am using a multi core machine' do
-  expect(Flatware::ProcessorInfo.count).to be > 1
+  expect(Etc.nprocessors).to be > 1
 end
 
 Given(
@@ -143,5 +145,5 @@ Then 'the output contains a summary of failing features' do
 end
 
 Then 'I see log messages' do
-  expect(flatware_process).to have_output Regexp.new 'flatware sink bind'
+  expect(flatware_process).to have_output Regexp.new 'flatware sink'
 end

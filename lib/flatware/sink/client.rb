@@ -1,15 +1,17 @@
-require 'flatware/socket'
+require 'drb/drb'
+
 module Flatware
   module Sink
-    extend self
+    module_function
+
     attr_accessor :client
 
     class Client
       def initialize(sink_endpoint)
-        @socket = Flatware.socket ZMQ::PUSH, connect: sink_endpoint
+        @sink = DRbObject.new_with_uri sink_endpoint
       end
 
-      %w[finished started progress checkpoint].each do |message|
+      %w[ready finished started progress checkpoint].each do |message|
         define_method message do |content|
           push [message.to_sym, content]
         end
@@ -18,7 +20,7 @@ module Flatware
       private
 
       def push(message)
-        @socket.send message
+        @sink.public_send message
       end
     end
   end

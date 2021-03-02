@@ -8,7 +8,7 @@ Feature: rspec task
       it { expect(true).to eq false }
       end
       """
-    When I run `flatware rspec`
+    When I run flatware with "rspec -l"
     Then the output contains the following:
       """
       F
@@ -21,7 +21,7 @@ Feature: rspec task
       """
       Failures:
 
-      1) fail should eq false
+      1) fail is expected to eq false
       Failure/Error: it { expect(true).to eq false }
 
       expected: false

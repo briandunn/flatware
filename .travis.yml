@@ -1,9 +1,6 @@
 language: ruby
-# cache: bundler
+cache: bundler
 rvm:
-  - 2.3.8
-  - 2.4.6
-  - 2.5.5
-  - 2.6.3
-before_install:
-  - sudo apt-get install -qq libzmq3-dev
+  - 2.6.6
+  - 2.7.2
+  - 3.0.0
