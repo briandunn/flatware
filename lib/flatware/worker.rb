@@ -61,18 +61,14 @@ module Flatware
     end
 
     def retrying(times:, wait:)
-      tries = 1
+      tries = 0
       begin
         yield unless want_to_quit?
       rescue DRb::DRbConnError => e
-        raise if tries >= times
-
-        tries += 1
+        raise if (tries += 1) >= times
 
         sleep wait
-
-        Flatware.logger.info(e.message)
-        Flatware.logger.info('retrying')
+        Flatware.log('retrying', e.message)
         retry
       end
     end
