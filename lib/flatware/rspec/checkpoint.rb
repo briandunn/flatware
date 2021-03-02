@@ -25,7 +25,7 @@ module Flatware
 
       EVENTS.each do |event|
         define_method(event) do |notification|
-          events[event] = Marshalable.for_event(event).from_notification(notification)
+          events[event] = Marshalable.for_event(event).from_rspec(notification)
         end
       end
 

@@ -16,7 +16,7 @@ module Flatware
           )
         end
 
-        def self.from_notification(rspec_notification)
+        def self.from_rspec(rspec_notification)
           new(
             rspec_notification.duration,
             rspec_notification.examples.map(&Example.method(:new)),

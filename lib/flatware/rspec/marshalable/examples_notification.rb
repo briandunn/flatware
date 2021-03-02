@@ -17,7 +17,7 @@ module Flatware
 
         attr_reader :reporter
 
-        def self.from_notification(rspec_notification)
+        def self.from_rspec(rspec_notification)
           new Reporter.from_rspec(rspec_notification.instance_variable_get(:@reporter))
         end
 

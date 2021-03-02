@@ -13,7 +13,7 @@ module Flatware
           [failure_count, errors_outside_of_examples_count].any?(&:positive?)
         end
 
-        def self.from_notification(summary)
+        def self.from_rspec(summary)
           serialized_examples = [
             summary.examples,
             summary.failed_examples,

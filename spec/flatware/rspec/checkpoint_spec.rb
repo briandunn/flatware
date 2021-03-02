@@ -15,13 +15,13 @@ describe Flatware::RSpec::Checkpoint do
       )
 
       bad_news = described_class.new(
-        dump_summary: Flatware::RSpec::Marshalable::SummaryNotification.from_notification(
+        dump_summary: Flatware::RSpec::Marshalable::SummaryNotification.from_rspec(
           ::RSpec::Core::Notifications::SummaryNotification.new(0, [], [failure_notification], [], 0, 0)
         )
       )
 
       good_news = described_class.new(
-        dump_summary: Flatware::RSpec::Marshalable::SummaryNotification.from_notification(
+        dump_summary: Flatware::RSpec::Marshalable::SummaryNotification.from_rspec(
           ::RSpec::Core::Notifications::SummaryNotification.new(0, [], [], [], 0, 0)
         )
       )

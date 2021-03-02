@@ -13,7 +13,7 @@ describe Flatware::RSpec::Marshalable::ExamplesNotification do
     )
 
     notifications = [[], [failed_example]].map do |failed_examples|
-      described_class.from_notification(
+      described_class.from_rspec(
         instance_double(
           ::RSpec::Core::Notifications::ExamplesNotification,
           instance_variable_get: instance_double(
