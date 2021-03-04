@@ -9,7 +9,7 @@ module Flatware
     class Formatter
       extend Forwardable
 
-      def_delegators :@checkpoint, *Checkpoint::EVENTS
+      def_delegators :checkpoint, *Checkpoint::EVENTS
 
       attr_reader :output
 
@@ -29,12 +29,8 @@ module Flatware
         send_progress :pending
       end
 
-      def start_dump(*)
-        @checkpoint = Checkpoint.new
-      end
-
       def close(*)
-        Sink.client.checkpoint @checkpoint
+        Sink.client.checkpoint checkpoint
         @checkpoint = nil
       end
 
@@ -43,16 +39,19 @@ module Flatware
       def send_progress(status)
         Sink.client.progress ProgressMessage.new status
       end
-    end
 
-    ::RSpec::Core::Formatters.register(
-      Formatter,
-      *Checkpoint::EVENTS,
-      :example_passed,
-      :example_failed,
-      :example_pending,
-      :start_dump,
-      :close
-    )
+      def checkpoint
+        @checkpoint ||= Checkpoint.new
+      end
+
+      ::RSpec::Core::Formatters.register(
+        self,
+        *Checkpoint::EVENTS,
+        :example_passed,
+        :example_failed,
+        :example_pending,
+        :close
+      )
+    end
   end
 end

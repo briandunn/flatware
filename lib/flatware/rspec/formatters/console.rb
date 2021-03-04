@@ -4,13 +4,13 @@ module Flatware
   module RSpec
     module Formatters
       class Console
-        attr_reader :progress_formatter, :profile_formatter
+        attr_reader :progress_formatter, :out, :deprecation_stream
 
-        def initialize(out, _err)
-          ::RSpec.configuration.tty = true
-          ::RSpec.configuration.color = true
+        def initialize(out, deprecation_stream: StringIO.new)
+          @out = out
+          @deprecation_stream = deprecation_stream
+          ::RSpec.configuration.backtrace_exclusion_patterns += [%r{/lib/flatware/worker}, %r{/lib/flatware/rspec}]
           @progress_formatter = ::RSpec::Core::Formatters::ProgressFormatter.new(out)
-          @profile_formatter = ::RSpec::Core::Formatters::ProfileFormatter.new(out)
         end
 
         def progress(result)
@@ -22,10 +22,11 @@ module Flatware
 
           result = checkpoints.reduce :+
 
-          progress_formatter.dump_failures(result)
-          progress_formatter.dump_summary(result.summary)
-          profile_formatter.dump_profile(result.profile) if result.profile
           progress_formatter.dump_pending(result) if result.pending_examples.any?
+          progress_formatter.dump_failures(result)
+          dump_deprecations(result.deprecations)
+          dump_profile(result.profile) if result.profile
+          progress_formatter.dump_summary(result.summary)
         end
 
         def summarize_remaining(remaining)
@@ -39,6 +40,20 @@ module Flatware
         end
 
         private
+
+        def dump_deprecations(deprecations)
+          formatter = ::RSpec::Core::Formatters::DeprecationFormatter.new(
+            deprecation_stream,
+            out
+          )
+
+          deprecations.each(&formatter.method(:deprecation))
+          formatter.deprecation_summary(nil)
+        end
+
+        def dump_profile(profile)
+          ::RSpec::Core::Formatters::ProfileFormatter.new(out).dump_profile(profile)
+        end
 
         def spec_list(remaining)
           remaining

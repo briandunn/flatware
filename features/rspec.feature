@@ -59,3 +59,30 @@ Feature: rspec task
       """
       1 example, 0 failures
       """
+
+  Scenario: group deprecations
+    Given spec "1" contains:
+      """
+      describe 'some deprecations' do
+        it { ''.stub(:foo) }
+      end
+      """
+    And spec "2" contains:
+      """
+      describe 'other deprecations' do
+        it { ''.should be_empty }
+      end
+      """
+    When I run flatware with "rspec"
+    Then the output contains the following line 1 time:
+      """
+      Deprecation Warnings:
+      """
+    And the output contains the following line:
+      """
+      2 deprecation warnings total
+      """
+    And the output contains the following line:
+      """
+      2 examples, 0 failures
+      """
