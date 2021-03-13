@@ -3,7 +3,12 @@ gemspec name: 'flatware'
 gemspec name: 'flatware-rspec'
 gemspec name: 'flatware-cucumber'
 
-gem 'aruba', '~> 0.14'
-gem 'pry'
-gem 'rake', '~> 12.3.3'
-gem 'rubocop', '~> 1.10.0'
+group :development do
+  gem 'appraisal'
+  gem 'aruba', '~> 0.14'
+  gem 'pry'
+  gem 'rake'
+  gem 'rubocop', '~> 1.10.0'
+  gem 'rubocop-rake'
+  gem 'rubocop-rspec'
+end

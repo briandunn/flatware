@@ -19,9 +19,6 @@ Feature: rspec task
       """
     And the output contains the following lines:
       """
-      Failures:
-
-      1) fail is expected to eq false
       Failure/Error: it { expect(true).to eq false }
 
       expected: false

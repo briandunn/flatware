@@ -13,6 +13,7 @@ AllCops:
   Exclude:
     - tmp/**/*
     - vendor/**/*
+    - gemfiles/**/*
 Style/FrozenStringLiteralComment:
   Enabled: false
 Naming/FileName:

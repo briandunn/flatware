@@ -1,6 +1,14 @@
 language: ruby
 cache: bundler
+before_install:
+  - gem install bundler
 rvm:
   - 2.6.6
   - 2.7.2
   - 3.0.0
+gemfile:
+  - gemfiles/rspec_3.6.gemfile
+  - gemfiles/rspec_3.7.gemfile
+  - gemfiles/rspec_3.8.gemfile
+  - gemfiles/rspec_3.9.gemfile
+  - gemfiles/rspec_3.10.gemfile
