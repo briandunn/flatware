@@ -8,7 +8,7 @@ PATH
       flatware (= 2.0.0.rc2)
     flatware-rspec (2.0.0.rc2)
       flatware (= 2.0.0.rc2)
-      rspec (>= 3.4)
+      rspec (>= 3.6)
 
 GEM
   remote: https://rubygems.org/
@@ -97,6 +97,7 @@ GEM
 
 PLATFORMS
   x86_64-darwin-20
+  x86_64-linux
 
 DEPENDENCIES
   appraisal
