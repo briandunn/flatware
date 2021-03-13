@@ -43,7 +43,7 @@ describe Flatware::Worker do
         allow(runner).to receive(:run).and_raise(StandardError)
         subject.listen
         expect(sink).to have_received(:finished).with(
-          having_attributes(failed?: true)
+          have_attributes(failed?: true)
         )
       end
     end

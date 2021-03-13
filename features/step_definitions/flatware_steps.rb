@@ -87,11 +87,12 @@ Then 'the output contains the following:' do |string|
   expect(flatware_process).to have_output Regexp.new Regexp.escape string
 end
 
-Then 'the output contains the following lines:' do |string|
+Then(/^the output contains the following lines?( (\d+) times?)?:$/) do |n, string|
   normalize_space = ->(s) { s.split("\n").map(&:strip).join("\n") }
   expected_lines = normalize_space[string]
   actual_lines = normalize_space[sanitize_text(flatware_process.output)]
   expect(actual_lines).to include expected_lines
+  expect(actual_lines.each_line.count { |line| line.strip == expected_lines }).to eq(n.to_i) if n
 end
 
 Given 'the following scenario:' do |scenario|
@@ -106,6 +107,10 @@ end
 
 Given 'the following spec:' do |spec|
   write_file 'spec/spec_spec.rb', spec
+end
+
+Given(/^spec "([^"]*)" contains:$/) do |name, spec|
+  write_file "spec/#{name}_spec.rb", spec
 end
 
 Then 'the output contains a backtrace' do

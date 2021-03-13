@@ -19,9 +19,6 @@ Feature: rspec task
       """
     And the output contains the following lines:
       """
-      Failures:
-
-      1) fail is expected to eq false
       Failure/Error: it { expect(true).to eq false }
 
       expected: false
@@ -58,4 +55,31 @@ Feature: rspec task
     Then the output contains the following:
       """
       1 example, 0 failures
+      """
+
+  Scenario: group deprecations
+    Given spec "1" contains:
+      """
+      describe 'some deprecations' do
+        it { ''.stub(:foo) }
+      end
+      """
+    And spec "2" contains:
+      """
+      describe 'other deprecations' do
+        it { ''.should be_empty }
+      end
+      """
+    When I run flatware with "rspec"
+    Then the output contains the following line 1 time:
+      """
+      Deprecation Warnings:
+      """
+    And the output contains the following line:
+      """
+      2 deprecation warnings total
+      """
+    And the output contains the following line:
+      """
+      2 examples, 0 failures
       """

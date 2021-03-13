@@ -15,32 +15,46 @@ module Flatware
       def_delegators :failures_notification, :fully_formatted_failed_examples, :failure_notifications
       def_delegators :pending_notification, :fully_formatted_pending_examples, :pending_examples
 
-      EVENTS = %i[dump_profile dump_summary dump_pending dump_failures].freeze
+      EVENTS = %i[
+        deprecation
+        dump_failures
+        dump_pending
+        dump_profile
+        dump_summary
+      ].freeze
 
       attr_reader :events
 
       def initialize(events = {})
-        @events = events
+        @events = { deprecation: [] }.merge(events)
       end
 
-      EVENTS.each do |event|
+      def self.listen_for(event, &block)
         define_method(event) do |notification|
-          events[event] = Marshalable.for_event(event).from_rspec(notification)
+          instance_exec(Marshalable.for_event(event).from_rspec(notification), &block)
         end
       end
 
-      def +(other)
-        self.class.new(
-          events.merge(other.events) { |_, event, other_event| event + other_event }
-        )
+      (EVENTS - %i[deprecation]).each do |event|
+        listen_for(event) do |notification|
+          events[event] = notification
+        end
       end
 
-      def failures?
-        summary.failures?
+      listen_for(:deprecation) do |deprecation|
+        events[:deprecation] << deprecation
+      end
+
+      def +(other)
+        self.class.new(events.merge(other.events) { |_, event, other_event| event + other_event })
       end
 
       def summary
         events.fetch(:dump_summary)
+      end
+
+      def deprecations
+        events.fetch(:deprecation)
       end
 
       def profile

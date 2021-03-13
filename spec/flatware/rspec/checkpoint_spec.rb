@@ -30,4 +30,18 @@ describe Flatware::RSpec::Checkpoint do
       expect(sum).to be_failures
     end
   end
+
+  it 'accrues deprecations' do
+    add_deprecation = lambda do |checkpoint|
+      checkpoint.deprecation(instance_double(::RSpec::Core::Notifications::DeprecationNotification))
+    end
+
+    checkpoint1 = described_class.new
+    checkpoint2 = described_class.new
+
+    2.times { add_deprecation.call(checkpoint1) }
+    add_deprecation.call(checkpoint2)
+
+    expect((checkpoint1 + checkpoint2).deprecations.size).to eq(3)
+  end
 end

@@ -25,5 +25,5 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.rubygems_version = '1.8.10'
   s.add_dependency %(flatware), Flatware::VERSION
-  s.add_dependency %(rspec), '>= 3.4'
+  s.add_dependency %(rspec), '>= 3.6'
 end
