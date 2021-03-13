@@ -1,7 +1,5 @@
-# Flatware [![Build Status][travis-badge]][travis] [![Code Climate][code-climate-badge]][code-climate]
+# Flatware [![Code Climate][code-climate-badge]][code-climate]
 
-[travis-badge]: https://travis-ci.org/briandunn/flatware.svg?branch=master
-[travis]: http://travis-ci.org/briandunn/flatware
 [code-climate-badge]: https://codeclimate.com/github/briandunn/flatware.png
 [code-climate]: https://codeclimate.com/github/briandunn/flatware
 
