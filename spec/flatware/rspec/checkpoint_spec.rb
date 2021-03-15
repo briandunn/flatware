@@ -8,7 +8,7 @@ describe Flatware::RSpec::Checkpoint do
       failure_notification = instance_double(
         ::RSpec::Core::Example,
         full_description: 'bad news',
-        execution_result: nil,
+        execution_result: instance_double(::RSpec::Core::Example::ExecutionResult, exception: nil).as_null_object,
         location: nil,
         location_rerun_argument: nil,
         metadata: {}

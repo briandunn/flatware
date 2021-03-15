@@ -1,6 +1,7 @@
 module Flatware
   module RSpec
     module Marshalable
+      require 'flatware/rspec/marshalable/execution_result'
       require 'flatware/rspec/marshalable/shared_group_inclusion_backtrace'
 
       ##
@@ -14,7 +15,7 @@ module Flatware
         ]
       ) do
         def initialize(rspec_example)
-          super(*members.map do |attribute|
+          super(marshalable_execution_result(rspec_example.execution_result), *members[1..].map do |attribute|
             rspec_example.public_send(attribute)
           end)
 
@@ -24,6 +25,10 @@ module Flatware
         attr_reader :metadata
 
         private
+
+        def marshalable_execution_result(execution_result)
+          ExecutionResult.from_rspec(execution_result)
+        end
 
         def marshalable_metadata(rspec_metadata)
           rspec_metadata.slice(:extra_failure_lines).tap do |metadata|
