@@ -15,18 +15,19 @@ module Flatware
       JobBuilder.new(args, workers: workers).jobs
     end
 
-    def run(job, _options = {})
-      runner = ::RSpec::Core::Runner
-      def runner.trap_interrupt() end
+    def runner
+      ::RSpec::Core::Runner.tap do |runner|
+        def runner.trap_interrupt() end
+      end
+    end
 
-      profile_examples = ::RSpec.configuration.profile_examples
-      ::RSpec.reset
-      ::RSpec.configuration.profile_examples = profile_examples
+    def run(job, _options = [])
       ::RSpec.configuration.deprecation_stream = StringIO.new
       ::RSpec.configuration.output_stream = StringIO.new
       ::RSpec.configuration.add_formatter(Flatware::RSpec::Formatter)
 
       runner.run(Array(job), $stderr, $stdout)
+      ::RSpec.reset # prevents duplicate runs
     end
   end
 end
