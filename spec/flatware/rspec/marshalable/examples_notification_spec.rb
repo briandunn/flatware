@@ -5,7 +5,7 @@ describe Flatware::RSpec::Marshalable::ExamplesNotification do
   it 'can be added together' do
     failed_example = instance_double(
       ::RSpec::Core::Example,
-      execution_result: nil,
+      execution_result: instance_double(::RSpec::Core::Example::ExecutionResult, exception: nil).as_null_object,
       full_description: 'the example',
       location_rerun_argument: nil,
       location: nil,
