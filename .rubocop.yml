@@ -10,6 +10,7 @@
 # See https://github.com/rubocop-hq/rubocop/blob/master/manual/configuration.md
 #
 AllCops:
+  TargetRubyVersion: 2.6
   Exclude:
     - tmp/**/*
     - vendor/**/*
