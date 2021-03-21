@@ -29,6 +29,10 @@ module Flatware
         send_progress :pending
       end
 
+      def message(message)
+        Sink.client.message message
+      end
+
       def close(*)
         Sink.client.checkpoint checkpoint
         @checkpoint = nil
@@ -50,6 +54,7 @@ module Flatware
         :example_passed,
         :example_failed,
         :example_pending,
+        :message,
         :close
       )
     end

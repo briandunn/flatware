@@ -21,9 +21,17 @@ module Flatware
       end
     end
 
+    def output_stream
+      StringIO.new.tap do |output|
+        output.define_singleton_method(:tty?) do
+          $stdout.tty?
+        end
+      end
+    end
+
     def run(job, _options = [])
       ::RSpec.configuration.deprecation_stream = StringIO.new
-      ::RSpec.configuration.output_stream = StringIO.new
+      ::RSpec.configuration.output_stream = output_stream
       ::RSpec.configuration.add_formatter(Flatware::RSpec::Formatter)
 
       runner.run(Array(job), $stderr, $stdout)

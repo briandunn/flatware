@@ -11,7 +11,7 @@ module Flatware
         @sink = DRbObject.new_with_uri sink_endpoint
       end
 
-      %w[ready finished started progress checkpoint].each do |message|
+      %w[ready finished started progress message checkpoint].each do |message|
         define_method message do |content|
           push [message.to_sym, content]
         end

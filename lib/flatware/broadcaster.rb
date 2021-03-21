@@ -4,10 +4,11 @@ module Flatware
   # sends messages to all formatters
   class Broadcaster
     FORMATTER_MESSAGES = %i[
-      jobs
-      started
-      progress
       finished
+      jobs
+      message
+      progress
+      started
       summarize
       summarize_remaining
     ].freeze

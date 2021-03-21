@@ -83,3 +83,23 @@ Feature: rspec task
       """
       2 examples, 0 failures
       """
+
+  @non-zero
+  Scenario: failure outside of examples
+    Given the following spec:
+      """
+      throw :a_fit
+      describe 'fits' do
+        it('already threw one')
+      end
+      """
+    When I run flatware with "rspec"
+    Then the output contains the following line:
+      """
+      uncaught throw :a_fit
+      """
+
+    And the output contains the following line:
+      """
+      0 examples, 0 failures, 1 error occurred outside of examples
+      """
