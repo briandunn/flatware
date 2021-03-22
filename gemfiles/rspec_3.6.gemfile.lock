@@ -1,13 +1,13 @@
 PATH
   remote: ..
   specs:
-    flatware (2.0.0.rc2)
+    flatware (2.0.0.rc3)
       thor (< 2.0)
-    flatware-cucumber (2.0.0.rc2)
+    flatware-cucumber (2.0.0.rc3)
       cucumber (~> 3.0)
-      flatware (= 2.0.0.rc2)
-    flatware-rspec (2.0.0.rc2)
-      flatware (= 2.0.0.rc2)
+      flatware (= 2.0.0.rc3)
+    flatware-rspec (2.0.0.rc3)
+      flatware (= 2.0.0.rc3)
       rspec (>= 3.6)
 
 GEM
@@ -47,7 +47,7 @@ GEM
     cucumber-tag_expressions (1.1.1)
     cucumber-wire (0.0.1)
     diff-lcs (1.4.4)
-    ffi (1.14.2)
+    ffi (1.15.0)
     gherkin (5.1.0)
     method_source (1.0.0)
     multi_json (1.15.0)
@@ -75,7 +75,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.6.0)
     rspec-support (3.6.0)
-    rubocop (1.10.0)
+    rubocop (1.11.0)
       parallel (~> 1.10)
       parser (>= 3.0.0.0)
       rainbow (>= 2.2.2, < 4.0)
@@ -96,21 +96,22 @@ GEM
     unicode-display_width (2.0.0)
 
 PLATFORMS
+  arm64-darwin-20
   x86_64-darwin-20
   x86_64-linux
 
 DEPENDENCIES
-  appraisal
+  appraisal (~> 2.4)
   aruba (~> 0.14)
   flatware!
   flatware-cucumber!
   flatware-rspec!
-  pry
-  rake
+  pry (~> 0.14)
+  rake (~> 13.0)
   rspec (= 3.6.0)
-  rubocop (~> 1.10.0)
-  rubocop-rake
-  rubocop-rspec
+  rubocop (~> 1.11)
+  rubocop-rake (~> 0.5)
+  rubocop-rspec (~> 2.2)
 
 BUNDLED WITH
    2.2.3

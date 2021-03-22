@@ -17,6 +17,10 @@ module Flatware
           progress_formatter.public_send(message_for(result), nil)
         end
 
+        def message(message)
+          out.puts(message.message)
+        end
+
         def summarize(checkpoints)
           return if checkpoints.empty?
 
