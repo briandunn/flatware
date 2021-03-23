@@ -11,10 +11,6 @@ module Flatware
 
     module_function
 
-    def extract_jobs_from_args(args, workers:)
-      JobBuilder.new(args, workers: workers).jobs
-    end
-
     def runner
       ::RSpec::Core::Runner.tap do |runner|
         def runner.trap_interrupt() end

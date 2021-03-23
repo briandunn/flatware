@@ -17,14 +17,9 @@ module Flatware
         :example_status_persistence_file_path
       )
 
-      def initialize(args, workers:)
-        @args = args
+      def initialize(configuration, workers:)
         @workers = workers
-
-        @configuration = ::RSpec.configuration
-        configuration.define_singleton_method(:command) { 'rspec' }
-
-        ::RSpec::Core::ConfigurationOptions.new(args).configure(@configuration)
+        @configuration = configuration
       end
 
       def jobs
@@ -32,11 +27,12 @@ module Flatware
           sum_seconds(load_persisted_example_statuses)
         )
 
-        balance_jobs(
-          bucket_count: [files_to_run.size, workers].min,
-          timed_files: timed_files,
-          untimed_files: untimed_files
-        )
+        Flatware.logger.debug(<<~MSG)
+          balancing #{timed_files.size} timed spec files and #{untimed_files.size} untimed spec files
+        MSG
+
+        balance_jobs(bucket_count: [files_to_run.size, workers].min, timed_files: timed_files,
+                     untimed_files: untimed_files)
       end
 
       private
@@ -107,8 +103,7 @@ module Flatware
         Array.new(count) { [] }.tap do |groups|
           items
             .sort_by(&block)
-            .reverse
-            .each do |entry|
+            .reverse_each do |entry|
             groups.min_by do |group|
               group.map(&block).reduce(:+) || 0
             end.push(entry)

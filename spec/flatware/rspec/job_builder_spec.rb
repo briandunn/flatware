@@ -4,22 +4,22 @@ require 'spec_helper'
 require 'flatware/rspec/job_builder'
 
 describe Flatware::RSpec::JobBuilder do
+  subject do
+    described_class.new(rspec_configuration, workers: 2).jobs
+  end
+
   before do
     allow(::RSpec::Core::ExampleStatusPersister).to(
       receive(:load_from).and_return(persisted_examples)
     )
+  end
 
-    allow(::RSpec.configuration).to(
-      receive(:files_to_run).and_return(files_to_run)
-    )
+  let(:rspec_configuration) do
+    instance_double(::RSpec::Core::Configuration, files_to_run: files_to_run, example_status_persistence_file_path: nil)
   end
 
   let(:persisted_examples) { [] }
   let(:files_to_run) { [] }
-
-  subject do
-    described_class.new([], workers: 2).jobs
-  end
 
   context 'when this run includes persisted examples' do
     let(:persisted_examples) do
