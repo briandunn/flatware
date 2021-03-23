@@ -13,6 +13,12 @@ module Flatware
           [failure_count, errors_outside_of_examples_count].any?(&:positive?)
         end
 
+        def example_paths
+          examples.map do |example|
+            example.location_rerun_argument.match(/^(?<path>.+):\d+$/)[:path]
+          end.uniq.sort
+        end
+
         def self.from_rspec(summary)
           serialized_examples = [
             summary.examples,

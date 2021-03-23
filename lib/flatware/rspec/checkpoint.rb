@@ -15,18 +15,21 @@ module Flatware
       def_delegators :failures_notification, :fully_formatted_failed_examples, :failure_notifications
       def_delegators :pending_notification, :fully_formatted_pending_examples, :pending_examples
 
-      EVENTS = %i[
-        deprecation
+      DUMP_EVENTS = %i[
         dump_failures
         dump_pending
         dump_profile
         dump_summary
       ].freeze
 
-      attr_reader :events
+      EVENTS = (DUMP_EVENTS + %i[seed deprecation]).freeze
 
-      def initialize(events = {})
+      attr_reader :events, :worker_number
+
+      def initialize(worker_number: nil, reruns: nil, **events)
         @events = { deprecation: [] }.merge(events)
+        @reruns = reruns
+        @worker_number = worker_number
       end
 
       def self.listen_for(event, &block)
@@ -35,7 +38,7 @@ module Flatware
         end
       end
 
-      (EVENTS - %i[deprecation]).each do |event|
+      DUMP_EVENTS.each do |event|
         listen_for(event) do |notification|
           events[event] = notification
         end
@@ -44,9 +47,13 @@ module Flatware
       listen_for(:deprecation) do |deprecation|
         events[:deprecation] << deprecation
       end
+      listen_for(:seed) do |message|
+        @seed = message
+      end
 
       def +(other)
-        self.class.new(events.merge(other.events) { |_, event, other_event| event + other_event })
+        merged_events = events.merge(other.events) { |_, event, other_event| event + other_event }
+        self.class.new(**merged_events, reruns: reruns.merge(other.reruns))
       end
 
       def summary
@@ -61,7 +68,15 @@ module Flatware
         events[:dump_profile]
       end
 
+      def reruns
+        @reruns ||= reruns? ? { worker_number => { seed: @seed.seed, examples: summary.example_paths } } : {}
+      end
+
       private
+
+      def reruns?
+        @seed&.seed_used? && failures?
+      end
 
       def failures_notification
         events.fetch(:dump_failures)

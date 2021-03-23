@@ -45,7 +45,11 @@ module Flatware
       end
 
       def checkpoint
-        @checkpoint ||= Checkpoint.new
+        @checkpoint ||= Checkpoint.new(worker_number: worker_number)
+      end
+
+      def worker_number
+        ENV.fetch('TEST_ENV_NUMBER').to_i
       end
 
       ::RSpec::Core::Formatters.register(

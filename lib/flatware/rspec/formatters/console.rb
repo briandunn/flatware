@@ -26,15 +26,15 @@ module Flatware
 
           result = checkpoints.reduce :+
 
-          progress_formatter.dump_pending(result) if result.pending_examples.any?
+          dump_pending(result)
           progress_formatter.dump_failures(result)
           dump_deprecations(result.deprecations)
-          dump_profile(result.profile) if result.profile
+          dump_reruns(result.reruns) if result.reruns.any?
           progress_formatter.dump_summary(result.summary)
         end
 
         def summarize_remaining(remaining)
-          progress_formatter.output.puts(colorizer.wrap(<<~MESSAGE, :detail))
+          out.puts(colorizer.wrap(<<~MESSAGE, :detail))
 
             The following specs weren't run:
 
@@ -44,6 +44,22 @@ module Flatware
         end
 
         private
+
+        def dump_pending(result)
+          progress_formatter.dump_pending(result) if result.pending_examples.any?
+        end
+
+        def dump_reruns(reruns)
+          lines = ["\nWorker reruns:\n"].concat(
+            reruns.map do |worker, seed:, examples:|
+              [
+                colorizer.wrap("rspec --seed=#{seed} #{examples.join(' ')}", ::RSpec.configuration.failure_color),
+                colorizer.wrap("# worker #{worker}", ::RSpec.configuration.detail_color)
+              ].join(' ')
+            end
+          )
+          out.puts lines.join("\n")
+        end
 
         def dump_deprecations(deprecations)
           formatter = ::RSpec::Core::Formatters::DeprecationFormatter.new(
@@ -56,6 +72,8 @@ module Flatware
         end
 
         def dump_profile(profile)
+          return unless profile
+
           ::RSpec::Core::Formatters::ProfileFormatter.new(out).dump_profile(profile)
         end
 
