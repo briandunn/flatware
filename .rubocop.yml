@@ -9,6 +9,8 @@
 #
 # See https://github.com/rubocop-hq/rubocop/blob/master/manual/configuration.md
 #
+require: rubocop-rake
+
 AllCops:
   TargetRubyVersion: 2.6
   Exclude:
@@ -25,7 +27,7 @@ Style/Documentation:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*_spec.rb
-Gemspec/DateAssignment:
+Gemspec/DeprecatedAttributeAssignment:
   Enabled: true
 Layout/SpaceBeforeBrackets:
   Enabled: true

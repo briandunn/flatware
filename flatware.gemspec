@@ -29,6 +29,5 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ['>= 2.6', '< 3.2']
   s.require_paths = ['lib']
   s.executables = ['flatware']
-  s.rubygems_version = '1.8.10'
   s.add_dependency %(thor), '< 2.0'
 end
