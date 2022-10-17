@@ -1,13 +1,13 @@
 PATH
   remote: ..
   specs:
-    flatware (2.0.0.rc3)
+    flatware (2.0.0)
       thor (< 2.0)
-    flatware-cucumber (2.0.0.rc3)
+    flatware-cucumber (2.0.0)
       cucumber (~> 3.0)
-      flatware (= 2.0.0.rc3)
-    flatware-rspec (2.0.0.rc3)
-      flatware (= 2.0.0.rc3)
+      flatware (= 2.0.0)
+    flatware-rspec (2.0.0)
+      flatware (= 2.0.0)
       rspec (>= 3.6)
 
 GEM
@@ -49,19 +49,20 @@ GEM
     diff-lcs (1.4.4)
     ffi (1.15.0)
     gherkin (5.1.0)
+    json (2.6.2)
     method_source (1.0.0)
     multi_json (1.15.0)
     multi_test (0.1.2)
-    parallel (1.20.1)
-    parser (3.0.0.0)
+    parallel (1.22.1)
+    parser (3.1.2.1)
       ast (~> 2.4.1)
     pry (0.14.0)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    rainbow (3.0.0)
+    rainbow (3.1.1)
     rake (13.0.3)
-    regexp_parser (2.1.1)
-    rexml (3.2.4)
+    regexp_parser (2.6.0)
+    rexml (3.2.5)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -75,17 +76,18 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.3)
-    rubocop (1.11.0)
+    rubocop (1.36.0)
+      json (~> 2.3)
       parallel (~> 1.10)
-      parser (>= 3.0.0.0)
+      parser (>= 3.1.2.1)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 1.8, < 3.0)
-      rexml
-      rubocop-ast (>= 1.2.0, < 2.0)
+      rexml (>= 3.2.5, < 4.0)
+      rubocop-ast (>= 1.20.1, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.4.1)
-      parser (>= 2.7.1.5)
+    rubocop-ast (1.21.0)
+      parser (>= 3.1.1.0)
     rubocop-rake (0.5.1)
       rubocop
     rubocop-rspec (2.2.0)
@@ -93,10 +95,11 @@ GEM
       rubocop-ast (>= 1.1.0)
     ruby-progressbar (1.11.0)
     thor (1.1.0)
-    unicode-display_width (2.0.0)
+    unicode-display_width (2.3.0)
 
 PLATFORMS
   arm64-darwin-20
+  arm64-darwin-21
   x86_64-darwin-20
   x86_64-linux
 
@@ -109,9 +112,9 @@ DEPENDENCIES
   pry (~> 0.14)
   rake (~> 13.0)
   rspec (= 3.8.0)
-  rubocop (~> 1.11)
+  rubocop (>= 1.30)
   rubocop-rake (~> 0.5)
   rubocop-rspec (~> 2.2)
 
 BUNDLED WITH
-   2.2.3
+   2.2.33
