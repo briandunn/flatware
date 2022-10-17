@@ -1,4 +1,5 @@
 require 'drb/drb'
+require 'set'
 
 module Flatware
   module Sink
