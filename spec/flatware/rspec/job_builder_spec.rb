@@ -5,11 +5,11 @@ require 'flatware/rspec/job_builder'
 
 describe Flatware::RSpec::JobBuilder do
   before do
-    allow(::RSpec::Core::ExampleStatusPersister).to(
+    allow(RSpec::Core::ExampleStatusPersister).to(
       receive(:load_from).and_return(persisted_examples)
     )
 
-    allow(::RSpec.configuration).to(
+    allow(RSpec.configuration).to(
       receive(:files_to_run).and_return(files_to_run)
     )
   end
