@@ -14,7 +14,7 @@ describe Flatware::RSpec::Marshalable::SummaryNotification do
   end
 
   it 'plays nice with the rspec formatting stuff' do
-    notification = ::RSpec::Core::Notifications::SummaryNotification.new(*args)
+    notification = RSpec::Core::Notifications::SummaryNotification.new(*args)
     summary = described_class.from_rspec(notification)
     expect(summary.fully_formatted).to match(/Finished/)
   end

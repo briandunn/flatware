@@ -3,7 +3,7 @@ require 'flatware/rspec/marshalable/example'
 describe Flatware::RSpec::Marshalable::Example do
   def stub_execution_result(exception)
     instance_double(
-      ::RSpec::Core::Example::ExecutionResult,
+      RSpec::Core::Example::ExecutionResult,
       exception: exception,
       finished_at: Time.now,
       run_time: 0,
@@ -14,11 +14,11 @@ describe Flatware::RSpec::Marshalable::Example do
 
   it 'caries what is needed to format a backtrace' do
     exception = Exception.new
-    ::RSpec::Core::Formatters::ExceptionPresenter.new(
+    RSpec::Core::Formatters::ExceptionPresenter.new(
       exception,
       described_class.new(
         instance_double(
-          ::RSpec::Core::Example,
+          RSpec::Core::Example,
           execution_result: stub_execution_result(exception),
           full_description: nil,
           location: nil,
@@ -33,7 +33,7 @@ describe Flatware::RSpec::Marshalable::Example do
     const = stub_const('A::Constant::Not::Likely::Loaded::In::Sink', Class.new(RuntimeError))
     message = described_class.new(
       instance_double(
-        ::RSpec::Core::Example,
+        RSpec::Core::Example,
         execution_result: stub_execution_result(const.new),
         full_description: nil,
         location: nil,
