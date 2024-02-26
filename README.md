@@ -106,6 +106,11 @@ Flatware has a couple lifecycle callbacks that you can use to avoid booting your
 over again on every core. One way to take advantage of this via a `spec/flatware_helper.rb` file like so:
 
 ```ruby
+##
+# uncomment if you get a segmentation fault from the "pg" gem
+# @see https://github.com/ged/ruby-pg/issues/311#issuecomment-1609970533
+# ENV["PGGSSENCMODE"] = "disable"
+
 Flatware.configure do |conf|
   conf.before_fork do
     require 'rails_helper'
@@ -114,6 +119,11 @@ Flatware.configure do |conf|
   end
 
   conf.after_fork do |test_env_number|
+    ##
+    # uncomment if you're using SimpleCov and have started it in `rails_helper` as suggested here:
+    # @see https://github.com/simplecov-ruby/simplecov/tree/main?tab=readme-ov-file#use-it-with-any-framework
+    # SimpleCov.at_fork.call(test_env_number)
+
     config = ActiveRecord::Base.connection_db_config.configuration_hash
 
     ActiveRecord::Base.establish_connection(
@@ -125,6 +135,15 @@ Flatware.configure do |conf|
 end
 ```
 Now when I run `bundle exec flatware rspec -r ./spec/flatware_helper` My app only boots once, rather than once per core.
+
+## SimpleCov
+
+If you're using SimpleCov, follow [their directions](https://github.com/simplecov-ruby/simplecov/tree/main?tab=readme-ov-file#use-it-with-any-framework) to install. When you have it working as desired for serial runs, add
+`SimpleCov.at_fork.call(test_env_number)` to flatware's `after_fork` hook. You should now get the same coverage stats from parallel and serial runs.
+
+## Segmentation faults in the PG gem
+
+If you get a segmentation fault on start you may need to add `ENV["PGGSSENCMODE"] = "disable"` to the top of your flatware helper.
 
 ## Design Goals
 
@@ -170,3 +189,10 @@ Do whatever you want. I'd love to help make sure Flatware meets your needs.
 [![Hashrocket logo](https://hashrocket.com/hashrocket_logo.svg)](https://hashrocket.com)
 
 Flatware is supported by the team at [Hashrocket](https://hashrocket.com), a multidisciplinary design & development consultancy. If you'd like to [work with us](https://hashrocket.com/contact-us/hire-us) or [join our team](https://hashrocket.com/contact-us/jobs), don't hesitate to get in touch.
+
+
+# TODO:
+
+possible simplecov fixes
+
+1. seems like we won't get the same results as serial rspec runs unless we start simplecov after fork. And if we do that, I think a process needs to claim to be the last one for simplecov to run the merge.
