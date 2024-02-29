@@ -3,11 +3,11 @@ module Flatware
     attr_reader :class, :message, :cause
     attr_accessor :backtrace
 
-    def initialize(klass, message, backtrace, cause = '')
+    def initialize(klass, message, backtrace, cause = nil)
       @class = serialized(klass)
       @message = message
       @backtrace = backtrace
-      @cause = cause
+      @cause = cause && SerializedException.from(cause)
     end
 
     def self.from(exception)
