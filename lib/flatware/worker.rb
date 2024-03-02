@@ -16,7 +16,7 @@ module Flatware
     end
 
     def self.spawn(count:, runner:, sink:, **)
-      Flatware.configuration.before_fork.call
+      # Flatware.configuration.before_fork.call
       count.times do |i|
         fork do
           $0 = "flatware worker #{i}"

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'flatware/cli'
+require 'flatware/configuration'
 require 'flatware/rspec'
 require 'flatware/rspec/formatters/console'
 
@@ -15,6 +16,10 @@ module Flatware
     )
     desc 'rspec [FLATWARE_OPTS]', 'parallelizes rspec'
     def rspec(*rspec_args)
+      # the file hasn't been evaluated yet, because `-r` is handled by rspec
+      # and the rspec configuration is loaded by `extract_jobs_from_args`
+      Flatware.configuration.before_fork.call
+
       jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
 
       formatter = Flatware::RSpec::Formatters::Console.new(
