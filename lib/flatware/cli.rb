@@ -55,7 +55,8 @@ module Flatware
 
     def start_sink(jobs:, workers:, formatter:)
       $0 = 'flatware sink'
-      Process.setpgrp
+      try_setpgrp
+
       passed = Sink.start_server(
         jobs: jobs,
         formatter: Flatware::Broadcaster.new([formatter]),
@@ -63,6 +64,12 @@ module Flatware
         worker_count: workers
       )
       exit passed ? 0 : 1
+    end
+
+    def try_setpgrp
+      Process.setpgrp
+    rescue Errno::EPERM => e
+      Flatware.log 'continuing after: Process.setpgrp:', e.message
     end
 
     def workers
