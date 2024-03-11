@@ -18,33 +18,37 @@ module Flatware
     end
 
     class Server
-      attr_reader :checkpoints, :completed_jobs, :formatter, :jobs, :queue, :sink, :workers
+      attr_reader :checkpoints, :completed_jobs, :in_progress_jobs, :formatter, :jobs, :queue, :sink, :worker_manager
 
-      def initialize(jobs:, formatter:, sink:, worker_count: 0, **)
+      def initialize(jobs:, formatter:, sink:, worker_manager:, **)
         @checkpoints = []
         @completed_jobs = []
         @formatter = formatter
-        @jobs = group_jobs(jobs, worker_count).freeze
+        @jobs = group_jobs(jobs, worker_manager.count).freeze
         @queue = @jobs.dup
+        @in_progress_jobs = {}
         @sink = sink
-        @workers = Set.new(worker_count.times.to_a)
+        @worker_manager = worker_manager
       end
 
       def start
         trap_interrupt
         formatter.jobs jobs
+        worker_manager.spawn
         DRb.start_service(sink, self, verbose: Flatware.verbose?)
         DRb.thread.join
+        worker_manager.stop
         !failures?
       end
 
       def ready(worker)
-        job = queue.shift
-        if job && !(remaining_work.empty? || interruped?)
-          workers << worker
+        job = in_progress_jobs[worker] || queue.shift
+        if job && !(remaining_work.empty? || interrupted?)
+          worker_manager.register worker
+          in_progress_jobs[worker] = job
           job
         else
-          workers.delete worker
+          worker_manager.delete worker
           check_finished!
           Job.sentinel
         end
@@ -56,6 +60,7 @@ module Flatware
 
       def finished(job)
         completed_jobs << job
+        in_progress_jobs.delete(job.worker)
         formatter.finished(job)
         check_finished!
       end
@@ -92,13 +97,13 @@ module Flatware
         abort
       end
 
-      def interruped?
+      def interrupted?
         signals = Thread.main[:signals]
         signals && !signals.empty?
       end
 
       def check_finished!
-        return unless [workers, remaining_work].all?(&:empty?)
+        return unless [worker_manager.workers, remaining_work].all?(&:empty?)
 
         DRb.stop_service
         summarize

@@ -15,18 +15,6 @@ module Flatware
       Flatware::Sink.client = @sink
     end
 
-    def self.spawn(count:, runner:, sink:, **)
-      Flatware.configuration.before_fork.call
-      count.times do |i|
-        fork do
-          $0 = "flatware worker #{i}"
-          ENV['TEST_ENV_NUMBER'] = i.to_s
-          Flatware.configuration.after_fork.call(i)
-          new(i, runner, sink).listen
-        end
-      end
-    end
-
     def listen
       retrying(times: 10, wait: 0.1) do
         job = sink.ready id

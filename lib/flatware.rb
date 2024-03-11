@@ -7,6 +7,7 @@ module Flatware
   require 'flatware/cli'
   require 'flatware/sink'
   require 'flatware/worker'
+  require 'flatware/worker_manager'
   require 'flatware/broadcaster'
 
   module_function

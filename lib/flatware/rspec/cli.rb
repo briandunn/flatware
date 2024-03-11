@@ -23,8 +23,8 @@ module Flatware
       )
 
       Flatware.verbose = options[:log]
-      Worker.spawn count: workers, runner: RSpec, sink: options['sink-endpoint']
-      start_sink(jobs: jobs, workers: workers, formatter: formatter)
+      worker_manager = WorkerManager.new(count: workers, runner: RSpec, sink: options['sink-endpoint'])
+      start_sink(jobs: jobs, worker_manager: worker_manager, formatter: formatter)
     end
   end
 end

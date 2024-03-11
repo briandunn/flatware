@@ -22,10 +22,10 @@ module Flatware
 
       Flatware.verbose = options[:log]
       sink = options['sink-endpoint']
-      Worker.spawn(count: workers, runner: Cucumber, sink: sink)
+      worker_manager = WorkerManager.new(count: workers, runner: Cucumber, sink: sink)
       start_sink(
         jobs: config.jobs,
-        workers: workers,
+        worker_manager: worker_manager,
         formatter: Flatware::Cucumber::Formatters::Console.new($stdout, $stderr)
       )
     end
