@@ -6,7 +6,15 @@ module Flatware
     module Marshalable
       class SummaryNotification < ::RSpec::Core::Notifications::SummaryNotification
         def +(other)
-          self.class.new(*zip(other).map { |a, b| a + b })
+          values = to_h.map do |key, value|
+            if %i[duration load_time].include?(key)
+              [value, other.public_send(key)].max
+            else
+              value + other.public_send(key)
+            end
+          end
+
+          self.class.new(*values)
         end
 
         def failures?
