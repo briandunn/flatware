@@ -50,6 +50,7 @@ module Flatware
       Flatware.log e
       job.failed!
       sink.finished job
+      raise
     end
 
     def want_to_quit!

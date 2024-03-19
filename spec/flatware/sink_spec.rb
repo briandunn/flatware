@@ -11,7 +11,7 @@ describe Flatware::Sink do
   end
 
   let! :formatter do
-    double(
+    OpenStruct.new(
       'Formatter',
       finished: nil,
       jobs: nil,
@@ -20,7 +20,9 @@ describe Flatware::Sink do
       summarize: nil,
       summarize_remaining: nil
     ).tap do |formatter|
-      allow(formatter).to receive(:summarize_remaining, &method(:puts))
+      def formatter.summarize_remaining(*args)
+        puts *args
+      end
     end
   end
 

@@ -11,10 +11,16 @@ module Flatware
           @deprecation_stream = deprecation_stream
           ::RSpec.configuration.backtrace_exclusion_patterns += [%r{/lib/flatware/worker}, %r{/lib/flatware/rspec}]
           @progress_formatter = ::RSpec::Core::Formatters::ProgressFormatter.new(out)
+          @all_examples = Set.new
         end
 
         def progress(result)
+          @all_examples.delete result.location
           progress_formatter.public_send(message_for(result), nil)
+        end
+
+        def started(notification)
+          @all_examples = notification
         end
 
         def message(message)
@@ -33,12 +39,14 @@ module Flatware
           progress_formatter.dump_summary(result.summary)
         end
 
-        def summarize_remaining(remaining)
+        def summarize_remaining(_remaining)
+          require 'pry'
+          binding.pry
           progress_formatter.output.puts(colorizer.wrap(<<~MESSAGE, :detail))
 
             The following specs weren't run:
 
-            #{spec_list(remaining)}
+            #{spec_list(@all_examples)}
 
           MESSAGE
         end
@@ -61,7 +69,9 @@ module Flatware
 
         def spec_list(remaining)
           remaining
-            .flat_map(&:id).sort.each_with_index
+            # .flat_map(&:id)
+            .sort
+            .each_with_index
             .map do |example, index|
             format(
               '%<index>4d) %<example>s',
