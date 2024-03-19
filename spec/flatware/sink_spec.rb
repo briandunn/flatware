@@ -1,24 +1,27 @@
 require 'spec_helper'
 require 'drb'
+require 'timeout'
 
 describe Flatware::Sink do
-  let(:sink_endpoint) do
+  let!(:sink_endpoint) do
     server = TCPServer.new('127.0.0.1', 0)
     port = server.addr[1]
     server.close
-    "druby://localhost:#{port}"
+    "druby://0.0.0.0:#{port}"
   end
 
   let! :formatter do
     double(
       'Formatter',
-      ready: nil,
-      summarize: nil,
+      finished: nil,
       jobs: nil,
       progress: nil,
-      finished: nil,
+      ready: nil,
+      summarize: nil,
       summarize_remaining: nil
-    )
+    ).tap do |formatter|
+      allow(formatter).to receive(:summarize_remaining, &method(:puts))
+    end
   end
 
   let :defaults do
@@ -28,21 +31,52 @@ describe Flatware::Sink do
     }
   end
 
-  context 'when I have work to do, but am interupted' do
-    it 'exits' do
-      job = double 'job', id: 'int.feature'
+  def connect
+    Timeout.timeout(2) do
+      sleep 0.1
+      DRbObject.new_with_uri(sink_endpoint)
+    rescue DRb::DRbConnError
+      retry
+    end
+  end
 
-      IO.popen('-') do |f|
-        if f
-          sleep 1
-          Process.kill 'INT', f.pid
+  def fork_server(&block)
+    IO.popen('-') do |f|
+      if f
+        connect.ready(1)
+        block.call(f)
+        Process.waitall
+      else
+        described_class.start_server(**defaults, jobs: [job])
+      end
+    end
+  end
 
-          expect(f.read).to match(/Interrupted/)
+  context 'when I have work to do' do
+    let(:job) { Flatware::Job.new('int.feature') }
 
-          child_pids = Flatware.pids { |cpid| cpid.ppid == Process.pid }
-          expect(child_pids).to_not include f.pid
-        else
-          described_class.start_server(**defaults, jobs: [job])
+    context 'but a worker dies' do
+      it 'explains and exits non-zero' do
+        fork_server do |server|
+          Process.kill 'CLD', server.pid
+
+          expect(server.read).to match(/A worker died/).and(match(/int\.feature/))
+
+          Process.wait(server.pid)
+          expect(Process.last_status).to_not be_success
+        end
+      end
+    end
+
+    context 'but am interupted' do
+      it 'explains and exits non-zero' do
+        fork_server do |server|
+          Process.kill 'INT', server.pid
+
+          expect(server.read).to match(/Interrupted/).and(match(/int\.feature/))
+
+          Process.wait(server.pid)
+          expect(Process.last_status).to_not be_success
         end
       end
     end

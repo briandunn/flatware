@@ -1,5 +1,6 @@
 require 'drb/drb'
 require 'set'
+require 'flatware/sink/signal'
 
 module Flatware
   module Sink
@@ -31,7 +32,7 @@ module Flatware
       end
 
       def start
-        trap_interrupt
+        @signal = Signal.listen(&method(:summarize_remaining))
         formatter.jobs jobs
         DRb.start_service(sink, self, verbose: Flatware.verbose?)
         DRb.thread.join
@@ -72,29 +73,8 @@ module Flatware
 
       private
 
-      def trap_interrupt
-        Thread.main[:signals] = Queue.new
-
-        Thread.new(&method(:handle_interrupt))
-
-        trap 'INT' do
-          Thread.main[:signals] << :int
-        end
-      end
-
-      def handle_interrupt
-        Thread.main[:signals].pop
-        puts 'Interrupted!'
-        summarize_remaining
-        puts "\n\nCleaning up. Please wait...\n"
-        Process.waitall
-        puts 'done.'
-        abort
-      end
-
       def interruped?
-        signals = Thread.main[:signals]
-        signals && !signals.empty?
+        @signal&.interruped?
       end
 
       def check_finished!
