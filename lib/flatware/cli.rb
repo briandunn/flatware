@@ -17,7 +17,7 @@ module Flatware
         aliases: '-w',
         type: :numeric,
         default: processors,
-        desc: 'Number of concurent processes to run'
+        desc: 'Number of concurrent processes to run'
       )
     end
 
