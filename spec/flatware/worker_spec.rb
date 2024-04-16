@@ -35,7 +35,7 @@ describe Flatware::Worker do
       end
     end
 
-    context 'when attepted job raises' do
+    context 'when attempted job raises' do
       it 'marks the job as failed' do
         job = Flatware::Job.new
         allow(sink).to receive_messages(started: nil, finished: nil)
