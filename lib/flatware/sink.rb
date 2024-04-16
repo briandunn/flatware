@@ -41,7 +41,7 @@ module Flatware
 
       def ready(worker)
         job = queue.shift
-        if job && !(remaining_work.empty? || interruped?)
+        if job && !(remaining_work.empty? || interrupted?)
           workers << worker
           job
         else
@@ -73,8 +73,8 @@ module Flatware
 
       private
 
-      def interruped?
-        @signal&.interruped?
+      def interrupted?
+        @signal&.interrupted?
       end
 
       def check_finished!
