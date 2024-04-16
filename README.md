@@ -46,7 +46,7 @@ For this to work the configuration option must be loaded before any specs are ru
 
     --require spec_helper
 
-But beware, if you're using ActiveRecord in your suite you'll need to avoid doing things that cause it to establish a database connection in `spec_helper.rb`. If ActiveRecord connects before flatware forks off workers, each will die messily. All of this will just work if you're following [the recomended pattern of splitting your helpers into `spec_helper` and `rails_helper`](https://github.com/rspec/rspec-rails/blob/v3.8.2/lib/generators/rspec/install/templates/spec/rails_helper.rb). Another option is to use [the configurable hooks](
+But beware, if you're using ActiveRecord in your suite you'll need to avoid doing things that cause it to establish a database connection in `spec_helper.rb`. If ActiveRecord connects before flatware forks off workers, each will die messily. All of this will just work if you're following [the recommended pattern of splitting your helpers into `spec_helper` and `rails_helper`](https://github.com/rspec/rspec-rails/blob/v3.8.2/lib/generators/rspec/install/templates/spec/rails_helper.rb). Another option is to use [the configurable hooks](
 #faster-startup-with-activerecord
 ).
 
