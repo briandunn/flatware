@@ -5,30 +5,27 @@ require 'flatware/rspec/job_builder'
 
 describe Flatware::RSpec::JobBuilder do
   before do
-    allow(RSpec::Core::ExampleStatusPersister).to(
-      receive(:load_from).and_return(persisted_examples)
-    )
-
     allow(RSpec.configuration).to(
       receive(:files_to_run).and_return(files_to_run)
     )
   end
 
-  let(:persisted_examples) { [] }
+  let(:duration_provider) { double('duration_provider', seconds_per_file: seconds_per_file) }
+  let(:seconds_per_file) { [] }
   let(:files_to_run) { [] }
 
   subject do
-    described_class.new([], workers: 2).jobs
+    described_class.new([], workers: 2, duration_provider: duration_provider).jobs
   end
 
   context 'when this run includes persisted examples' do
-    let(:persisted_examples) do
-      [
-        { example_id: './fast_1_spec.rb[1]', run_time: '1 second' },
-        { example_id: './fast_2_spec.rb[1]', run_time: '1 second' },
-        { example_id: './fast_3_spec.rb[1]', run_time: '1 second' },
-        { example_id: './slow_spec.rb[1]', run_time: '2 seconds' }
-      ].map { |example| example.merge status: 'passed' }
+    let(:seconds_per_file) do
+      {
+        './fast_1_spec.rb' => 1.0,
+        './fast_2_spec.rb' => 1.0,
+        './fast_3_spec.rb' => 1.0,
+        './slow_spec.rb' => 2.0
+      }
     end
 
     let(:files_to_run) { %w[fast_1_spec.rb fast_2_spec.rb slow_spec.rb] }

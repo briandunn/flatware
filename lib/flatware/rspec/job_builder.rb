@@ -9,17 +9,14 @@ module Flatware
     # and attempts to ballence the jobs accordingly.
     class JobBuilder
       extend Forwardable
-      attr_reader :args, :workers, :configuration
+      attr_reader :args, :workers, :configuration, :duration_provider
 
-      def_delegators(
-        :configuration,
-        :files_to_run,
-        :example_status_persistence_file_path
-      )
+      def_delegators :configuration, :files_to_run
 
-      def initialize(args, workers:)
+      def initialize(args, workers:, duration_provider:)
         @args = args
         @workers = workers
+        @duration_provider = duration_provider
 
         @configuration = ::RSpec.configuration
         configuration.define_singleton_method(:command) { 'rspec' }
@@ -29,7 +26,7 @@ module Flatware
 
       def jobs
         timed_files, untimed_files = timed_and_untimed_files(
-          sum_seconds(load_persisted_example_statuses)
+          duration_provider.seconds_per_file
         )
 
         balance_jobs(
@@ -64,34 +61,6 @@ module Flatware
 
       def normalize_path(path)
         ::RSpec::Core::Metadata.relative_path(File.expand_path(path))
-      end
-
-      def load_persisted_example_statuses
-        ::RSpec::Core::ExampleStatusPersister.load_from(
-          example_status_persistence_file_path || ''
-        )
-      end
-
-      def sum_seconds(statuses)
-        statuses.select(&passing)
-                .map { |example| parse_example(**example) }
-                .reduce({}) do |times, example|
-          times.merge(
-            example.fetch(:file_name) => example.fetch(:seconds)
-          ) do |_, old = 0, new|
-            old + new
-          end
-        end
-      end
-
-      def passing
-        ->(example) { example.fetch(:status) =~ /pass/i }
-      end
-
-      def parse_example(example_id:, run_time:, **)
-        seconds = run_time.match(/\d+(\.\d+)?/).to_s.to_f
-        file_name = ::RSpec::Core::Example.parse_id(example_id).first
-        { seconds: seconds, file_name: file_name }
       end
 
       def round_robin(count, items)

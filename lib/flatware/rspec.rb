@@ -11,8 +11,8 @@ module Flatware
 
     module_function
 
-    def extract_jobs_from_args(args, workers:)
-      JobBuilder.new(args, workers: workers).jobs
+    def extract_jobs_from_args(args, workers:, duration_provider:)
+      JobBuilder.new(args, workers: workers, duration_provider: duration_provider).jobs
     end
 
     def runner

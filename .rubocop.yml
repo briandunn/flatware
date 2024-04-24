@@ -27,6 +27,8 @@ Naming/FileName:
     - lib/flatware-*.rb
 Style/Documentation:
   Enabled: false
+Metrics/AbcSize:
+  Max: 20
 Metrics/BlockLength:
   Exclude:
     - spec/**/*_spec.rb
