@@ -1,46 +1,77 @@
 module Flatware
   module Sink
     class Signal
-      def initialize(&on_interrupt)
+      Message = Struct.new(:message)
+
+      attr_reader :formatter
+
+      def initialize(formatter, &on_interrupt)
+        @formatter = formatter
         Thread.main[:signals] = Queue.new
 
         @on_interrupt = on_interrupt
-      end
-
-      def interruped?
-        !signals.empty?
       end
 
       def listen
         Thread.new(&method(:handle_signals))
 
         ::Signal.trap('INT') { signals << :int }
-        ::Signal.trap('CLD') { signals << :cld }
+        ::Signal.trap('CLD') do
+          signals << :cld if child_failed?
+        end
 
         self
       end
 
-      def self.listen(&block)
-        new(&block).listen
+      def self.listen(formatter, &block)
+        new(formatter, &block).listen
       end
 
       private
 
+      def child_status
+        _worker_pid, status = begin
+          Process.wait2(-1, Process::WNOHANG)
+        rescue Errno::ECHILD
+          []
+        end
+        status
+      end
+
+      def child_statuses
+        statuses = []
+        loop do
+          status = child_status
+          return statuses unless status
+
+          statuses << status
+        end
+      end
+
+      def child_failed?
+        child_statuses.any? { |status| !status.success? }
+      end
+
       def handle_signals
-        puts signal_message(signals.pop)
-        Process.waitall
-        @on_interrupt.call
-        puts 'done.'
+        signal_message(signals.pop) do
+          Process.waitall
+          @on_interrupt.call
+        end
+
         abort
       end
 
       def signal_message(signal)
-        format(<<~MESSAGE, { cld: 'A worker died', int: 'Interrupted' }.fetch(signal))
+        formatter.message(Message.new(format(<<~MESSAGE, { cld: 'A worker died', int: 'Interrupted' }.fetch(signal))))
 
           %s!
 
-          Cleaning up. Please wait...
+          Waiting for workers to finish their current jobs...
         MESSAGE
+
+        yield
+
+        formatter.message(Message.new('done.'))
       end
 
       def signals

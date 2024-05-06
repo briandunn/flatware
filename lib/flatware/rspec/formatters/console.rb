@@ -34,7 +34,7 @@ module Flatware
         end
 
         def summarize_remaining(remaining)
-          progress_formatter.output.puts(colorizer.wrap(<<~MESSAGE, :detail))
+          puts colorizer.wrap(<<~MESSAGE, :detail)
 
             The following specs weren't run:
 
@@ -44,6 +44,10 @@ module Flatware
         end
 
         private
+
+        def puts(message)
+          progress_formatter.output.puts(message)
+        end
 
         def dump_deprecations(deprecations)
           formatter = ::RSpec::Core::Formatters::DeprecationFormatter.new(

@@ -25,6 +25,7 @@ module Flatware
         @checkpoints = []
         @completed_jobs = []
         @formatter = formatter
+        @interrupted = false
         @jobs = group_jobs(jobs, worker_count).freeze
         @queue = @jobs.dup
         @sink = sink
@@ -32,11 +33,11 @@ module Flatware
       end
 
       def start
-        @signal = Signal.listen(&method(:summarize_remaining))
+        Signal.listen(formatter, &method(:on_interrupt))
         formatter.jobs jobs
         DRb.start_service(sink, self, verbose: Flatware.verbose?)
         DRb.thread.join
-        !failures?
+        !(failures? || interruped?)
       end
 
       def ready(worker)
@@ -73,8 +74,13 @@ module Flatware
 
       private
 
+      def on_interrupt
+        @interrupted = true
+        summarize_remaining
+      end
+
       def interruped?
-        @signal&.interruped?
+        @interruped
       end
 
       def check_finished!
