@@ -34,7 +34,7 @@ module Flatware
         end
 
         def summarize_remaining(remaining)
-          progress_formatter.output.puts(colorizer.wrap(<<~MESSAGE, :detail))
+          out.puts(colorizer.wrap(<<~MESSAGE, :detail))
 
             The following specs weren't run:
 
