@@ -6,7 +6,7 @@ Feature: Survives weird uses of gherkin
     Background:
       Given the pubas is grand
 
-    Scenario Outline: Sanwiches
+    Scenario Outline: Sandwiches
       Given I know you want to do it
       Then we make the following <food_item>:
         | Peanut Butter | Jelly  |  | time  |

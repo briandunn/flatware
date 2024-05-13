@@ -7,7 +7,7 @@ module Flatware
         @on_interrupt = on_interrupt
       end
 
-      def interruped?
+      def interrupted?
         !signals.empty?
       end
 

@@ -17,7 +17,7 @@ module Flatware
         aliases: '-w',
         type: :numeric,
         default: processors,
-        desc: 'Number of concurent processes to run'
+        desc: 'Number of concurrent processes to run'
       )
     end
 
@@ -90,6 +90,6 @@ if loaded_flatware_gem_count.zero?
   warn(
     format(<<~MESSAGE, gem_list: flatware_gems.join(' or ')))
       The flatware gem is a dependency of flatware runners for rspec and cucumber.
-      Install %<gem_list>s for more usefull commands.
+      Install %<gem_list>s for more useful commands.
     MESSAGE
 end
