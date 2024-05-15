@@ -52,13 +52,14 @@ module Flatware
         child_statuses.any? { |status| !status.success? }
       end
 
+      # TODO: handle second int
       def handle_signals
         signal_message(signals.pop) do
-          Process.waitall
+          Process.waitall # necessary? sink could wait.
           @on_interrupt.call
         end
 
-        abort
+        abort # necessary? sink counld do it.
       end
 
       def signal_message(signal)

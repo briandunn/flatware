@@ -59,6 +59,7 @@ module Flatware
       def finished(job)
         completed_jobs << job
         formatter.finished(job)
+        # do something else if interrupted? 
         check_finished!
       end
 
