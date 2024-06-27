@@ -40,7 +40,10 @@ $ flatware rspec
 
 The rspec runner can balance worker loads, making your suite even faster.
 
-It forms balanced groups of spec files according to their last run times, if you've set `example_status_persistence_file_path` [in your RSpec config](https://relishapp.com/rspec/rspec-core/v/3-8/docs/command-line/only-failures).
+It forms balanced groups of spec files according to their last run times, if
+you've set `example_status_persistence_file_path` in your [RSpec config].
+
+[RSpec config]: https://rspec.info/features/3-13/rspec-core/command-line/only-failures/
 
 For this to work the configuration option must be loaded before any specs are run. The `.rspec` file is one way to achieve this:
 
