@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ['>= 2.6', '< 3.4']
   s.require_paths = ['lib']
   s.executables = ['flatware']
+  s.add_dependency %(drb)
   s.add_dependency %(thor), '< 2.0'
   # s.metadata['rubygems_mfa_required'] = 'true'
 end
