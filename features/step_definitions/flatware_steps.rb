@@ -79,7 +79,7 @@ When(/^I run flatware(?: with "([^"]+)")?$/) do |args|
   command = ['flatware', args, '-w', max_workers].flatten.compact.join(' ')
 
   @duration = duration do
-    run_command_and_stop(command, fail_on_exit: false)
+    run_command(command)
   end
 end
 
@@ -115,7 +115,7 @@ end
 
 Then 'the output contains a backtrace' do
   trace = <<-TXT.gsub(/^ +/, '')
-    features/flunk.feature:4:in `Given flunk'
+    features/flunk.feature:4:in `flunk'
   TXT
 
   expect(flatware_process).to have_output Regexp.new Regexp.escape trace

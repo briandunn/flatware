@@ -12,6 +12,7 @@ Dir[Pathname(__FILE__).dirname.join('support/**/*.rb')]
 RSpec.configure do |config|
   config.include WaitingSupport
   config.raise_errors_for_deprecations!
+  config.example_status_persistence_file_path = 'tmp/examples.txt'
   config.around :each, :verbose do |example|
     Flatware.verbose = true
     example.run

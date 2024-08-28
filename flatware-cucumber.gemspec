@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.licenses = ['MIT']
   s.required_ruby_version = ['>= 2.6', '< 3.4']
   s.require_paths = ['lib']
-  s.add_dependency %(cucumber), '~> 3.0'
+  s.add_dependency %(cucumber), '~> 9.1'
   s.add_dependency %(flatware), Flatware::VERSION
   # s.metadata['rubygems_mfa_required'] = 'true'
 end
