@@ -36,15 +36,27 @@ describe Flatware::Cucumber do
         FEATURE
 
         Dir.chdir Pathname(Dir.pwd).join('tmp/aruba') do
-          described_class.run('features/feature_1.feature', [])
-          described_class.run('features/feature_2.feature', [])
+          described_class.run([1, 2].map { |n| "features/feature_#{n}.feature" }, [])
 
           expect(Flatware).to have_received(:ran).with(1)
           expect(Flatware).to have_received(:ran).with(2)
           expect(Flatware).to have_received(:ran).with(3)
           expect(Flatware).to have_received(:ran).exactly(3).times
           expect(sink).to have_received(:progress).exactly(3).times
-          expect(sink).to have_received(:checkpoint).exactly(2).times
+
+          expect(sink).to have_received(:checkpoint).with(
+            have_attributes(
+              scenarios: match_array(
+                %w[
+                  features/feature_1.feature:2
+                  features/feature_1.feature:4
+                  features/feature_2.feature:2
+                ].map do |file_colon_line|
+                  have_attributes(file_colon_line: file_colon_line)
+                end
+              )
+            )
+          )
         end
       end
     end

@@ -14,27 +14,9 @@ require 'rspec/expectations'
 
 World(Module.new do
   def max_workers
-    return 3 if travis?
-
     Etc.nprocessors
   end
-
-  def travis?
-    ENV.key? 'TRAVIS'
-  end
 end)
-
-Before do
-  if travis?
-    %i[
-      command
-      directory
-      environment
-      stderr
-      stdout
-    ].each(&aruba.announcer.method(:activate))
-  end
-end
 
 After do |_scenario|
   all_commands.reject(&:stopped?).each do |command|
@@ -55,9 +37,9 @@ After do |_scenario|
 end
 
 After 'not @non-zero' do |scenario|
-  expect(flatware_process.exit_status).to eq 0 if flatware_process && (scenario.status == :passed)
+  expect(last_command_stopped.exit_status).to eq 0 if flatware_process && (scenario.status == :passed)
 end
 
 After '@non-zero' do |scenario|
-  expect(flatware_process.exit_status).to eq 1 if flatware_process && (scenario.status == :passed)
+  expect(last_command_stopped.exit_status).to eq 1 if flatware_process && (scenario.status == :passed)
 end
