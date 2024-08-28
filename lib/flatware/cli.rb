@@ -41,7 +41,8 @@ module Flatware
           exec({ 'TEST_ENV_NUMBER' => i.to_s }, command)
         end
       end
-      Process.waitall
+      success = Process.waitall.all? { |_pid, status| status.success? }
+      exit success ? 0 : 1
     end
 
     desc 'clear', 'kills all flatware processes'
