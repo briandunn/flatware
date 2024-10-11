@@ -2,7 +2,6 @@
 
 require 'rspec/core'
 require 'rspec/expectations'
-require 'flatware/rspec/cli'
 
 module Flatware
   module RSpec
