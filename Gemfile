@@ -6,6 +6,8 @@ gemspec name: 'flatware-cucumber'
 group :development do
   gem 'appraisal'
   gem 'aruba', '~> 0.14'
+  gem 'logger'
+  gem 'ostruct'
   gem 'pry'
   gem 'racc'
   gem 'rake'
