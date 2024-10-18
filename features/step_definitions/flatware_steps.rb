@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'benchmark'
 require 'etc'
 
 # helper methods available in all steps
@@ -27,11 +28,8 @@ module Support
     all_commands.find { |command| command.commandline.include? 'flatware' }
   end
 
-  def duration(&_block)
-    started_at = Time.now
-    yield
-  ensure
-    Time.now - started_at
+  def duration(&block)
+    Benchmark.realtime(&block)
   end
 end
 World(Support)
