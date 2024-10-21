@@ -1,16 +1,24 @@
-require 'rspec/core'
+require 'fuubar'
 
 module Flatware
   module RSpec
     module Formatters
-      class Console
+      class Fuubar
         attr_reader :progress_formatter, :out, :deprecation_stream
 
         def initialize(out, deprecation_stream: StringIO.new)
           @out = out
           @deprecation_stream = deprecation_stream
           ::RSpec.configuration.backtrace_exclusion_patterns += [%r{/lib/flatware/worker}, %r{/lib/flatware/rspec}]
-          @progress_formatter = ::RSpec::Core::Formatters::ProgressFormatter.new(out)
+          @progress_formatter = ::Fuubar.new(out)
+        end
+
+        def worker_ready(notification)
+          if progress_formatter.progress.total.positive?
+            progress_formatter.progress.total += notification.count
+          else
+            progress_formatter.start(notification)
+          end
         end
 
         def progress(result)
