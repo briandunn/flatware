@@ -23,9 +23,11 @@ module Flatware
       start_sink(jobs: jobs, workers: workers, formatter: formatter)
     end
 
+    private
+
     def formatter
       @formatter ||= begin
-        formatter_klass = "Flatware::RSpec::Formatters::#{options[:formatter].capitalize}".constantize
+        formatter_klass = Flatware::RSpec::Formatters.const_get(options[:formatter].capitalize)
 
         formatter_klass.new(
           ::RSpec.configuration.output_stream,
