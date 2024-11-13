@@ -35,7 +35,7 @@ module Flatware
     def configure(args, out_stream = $stdout, error_stream = $stderr)
       raw_args = args.dup
       cli_config = ::Cucumber::Cli::Configuration.new(out_stream, error_stream)
-      cli_config.parse! args + %w[--format Flatware::Cucumber::Formatter]
+      cli_config.parse! args + %w[--format Flatware::Cucumber::Formatter --publish-quiet]
       cucumber_config = ::Cucumber::Configuration.new cli_config
       Config.new cucumber_config, raw_args
     end
