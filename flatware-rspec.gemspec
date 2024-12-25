@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
           )
   s.homepage = 'http://github.com/briandunn/flatware'
   s.licenses = ['MIT']
-  s.required_ruby_version = ['>= 2.6', '< 3.4']
+  s.required_ruby_version = ['>= 2.6', '< 3.5']
   s.require_paths = ['lib']
   s.add_dependency %(flatware), Flatware::VERSION
   s.add_dependency %(rspec), '>= 3.6'
