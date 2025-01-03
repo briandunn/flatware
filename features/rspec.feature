@@ -28,7 +28,11 @@ Feature: rspec task
       """
     And the output contains the following:
       """
-      # ./spec/spec_spec.rb:2:in `block (2 levels) in <top (required)>'
+      # ./spec/spec_spec.rb:2:in
+      """
+    And the output contains the following:
+      """
+      block (2 levels) in <top (required)>'
       """
 
   Scenario: it behaves like
