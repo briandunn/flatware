@@ -3,6 +3,7 @@
 require 'flatware/cli'
 require 'flatware/rspec'
 require 'flatware/rspec/formatters/console'
+require 'flatware/rspec/formatters/fuubar'
 
 module Flatware
   # rspec thor command
@@ -17,14 +18,22 @@ module Flatware
     def rspec(*rspec_args)
       jobs = RSpec.extract_jobs_from_args rspec_args, workers: workers
 
-      formatter = Flatware::RSpec::Formatters::Console.new(
-        ::RSpec.configuration.output_stream,
-        deprecation_stream: ::RSpec.configuration.deprecation_stream
-      )
-
       Flatware.verbose = options[:log]
       Worker.spawn count: workers, runner: RSpec, sink: options['sink-endpoint']
       start_sink(jobs: jobs, workers: workers, formatter: formatter)
+    end
+
+    private
+
+    def formatter
+      @formatter ||= begin
+        formatter_klass = Flatware::RSpec::Formatters.const_get(options[:formatter].capitalize)
+
+        formatter_klass.new(
+          ::RSpec.configuration.output_stream,
+          deprecation_stream: ::RSpec.configuration.deprecation_stream
+        )
+      end
     end
   end
 end
