@@ -107,3 +107,46 @@ Feature: rspec task
       """
       0 examples, 0 failures, 1 error occurred outside of examples
       """
+
+  @non-zero
+  Scenario: example job builder
+    Given spec "a" contains:
+      """
+      describe "fail" do
+      it { expect(true).to eq false }
+      end
+      """
+    And spec "b" contains:
+      """
+      describe "pass" do
+      it { expect(true).to eq true }
+      end
+      """
+    When I run flatware with "rspec -l --job-builder=ExampleJobBuilder"
+    Then the output contains the following:
+      """
+      Run options: include {:ids=>{"./spec/a_spec.rb"=>["1:1"]}}
+      """
+    And the output contains the following:
+      """
+      Run options: include {:ids=>{"./spec/b_spec.rb"=>["1:1"]}}
+      """
+    And the output contains the following:
+      """
+      2 examples, 1 failure
+      """
+
+  @non-zero
+  Scenario: failure outside of examples with example job builder
+    Given the following spec:
+      """
+      throw :a_fit
+      describe 'fits' do
+        it('already threw one')
+      end
+      """
+    When I run flatware with "rspec --job-builder=ExampleJobBuilder"
+    Then the output contains the following line:
+      """
+      uncaught throw :a_fit
+      """
