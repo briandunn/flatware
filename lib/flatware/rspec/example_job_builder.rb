@@ -19,10 +19,10 @@ module Flatware
 
       def jobs
         timed_examples, untimed_examples = timed_and_untimed_examples
-        bucket_count = [@examples_to_run.size, workers].min
+        buckets = Array.new([@examples_to_run.size, workers].min) { Bucket.new }
 
         balance_jobs(
-          bucket_count: bucket_count,
+          buckets: buckets,
           timed_examples: timed_examples,
           untimed_examples: untimed_examples
         )
@@ -30,34 +30,36 @@ module Flatware
 
       private
 
-      def balance_jobs(bucket_count:, timed_examples:, untimed_examples:)
-        buckets = Array.new(bucket_count) { Bucket.new }
-
-        timed_examples.sort_by!(&:last).reverse_each do |(example_id, time)|
+      def balance_jobs(buckets:, timed_examples:, untimed_examples:)
+        timed_examples.each do |(example_id, time)|
           buckets.min_by(&:runtime).add_example(example_id, time)
         end
 
         untimed_examples.each_with_index do |example_id, index|
-          buckets[index % bucket_count].add_example(example_id, 0)
+          offset = (timed_examples.size + index) % buckets.size
+          buckets[offset].add_example(example_id)
         end
 
         buckets.map { |bucket| Job.new(bucket.examples, args) }
       end
 
       def timed_and_untimed_examples
-        @examples_to_run.reduce([[], []]) do |(timed, untimed), example_id|
+        timed_examples = []
+        untimed_examples = []
+
+        @examples_to_run.each do |example_id|
           if (time = example_runtimes[example_id])
-            [timed + [[example_id, time]], untimed]
+            timed_examples << [example_id, time]
           else
-            [timed, untimed + [example_id]]
+            untimed_examples << example_id
           end
         end
+
+        [timed_examples.sort_by! { |(_id, time)| -time }, untimed_examples]
       end
 
       def load_persisted_example_statuses
-        ::RSpec::Core::ExampleStatusPersister.load_from(
-          @example_status_persistence_file_path || ''
-        )
+        ::RSpec::Core::ExampleStatusPersister.load_from(@example_status_persistence_file_path || '')
       end
 
       def example_runtimes
@@ -113,7 +115,7 @@ module Flatware
           @runtime = 0
         end
 
-        def add_example(example_id, runtime)
+        def add_example(example_id, runtime = 0)
           @examples << example_id
           @runtime += runtime
         end
