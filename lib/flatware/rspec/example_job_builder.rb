@@ -95,7 +95,7 @@ module Flatware
         end
 
         writer.close
-        Marshal.load(reader.gets) # rubocop:disable Security/MarshalLoad
+        Marshal.load(reader.gets(nil)) # rubocop:disable Security/MarshalLoad
       end
 
       def load_examples_to_run(configuration)
