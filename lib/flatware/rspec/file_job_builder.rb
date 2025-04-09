@@ -7,7 +7,7 @@ module Flatware
     # groups spec files into one job per worker.
     # reads from persisted example statuses, if available,
     # and attempts to ballence the jobs accordingly.
-    class JobBuilder
+    class FileJobBuilder
       extend Forwardable
       attr_reader :args, :workers, :configuration
 
