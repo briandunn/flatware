@@ -28,6 +28,14 @@ module Flatware
       desc: 'Print debug messages to $stderr'
     )
 
+    class_option(
+      :formatter,
+      aliases: '-f',
+      type: :string,
+      desc: 'Formatter to use',
+      default: :console
+    )
+
     worker_option
     desc 'fan [COMMAND]', 'executes the given job on all of the workers'
     def fan(*command)
