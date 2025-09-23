@@ -3,6 +3,7 @@
 require 'thor'
 require 'flatware/pid'
 require 'etc'
+require 'fileutils'
 
 module Flatware
   # shared flatware cli
@@ -50,6 +51,8 @@ module Flatware
       (Flatware.pids - [Process.pid]).each do |pid|
         Process.kill 6, pid
       end
+
+      FileUtils.rm_f('flatware-sink')
     end
 
     private
