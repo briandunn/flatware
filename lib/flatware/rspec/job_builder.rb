@@ -48,6 +48,7 @@ module Flatware
           .zip(
             round_robin(bucket_count, untimed_files)
           ).map(&:flatten)
+          .reject(&:empty?)
           .map { |files| Job.new(files, args) }
       end
 
