@@ -43,11 +43,16 @@ module Flatware
       private
 
       def balance_jobs(bucket_count:, timed_files:, untimed_files:)
-        balance_by(bucket_count, timed_files, &:last)
-          .map { |bucket| bucket.map(&:first) }
-          .zip(
-            round_robin(bucket_count, untimed_files)
-          ).map(&:flatten)
+        timed_groups = balance_by(bucket_count, timed_files, &:last)
+                       .map { |bucket| bucket.map(&:first) }
+        untimed_groups = round_robin(bucket_count, untimed_files)
+
+        # When the files can't be evenly divided between groups, the first groups
+        # in each of timed_groups & untimed_groups will have more files.
+        # By reversing one of them before combining them, we can improve the final distribution.
+        timed_groups
+          .zip(untimed_groups.reverse)
+          .map(&:flatten)
           .reject(&:empty?)
           .map { |files| Job.new(files, args) }
       end

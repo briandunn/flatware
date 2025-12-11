@@ -80,8 +80,9 @@ describe Flatware::RSpec::JobBuilder do
       it "doesn't return empty job-groups" do
         expect(subject).to match_array(
           [
-            have_attributes(id: include('./slow_spec.rb', './new_1_spec.rb')),
-            have_attributes(id: include('./fast_1_spec.rb'))
+            have_attributes(id: include('./fast_1_spec.rb')),
+            have_attributes(id: include('./slow_spec.rb')),
+            have_attributes(id: include('./new_1_spec.rb'))
           ]
         )
       end
