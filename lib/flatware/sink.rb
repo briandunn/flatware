@@ -32,6 +32,7 @@ module Flatware
         @workers = Set.new(worker_count.times.to_a)
       end
 
+      # rubocop:disable Naming/PredicateMethod
       def start
         Signal.listen(formatter, &method(:on_interrupt))
         formatter.jobs jobs
@@ -39,6 +40,7 @@ module Flatware
         DRb.thread.join
         !(failures? || interrupted?)
       end
+      # rubocop:enable Naming/PredicateMethod
 
       def ready(worker)
         job = queue.shift

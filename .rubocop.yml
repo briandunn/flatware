@@ -35,3 +35,7 @@ Gemspec/RequiredRubyVersion:
 Gemspec/RequireMFA:
   Enabled: false
   Severity: warning
+Layout/EmptyLinesAfterModuleInclusion:
+  # avoid false-positives from the instance method `include` being used in specs
+  Exclude:
+    - spec/**/*_spec.rb

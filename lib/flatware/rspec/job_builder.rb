@@ -9,6 +9,7 @@ module Flatware
     # and attempts to ballence the jobs accordingly.
     class JobBuilder
       extend Forwardable
+
       attr_reader :args, :workers, :configuration
 
       def_delegators(
