@@ -53,7 +53,7 @@ describe Flatware::Sink::Signal do
     end
 
     it 'tells the formatter to emit the signal message' do
-      expect(messages).to match([include(expected_message), 'done.'])
+      expect(messages).to match([match(expected_message), 'done.'])
     end
 
     it 'calls on_interrupt' do

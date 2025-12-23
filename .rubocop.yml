@@ -25,6 +25,9 @@ Style/FrozenStringLiteralComment:
 Naming/FileName:
   Exclude:
     - lib/flatware-*.rb
+Naming/PredicateMethod:
+  Exclude:
+    - lib/flatware/sink.rb
 Style/Documentation:
   Enabled: false
 Metrics/BlockLength:

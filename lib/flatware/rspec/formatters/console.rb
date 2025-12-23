@@ -63,12 +63,12 @@ module Flatware
           remaining
             .flat_map(&:id).sort.each_with_index
             .map do |example, index|
-            format(
-              '%<index>4d) %<example>s',
-              index: index.next,
-              example: example
-            )
-          end.join("\n")
+              format(
+                '%<index>4d) %<example>s',
+                index: index.next,
+                example: example
+              )
+            end.join("\n")
         end
 
         def colorizer

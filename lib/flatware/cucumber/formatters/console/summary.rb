@@ -7,6 +7,7 @@ module Flatware
       class Console
         class Summary
           include ::Cucumber::Formatter::Console
+
           attr_reader :io, :steps, :scenarios
 
           def initialize(steps, scenarios = [], io = StringIO.new)
