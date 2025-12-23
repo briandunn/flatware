@@ -21,6 +21,11 @@ jobs:
       matrix:
         rspec-minor-versions: [6, 7, 8, 9, 10, 11, 12, 13]
         ruby-versions: ["3.1", "3.2", "3.3", "3.4", "4.0"]
+        exclude:
+          - ruby-versions: 4.0
+            rspec-minor-versions: 6
+          - ruby-versions: 4.0
+            rspec-minor-versions: 7
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rspec_3.${{ matrix.rspec-minor-versions }}.gemfile
 
