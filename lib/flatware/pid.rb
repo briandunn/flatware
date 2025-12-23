@@ -27,9 +27,9 @@ module Flatware
         .popen(['ps', *args])
         .readlines
         .map do |row|
-        fields = row.strip.split(/\s+/, 4)
-        new(*fields.take(3).map(&:to_i), fields.last)
-      end
+          fields = row.strip.split(/\s+/, 4)
+          new(*fields.take(3).map(&:to_i), fields.last)
+        end
     end
 
     def pids_of_group(group_pid)
