@@ -24,5 +24,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.add_dependency %(cucumber), '~> 3.0'
   s.add_dependency %(flatware), Flatware::VERSION
+  s.add_dependency %(ostruct)
   # s.metadata['rubygems_mfa_required'] = 'true'
 end
