@@ -16,9 +16,10 @@ describe Flatware::RSpec::JobBuilder do
 
   let(:persisted_examples) { [] }
   let(:files_to_run) { [] }
+  let(:worker_count) { 2 }
 
   subject do
-    described_class.new([], workers: 2).jobs
+    described_class.new([], workers: worker_count).jobs
   end
 
   context 'when this run includes persisted examples' do
@@ -61,6 +62,27 @@ describe Flatware::RSpec::JobBuilder do
           [
             have_attributes(id: include('./new_1_spec.rb', './new_3_spec.rb')),
             have_attributes(id: include('./new_2_spec.rb'))
+          ]
+        )
+      end
+    end
+
+    context 'and there are more workers than example-files' do
+      let(:files_to_run) do
+        %w[
+          fast_1_spec.rb
+          slow_spec.rb
+          new_1_spec.rb
+        ]
+      end
+      let(:worker_count) { 5 }
+
+      it "doesn't return empty job-groups" do
+        expect(subject).to match_array(
+          [
+            have_attributes(id: include('./fast_1_spec.rb')),
+            have_attributes(id: include('./slow_spec.rb')),
+            have_attributes(id: include('./new_1_spec.rb'))
           ]
         )
       end

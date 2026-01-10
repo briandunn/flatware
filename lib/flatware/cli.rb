@@ -76,6 +76,10 @@ module Flatware
     def workers
       options[:workers]
     end
+
+    def worker_spawn_count(jobs)
+      [workers, jobs.length].min
+    end
   end
 end
 
