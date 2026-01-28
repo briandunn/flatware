@@ -83,7 +83,7 @@ module Flatware
             ) do |_, old = 0, new|
               old + new
             end
-        end
+          end
       end
 
       def passing
