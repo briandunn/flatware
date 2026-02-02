@@ -11,7 +11,7 @@ group :development do
   gem 'pry'
   gem 'racc'
   gem 'rake'
-  gem 'rubocop'
+  gem 'rubocop', '>= 1.84.0'
   gem 'rubocop-rake'
   gem 'rubocop-rspec'
 end
