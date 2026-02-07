@@ -19,11 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rspec-minor-versions: [6, 7, 8, 9, 10, 11, 12, 13]
+        rspec-minor-versions: [7, 8, 9, 10, 11, 12, 13]
         ruby-versions: ["3.2", "3.3", "3.4", "4.0"]
         exclude:
-          - ruby-versions: 4.0
-            rspec-minor-versions: 6
           - ruby-versions: 4.0
             rspec-minor-versions: 7
     env:
