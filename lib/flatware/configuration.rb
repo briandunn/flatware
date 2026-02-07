@@ -34,7 +34,7 @@ module Flatware
     @configuration ||= Configuration.new
   end
 
-  def configure(&_block)
+  def configure(&)
     yield configuration
   end
 end

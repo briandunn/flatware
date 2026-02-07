@@ -28,8 +28,8 @@ module Support
     all_commands.find { |command| command.commandline.include? 'flatware' }
   end
 
-  def duration(&block)
-    Benchmark.realtime(&block)
+  def duration(&)
+    Benchmark.realtime(&)
   end
 end
 World(Support)

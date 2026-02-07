@@ -23,8 +23,8 @@ module Flatware
         self
       end
 
-      def self.listen(formatter, &block)
-        new(formatter, &block).listen
+      def self.listen(formatter, &)
+        new(formatter, &).listen
       end
 
       private
