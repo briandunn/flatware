@@ -1,7 +1,6 @@
 require 'cucumber'
 require 'flatware/sink'
 require 'ostruct'
-require 'set'
 
 module Flatware
   module Cucumber

@@ -9,8 +9,8 @@ module Flatware
       end
 
       class << self
-        def step(*args)
-          step = StepResult.new(*args)
+        def step(*)
+          step = StepResult.new(*)
           new step.progress, [step]
         end
 

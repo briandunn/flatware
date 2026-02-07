@@ -1,5 +1,4 @@
 require 'drb/drb'
-require 'set'
 require 'flatware/sink/signal'
 
 module Flatware
@@ -62,10 +61,10 @@ module Flatware
         check_finished!
       end
 
-      def method_missing(name, *args)
+      def method_missing(name, *)
         super unless formatter.respond_to?(name)
-        Flatware.log(name, *args)
-        formatter.send(name, *args)
+        Flatware.log(name, *)
+        formatter.send(name, *)
       end
 
       def respond_to_missing?(name, include_all)
