@@ -1,6 +1,6 @@
 # vim: ft=ruby
 
-(7..13).each do |minor|
+(8..13).each do |minor|
   appraise "rspec 3.#{minor}" do
     gem 'rspec', "3.#{minor}.0"
   end

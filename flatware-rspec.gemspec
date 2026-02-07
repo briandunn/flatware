@@ -24,6 +24,6 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ['>= 3.2', '< 4.1']
   s.require_paths = ['lib']
   s.add_dependency %(flatware), Flatware::VERSION
-  s.add_dependency %(rspec), '>= 3.7'
+  s.add_dependency %(rspec), '>= 3.8'
   # s.metadata['rubygems_mfa_required'] = 'true'
 end
