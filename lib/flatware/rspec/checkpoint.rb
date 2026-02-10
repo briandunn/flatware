@@ -6,7 +6,7 @@ require 'flatware/rspec/marshalable'
 module Flatware
   module RSpec
     ##
-    # Marshalable container for the run details from a worker.
+    # Marshallable container for the run details from a worker.
     # Can be added to other checkpoints to create a final run summary.
     class Checkpoint
       extend Forwardable

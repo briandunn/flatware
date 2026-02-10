@@ -32,7 +32,7 @@ describe Flatware::Sink do
   end
 
   context 'there is no work' do
-    it 'sumarizes' do
+    it 'summarizes' do
       server = described_class::Server.new jobs: [], **defaults
       server.ready(1)
       expect(formatter).to have_received :summarize
