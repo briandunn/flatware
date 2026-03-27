@@ -3,6 +3,7 @@ module Flatware
     module Marshalable
       require 'flatware/rspec/marshalable/deprecation_notification'
       require 'flatware/rspec/marshalable/examples_notification'
+      require 'flatware/rspec/marshalable/example_notification'
       require 'flatware/rspec/marshalable/profile_notification'
       require 'flatware/rspec/marshalable/summary_notification'
 

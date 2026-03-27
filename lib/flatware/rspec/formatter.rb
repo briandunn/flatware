@@ -4,8 +4,6 @@ require 'forwardable'
 
 module Flatware
   module RSpec
-    ProgressMessage = Struct.new(:progress)
-
     class Formatter
       extend Forwardable
 
@@ -17,16 +15,20 @@ module Flatware
         @output = stdout
       end
 
-      def example_passed(_example)
-        send_progress :passed
+      def start(notification)
+        Sink.client.worker_ready notification
       end
 
-      def example_failed(_example)
-        send_progress :failed
+      def example_passed(notification)
+        send_progress marshaled_progress_notification(notification)
       end
 
-      def example_pending(_example)
-        send_progress :pending
+      def example_failed(notification)
+        send_progress marshaled_progress_notification(notification)
+      end
+
+      def example_pending(notification)
+        send_progress marshaled_progress_notification(notification)
       end
 
       def message(message)
@@ -40,12 +42,16 @@ module Flatware
 
       private
 
-      def send_progress(status)
-        Sink.client.progress ProgressMessage.new status
+      def send_progress(notification)
+        Sink.client.progress notification
       end
 
       def checkpoint
         @checkpoint ||= Checkpoint.new
+      end
+
+      def marshaled_progress_notification(notification)
+        Flatware::RSpec::Marshalable::ExampleNotification.from_rspec(notification)
       end
 
       ::RSpec::Core::Formatters.register(
@@ -54,6 +60,7 @@ module Flatware
         :example_passed,
         :example_failed,
         :example_pending,
+        :start,
         :message,
         :close
       )

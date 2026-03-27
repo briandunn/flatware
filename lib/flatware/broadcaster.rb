@@ -11,6 +11,7 @@ module Flatware
       started
       summarize
       summarize_remaining
+      worker_ready
     ].freeze
 
     attr_reader :formatters
