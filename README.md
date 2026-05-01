@@ -55,7 +55,7 @@ But beware, if you're using ActiveRecord in your suite you'll need to avoid doin
 If you'd like to limit the number of forked workers, you can pass the 'w' flag:
 
 ```sh
-$ flatware -w 3
+$ flatware rspec -w 3
 ```
 
 You can also pass most cucumber/rspec options to Flatware. For example, to run only
