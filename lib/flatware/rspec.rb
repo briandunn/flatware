@@ -7,12 +7,14 @@ require 'flatware/rspec/cli'
 module Flatware
   module RSpec
     require 'flatware/rspec/formatter'
-    require 'flatware/rspec/job_builder'
+    require 'flatware/rspec/file_job_builder'
+    require 'flatware/rspec/example_job_builder'
 
     module_function
 
-    def extract_jobs_from_args(args, workers:)
-      JobBuilder.new(args, workers: workers).jobs
+    def extract_jobs_from_args(args, workers:, job_builder:)
+      builder = const_get(job_builder)
+      builder.new(args, workers: workers).jobs
     end
 
     def runner

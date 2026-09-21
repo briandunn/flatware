@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'flatware/rspec/job_builder'
+require 'flatware/rspec/file_job_builder'
 
-describe Flatware::RSpec::JobBuilder do
+describe Flatware::RSpec::FileJobBuilder do
   before do
     allow(RSpec::Core::ExampleStatusPersister).to(
       receive(:load_from).and_return(persisted_examples)
