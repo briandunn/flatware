@@ -35,7 +35,7 @@ module Flatware
       ::RSpec.configuration.add_formatter(Flatware::RSpec::Formatter)
 
       runner.run(Array(job), $stderr, $stdout)
-      ::RSpec.reset # prevents duplicate runs
+      ::RSpec.clear_examples # prevents duplicate runs while keeping the configuration for the next job
     end
   end
 end

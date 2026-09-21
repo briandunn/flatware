@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
     'README.md'
   ]
   s.files = (
-            `git ls-files -- lib/flatware/rspec`.split("\n") +
-            %w[lib/flatware-rspec.rb lib/flatware/rspec.rb]
-          )
+    `git ls-files -- lib/flatware/rspec`.split("\n") +
+    %w[lib/flatware-rspec.rb lib/flatware/rspec.rb]
+  )
   s.homepage = 'http://github.com/briandunn/flatware'
   s.licenses = ['MIT']
   s.required_ruby_version = ['>= 3.2', '< 4.1']
