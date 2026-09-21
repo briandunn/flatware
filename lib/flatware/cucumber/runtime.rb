@@ -2,37 +2,14 @@ require 'cucumber'
 
 module Flatware
   module Cucumber
+    # Cucumber memoizes the feature files to run, so a runtime reused across
+    # jobs needs them cleared whenever it is reconfigured. Its formatters are
+    # memoized too, and must be kept: they are what carries results across jobs.
     class Runtime < ::Cucumber::Runtime
-      attr_accessor :configuration, :loader
-      attr_reader :out, :err, :visitor
-
-      def initialize(out = StringIO.new, err = out)
-        @out = out
-        @err = err
-        super(default_configuration)
-        load_step_definitions
-        @results = Results.new(configuration)
-      end
-
-      def default_configuration
-        config = ::Cucumber::Cli::Configuration.new
-        config.parse! []
-        config
-      end
-
-      def run(feature_files = [], options = [])
-        @loader = nil
-        options = [
-          Array(feature_files),
-          %w[--format Flatware::Cucumber::Formatter],
-          options
-        ].reduce(:+)
-
-        configure(::Cucumber::Cli::Main.new(options, out, err).configuration)
-
-        self.visitor = configuration.build_tree_walker(self)
-        visitor.visit_features(features)
-        results
+      def configure(new_configuration)
+        super
+        @features = nil
+        @filespecs = nil
       end
     end
   end

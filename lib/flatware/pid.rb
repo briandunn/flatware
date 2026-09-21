@@ -21,7 +21,8 @@ module Flatware
 
     def self.ps
       args = ['-o', members.join(',')]
-      args += { 'Darwin' => %w[-c] }.fetch(Etc.uname.fetch(:sysname), [])
+      # macOS omits processes without a controlling terminal unless asked (-x)
+      args += { 'Darwin' => %w[-c -x] }.fetch(Etc.uname.fetch(:sysname), [])
 
       IO
         .popen(['ps', *args])

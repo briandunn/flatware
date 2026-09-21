@@ -22,6 +22,13 @@ Feature: Survives weird uses of gherkin
     And I see that 2 scenarios where run
     And I see that 6 steps where run
 
+  Scenario: one worker runs several feature files
+    Given a cucumber suite with 3 features that each sleep for 0 seconds
+    When I run flatware with "cucumber" on 1 worker
+    Then the exit status should be 0
+    And I see that 3 scenarios where run
+    And I see that 3 steps where run
+
     @non-zero
   Scenario: fail with feedback when features do not exist
     When I run flatware with "cucumber"

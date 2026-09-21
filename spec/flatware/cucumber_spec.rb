@@ -15,8 +15,10 @@ describe Flatware::Cucumber do
         sink = double Flatware::Sink::Server, progress: nil, checkpoint: nil
         allow(Flatware::Sink).to receive(:client) { sink }
         allow(Flatware).to receive(:ran)
+        allow(Flatware).to receive(:hooked)
 
         write_file 'features/step_definitions/flunky_steps.rb', <<~RB
+          Before { Flatware.hooked }
           Then('ran {int}', &Flatware.method(:ran))
         RB
 
@@ -43,6 +45,7 @@ describe Flatware::Cucumber do
           expect(Flatware).to have_received(:ran).with(2)
           expect(Flatware).to have_received(:ran).with(3)
           expect(Flatware).to have_received(:ran).exactly(3).times
+          expect(Flatware).to have_received(:hooked).exactly(3).times
           expect(sink).to have_received(:progress).exactly(3).times
           expect(sink).to have_received(:checkpoint).exactly(2).times
         end

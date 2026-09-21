@@ -39,10 +39,10 @@ Given 'I am using a multi core machine' do
 end
 
 Given(
-  'a cucumber suite with two features that each sleep for {int} second'
-) do |sleepyness|
+  'a cucumber suite with {int} features that each sleep for {int} second(s)'
+) do |feature_count, sleepyness|
   create_sleep_step_definition
-  2.times do |feature_number|
+  feature_count.times do |feature_number|
     write_file "features/feature_#{feature_number}.feature", <<-FEATURE
       Feature: sleeeeeep
       Scenario: I iz tired
@@ -52,7 +52,7 @@ Given(
 end
 
 Given 'a sleepy cucumber suite' do
-  step 'a cucumber suite with two features that each sleep for 1 second'
+  step 'a cucumber suite with 2 features that each sleep for 1 second'
 end
 
 runners = Regexp.union %w[cucumber flatware]
@@ -73,8 +73,8 @@ Then(/^(#{runners}) is the fastest$/) do |runner|
   expect(@durations[runner]).to eq @durations.values.min
 end
 
-When(/^I run flatware(?: with "([^"]+)")?$/) do |args|
-  command = ['flatware', args, '-w', max_workers].flatten.compact.join(' ')
+When(/^I run flatware(?: with "([^"]+)")?(?: on (\d+) workers?)?$/) do |args, workers|
+  command = ['flatware', args, '-w', workers || max_workers].flatten.compact.join(' ')
 
   @duration = duration do
     run_command_and_stop(command, fail_on_error: false)
