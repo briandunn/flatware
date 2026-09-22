@@ -12,21 +12,30 @@ describe Flatware::RSpec::Marshalable::Example do
     )
   end
 
-  it 'carries what is needed to format a backtrace' do
-    exception = Exception.new
-    RSpec::Core::Formatters::ExceptionPresenter.new(
-      exception,
-      described_class.new(
-        instance_double(
-          RSpec::Core::Example,
-          execution_result: stub_execution_result(exception),
-          full_description: nil,
-          location: nil,
-          location_rerun_argument: nil,
-          metadata: { shared_group_inclusion_backtrace: [] }
-        )
+  it 'carries what is needed to format a backtrace with cause chain' do
+    exception = begin
+      raise ArgumentError, 'the wrapper', cause: RuntimeError.new('the real cause')
+    rescue ArgumentError => e
+      e
+    end
+
+    example = described_class.new(
+      instance_double(
+        RSpec::Core::Example,
+        execution_result: stub_execution_result(exception),
+        full_description: nil,
+        location: nil,
+        location_rerun_argument: nil,
+        metadata: { shared_group_inclusion_backtrace: [] }
       )
+    )
+
+    formatted = RSpec::Core::Formatters::ExceptionPresenter.new(
+      example.execution_result.exception,
+      example
     ).fully_formatted(nil)
+
+    expect(formatted).to include('RuntimeError:', 'the real cause')
   end
 
   it 'does not carry constant references in exceptions' do

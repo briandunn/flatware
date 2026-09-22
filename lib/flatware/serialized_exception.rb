@@ -1,9 +1,12 @@
 module Flatware
-  class SerializedException
+  class SerializedException < Exception # rubocop:disable Lint/InheritException
     attr_reader :class, :message, :cause
     attr_accessor :backtrace
 
     def initialize(klass, message, backtrace, cause = nil)
+      super(message)
+      set_backtrace(backtrace) if backtrace
+
       @class = serialized(klass)
       @message = message
       @backtrace = backtrace
