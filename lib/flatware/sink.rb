@@ -85,6 +85,7 @@ module Flatware
       def check_finished!
         return unless [workers, remaining_work].all?(&:empty?)
 
+        Flatware.configuration.after_forks_complete.call
         DRb.stop_service
         summarize
       end

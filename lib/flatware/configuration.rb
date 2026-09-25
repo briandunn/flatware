@@ -22,9 +22,18 @@ module Flatware
       end
     end
 
+    def after_forks_complete(&block)
+      if block_given?
+        @after_forks_complete = block
+      else
+        @after_forks_complete
+      end
+    end
+
     def reset!
       @before_fork = -> {}
       @after_fork = ->(_) {}
+      @after_forks_complete = -> {}
     end
   end
 
