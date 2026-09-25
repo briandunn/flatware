@@ -5,6 +5,8 @@ module Flatware
   module Sink
     module_function
 
+    at_exit { DRb.stop_service }
+
     def start_server(**args)
       Server.new(**args).start
     end
