@@ -16,24 +16,22 @@ module Flatware
       'parallelizes cucumber with custom arguments'
     )
     def cucumber(*args)
-      config = Cucumber.configure args
+      jobs = load_jobs(args)
 
-      ensure_jobs(config)
+      formatter = Flatware::Cucumber::Formatters::Console.new($stdout, $stderr)
 
       Flatware.verbose = options[:log]
-      sink = options['sink-endpoint']
-      Worker.spawn(count: workers, runner: Cucumber, sink: sink)
-      start_sink(
-        jobs: config.jobs,
-        workers: workers,
-        formatter: Flatware::Cucumber::Formatters::Console.new($stdout, $stderr)
-      )
+
+      spawn_count = worker_spawn_count(jobs)
+      Worker.spawn(count: spawn_count, runner: Cucumber, sink: options['sink-endpoint'])
+      start_sink(jobs: jobs, workers: spawn_count, formatter: formatter)
     end
 
     private
 
-    def ensure_jobs(config)
-      return if config.jobs.any?
+    def load_jobs(args)
+      config = Cucumber.configure args
+      return config.jobs if config.jobs.any?
 
       abort(
         format(
