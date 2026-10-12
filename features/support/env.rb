@@ -14,18 +14,18 @@ require 'rspec/expectations'
 
 World(Module.new do
   def max_workers
-    return 3 if travis?
+    return 3 if ci?
 
     Etc.nprocessors
   end
 
-  def travis?
-    ENV.key? 'TRAVIS'
+  def ci?
+    ENV.key? 'CI'
   end
 end)
 
 Before do
-  if travis?
+  if ci?
     %i[
       command
       directory

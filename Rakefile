@@ -12,7 +12,7 @@ end
 
 RSpec::Core::RakeTask.new :spec do |task|
   task.pattern = FileList['spec/**/*_spec.rb']
-  task.rspec_opts = %w[-f doc] if ENV['TRAVIS']
+  task.rspec_opts = %w[-f doc] if ENV['CI']
   task.verbose = false
 end
 
@@ -20,7 +20,7 @@ RuboCop::RakeTask.new :lint
 
 Cucumber::Rake::Task.new :cucumber do |task|
   task.cucumber_opts = ['--tags', 'not @wip', '--publish-quiet']
-  task.cucumber_opts += %w[-f progress] unless ENV['TRAVIS']
+  task.cucumber_opts += %w[-f progress] unless ENV['CI']
   task.fork = false
 end
 
